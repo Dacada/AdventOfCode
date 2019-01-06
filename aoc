@@ -1,0 +1,235 @@
+#!/usr/bin/python3
+
+
+import os
+import sys
+import time
+import argparse
+import threading
+import subprocess
+from dataclasses import dataclass
+
+import requests
+
+
+CACHE_FILENAME = '.cache/{}_{}_input.txt'
+
+
+class ReturnValueThread(threading.Thread):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.return_value = None
+
+    def run(self):
+        """
+        Copied verbatim from the threading module, plus the added return_value.
+        """
+        try:
+            if self._target:
+                self.return_value = self._target(*self._args, **self._kwargs)
+        finally:
+            # Avoid a refcycle if the thread is running a function with
+            # an argument that has a member that points to the thread.
+            del self._target, self._args, self._kwargs
+
+
+@dataclass
+class ProcStats:
+    pid: int
+    utime: int  # time scheduled in user mode (in clock ticks)
+    stime: int  # time scheduled in kernel mode (in clock ticks)
+    num_threads: int
+    starttime: int  # time process started (since boot, in clock ticks)
+    vsize: int  # virtual memory size
+    rss: int  # resident set size
+    processor: int
+    size: int  # total program size
+    resident: int  # resident set size
+    uptime: float  # time since last boot
+
+    @property
+    def _clk_tck(self):
+        return os.sysconf(os.sysconf_names['SC_CLK_TCK'])
+
+    @property
+    def utime_seconds(self):
+        return self.utime / self._clk_tck
+
+    @property
+    def stime_seconds(self):
+        return self.stime / self._clk_tck
+
+    @property
+    def starttime_seconds(self):
+        return self.starttime / self._clk_tck
+
+    @property
+    def runtime(self):
+        return self.uptime - self.starttime_seconds
+
+
+def parse_args():
+    parser = argparse.ArgumentParser(
+        description="""
+Download or take from a cache the input for an AoC problem, then
+run the solution with this input and present the result; along with
+stats about the process. If it takes long enough the stats will keep
+updating. The solution is expected to be a single executable file in a
+directory named after the year in the working directory, with its name
+as the day, and that takes the problem(1 for part 1, 2 for part 2) as
+its argument.""".strip(),
+        epilog="""
+A file called session.txt must exist within the working directory
+when this script is executed. A new directory called .cache may be
+created also on the working directory.  """.strip()
+    )
+
+    parser.add_argument(
+        'year',
+        type=int
+    )
+    parser.add_argument(
+        'day',
+        type=int
+    )
+    parser.add_argument(
+        'problem',
+        type=int
+    )
+
+    return parser.parse_args()
+
+
+def get_input(year: int, day: int) -> str:
+    input = get_input_from_cache(year, day)
+    if input is None:
+        input = get_input_from_aoc(year, day)
+        if input is not None:
+            save_input_to_cache(year, day, input)
+    return input
+
+
+def get_input_from_cache(year: int, day: int) -> str:
+    filename = CACHE_FILENAME.format(year, day)
+    try:
+        with open(filename, 'r') as f:
+            return f.read()
+    except:
+        return None
+
+
+def get_session() -> str:
+    with open('session.txt') as f:
+        return f.read().strip()
+
+
+def get_input_from_aoc(year: int, day: int) -> str:
+    url = "https://adventofcode.com/{}/day/{}/input".format(year, day)
+    cookies = {'session': get_session()}
+    r = requests.get(url, cookies=cookies)
+    r.raise_for_status()
+    return r.text
+
+
+def save_input_to_cache(year: int, day: int, input: str):
+    os.makedirs('.cache', exist_ok=True)
+    filename = CACHE_FILENAME.format(year, day)
+    with open(filename, 'w') as f:
+        f.write(input)
+
+
+def launch_solution(year: int, day: int, problem: int, input: str):
+    def communicate_thread(process, input):
+        output, _ = process.communicate(input.encode('ascii'))
+        return output.decode('ascii')
+
+    process_name = '{}/{}/{}'.format(year, day, problem)
+    process = subprocess.Popen(
+        [process_name, str(problem)],
+        stdin=subprocess.PIPE,
+        stdout=subprocess.PIPE
+    )
+
+    thread = ReturnValueThread(
+        target=communicate_thread,
+        args=(process, input)
+    )
+
+    return thread, process.pid
+
+
+def show_stats_loop(thread, pid):
+    thread.start()
+    print_process_stats(pid, clear=False)
+
+    while thread.is_alive():
+        time.sleep(0.5)
+        print_process_stats(pid)
+
+    print()
+    print("Result: " + str(thread.return_value).strip())
+
+
+def print_process_stats(pid, clear=True):
+    stats = get_process_stats(pid)
+    if stats is not None:
+        if clear:
+            clear_process_stats()
+        s = """
+PID:                  {}
+User mode time (s):   {:.3f}
+Kernel mode time (s): {:.3f}
+Threads:              {}
+Size:                 {}
+Runtime (s):          {:.3f}
+""".strip()
+        s = '\n'.join(l + '\033[K' for l in s.splitlines())
+        s = s.format(stats.pid, stats.utime_seconds, stats.stime_seconds,
+                     stats.num_threads, stats.size, stats.runtime)
+        print(s)
+
+
+def clear_process_stats():
+    print(''.join(['\033[F']*6), end='')
+
+
+def get_process_stats(pid):
+    try:
+        with open('/proc/{}/stat'.format(pid)) as f:
+            stats_str = f.read()
+    except FileNotFoundError:
+        return None
+
+    stats_split = stats_str.split()
+    _, comm, state, ppid, pgrp, session, tty_nr, tpgid, flags, minflt, cminflt, majflt, cmajflt, utime, stime, cutime, cstime, priority, nice, num_threads, itrealvalue, starttime, vsize, rss, rsslim, startcode, endcode, startstack, kstkesp, kstkeip, signal, blocked, sigignore, sigcatch, wchan, nswap, cnswap, exit_signal, processor, rt_priority, policy, delayacct_blkio_ticks, guest_time, cguest_time, start_data, end_data, start_brk, arg_start, arg_end, env_start, env_end, exit_code = stats_split
+
+    try:
+        with open('/proc/{}/statm'.format(pid)) as f:
+            stats_str = f.read()
+    except FileNotFoundError:
+        return None
+
+    stats_split = stats_str.split()
+    size, resident, shared, text, lib, data, dt = stats_split
+
+    try:
+        with open('/proc/uptime') as f:
+            stats_str = f.read()
+    except FileNotFoundError:
+        return None
+
+    stats_split = stats_str.split()
+    uptime, idletime = stats_split
+
+    return ProcStats(int(pid), int(utime), int(stime), int(num_threads), int(starttime), int(vsize), int(rss), int(processor), int(size), int(resident), float(uptime))
+
+
+def main():
+    args = parse_args()
+    input = get_input(args.year, args.day)
+    thread, pid = launch_solution(args.year, args.day, args.problem, input)
+    show_stats_loop(thread, pid)
+
+
+if __name__ == "__main__":
+    main()
