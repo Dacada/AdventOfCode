@@ -1,6 +1,5 @@
 #!/usr/bin/python3
 
-
 import os
 import sys
 import time
@@ -143,7 +142,7 @@ def launch_solution(year: int, day: int, problem: int, input: str):
         output, _ = process.communicate(input.encode('ascii'))
         return output.decode('ascii')
 
-    process_name = '{}/{}/{}'.format(year, day, problem)
+    process_name = '{}/{}'.format(year, day)
     process = subprocess.Popen(
         [process_name, str(problem)],
         stdin=subprocess.PIPE,
@@ -159,6 +158,7 @@ def launch_solution(year: int, day: int, problem: int, input: str):
 
 
 def show_stats_loop(thread, pid):
+    t = time.perf_counter()
     thread.start()
     print_process_stats(pid, clear=False)
 
@@ -167,7 +167,8 @@ def show_stats_loop(thread, pid):
         print_process_stats(pid)
 
     print()
-    print("Result: " + str(thread.return_value).strip())
+    print("Result: {}".format(str(thread.return_value).strip()))
+    print("Time: {:.5f}".format((time.perf_counter() - t)))
 
 
 def print_process_stats(pid, clear=True):
@@ -177,11 +178,11 @@ def print_process_stats(pid, clear=True):
             clear_process_stats()
         s = """
 PID:                  {}
-User mode time (s):   {:.3f}
-Kernel mode time (s): {:.3f}
+User mode time (s):   {:.5f}
+Kernel mode time (s): {:.5f}
 Threads:              {}
 Size:                 {}
-Runtime (s):          {:.3f}
+Runtime (s):          {:.5f}
 """.strip()
         s = '\n'.join(l + '\033[K' for l in s.splitlines())
         s = s.format(stats.pid, stats.utime_seconds, stats.stime_seconds,
@@ -197,7 +198,7 @@ def get_process_stats(pid):
     try:
         with open('/proc/{}/stat'.format(pid)) as f:
             stats_str = f.read()
-    except FileNotFoundError:
+    except:
         return None
 
     stats_split = stats_str.split()
@@ -206,7 +207,7 @@ def get_process_stats(pid):
     try:
         with open('/proc/{}/statm'.format(pid)) as f:
             stats_str = f.read()
-    except FileNotFoundError:
+    except:
         return None
 
     stats_split = stats_str.split()
