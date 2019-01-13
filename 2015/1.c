@@ -27,7 +27,7 @@ static void solution2(char *input, char *output) {
       break;
     }
   }
-  snprintf(output, OUTPUT_BUFFER_SIZE, "%lu", i);
+  snprintf(output, OUTPUT_BUFFER_SIZE, "%lu", i+1);
 }
 
 int main(int argc, char *argv[]) {
