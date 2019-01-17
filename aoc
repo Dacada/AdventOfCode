@@ -225,11 +225,21 @@ def get_process_stats(pid):
     return ProcStats(int(pid), int(utime), int(stime), int(num_threads), int(starttime), int(vsize), int(rss), int(processor), int(size), int(resident), float(uptime))
 
 
+def prepare_solution(year, day):
+    subprocess.run(['make', '{}/{}'.format(year, day)])
+
+
+def unprepare_solution(year, day):
+    subprocess.run(['rm', '{}/{}'.format(year, day)])
+
+
 def main():
     args = parse_args()
     input = get_input(args.year, args.day)
+    prepare_solution(args.year, args.day)
     thread, pid = launch_solution(args.year, args.day, args.problem, input)
     show_stats_loop(thread, pid)
+    unprepare_solution(args.year, args.day)
 
 
 if __name__ == "__main__":
