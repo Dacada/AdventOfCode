@@ -10,16 +10,19 @@ static unsigned long get_wrapping_size(int dims[3]) {
 }
 
 static unsigned long get_ribbon_size(int dims[3]) {
-  int a = dims[0];
-  int b = dims[1];
+  int a = dims[0]+dims[0]+dims[1]+dims[1];
+  int b = dims[0]+dims[0]+dims[2]+dims[2];
+  int c = dims[1]+dims[1]+dims[2]+dims[2];
+  int min = a;
 
-  if (dims[2] < a) {
-    a = dims[2];
-  } else if (dims[2] < b) {
-    b = dims[2];
+  if (b < min) {
+    min = b;
+  }
+  if (c < min) {
+    min = c;
   }
 
-  return a+a+b+b + dims[0]*dims[1]*dims[2];
+  return min + dims[0]*dims[1]*dims[2];
 }
 
 static void solution(char *input, char *output, unsigned long (*get_size)(int[3])) {
