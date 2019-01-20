@@ -13,6 +13,10 @@ import requests
 
 CACHE_FILENAME = '.cache/{}_{}_input.txt'
 
+SPECIAL_INPUTS = set((
+    (2015, 4),
+))
+
 
 class ReturnValueThread(threading.Thread):
     def __init__(self, *args, **kwargs):
@@ -123,6 +127,11 @@ def get_session() -> str:
 
 
 def get_input_from_aoc(year: int, day: int) -> str:
+    if (year, day) in SPECIAL_INPUTS:
+        print("The input for day {}, year {} is not a file, it's a text string in the problem description."
+              .format(day, year))
+        return input("Enter the input here (it will be cached): ")
+
     url = "https://adventofcode.com/{}/day/{}/input".format(year, day)
     cookies = {'session': get_session()}
     r = requests.get(url, cookies=cookies)
