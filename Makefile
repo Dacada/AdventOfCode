@@ -1,6 +1,6 @@
 CC = gcc
-CFLAGS = -Wall -Wextra -Wformat -Wshadow -Wpointer-arith -Wcast-qual -Wmissing-prototypes -std=c99 -Ofast
-LDFLAGS = -Wall -Wextra -std=c99 -Ofast
+CFLAGS = -Wall -Wextra -Wformat -Wshadow -Wpointer-arith -Wcast-qual -Wmissing-prototypes -Werror -std=c99 -Ofast
+LDFLAGS = -Wall -Wextra -Werror -std=c99 -Ofast
 LDLIBS =
 
 aoclib/aoclib.o: aoclib/aoclib.c
