@@ -172,7 +172,7 @@ def show_stats_loop(thread, pid):
     print_process_stats(pid, clear=False)
 
     while thread.is_alive():
-        time.sleep(0.5)
+        time.sleep(0.1)
         print_process_stats(pid)
 
     print()
