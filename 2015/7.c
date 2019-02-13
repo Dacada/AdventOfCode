@@ -1,5 +1,11 @@
 #include <aoclib.h>
+
+#include <ctype.h>
+
+#include <stdlib.h>
 #include <stdio.h>
+#include <stdint.h>
+#include <stdbool.h>
 
 #define DEBUG
 
@@ -34,13 +40,13 @@ expression_t expressions[512];
 
 uint16_t known_val[1024]; // index: var, content: value
 bool is_known[1024]; // index: var, content: the value in known_val is correct for this var
-uint16_t needs[1024][1024]; // index: var, content: vars which depend on index var in order to be calculated, they might depend on more vars. this array is laid out such that index 0 is the number of vars in the array and the following elements are the vars themselves, this way removing vars and adding vars are both O(1)
+uint16_t needs[1024][1024]; // index: var, content: vars which depend on index var in order to be calculated, they might depend on more vars. this array is laid out such that index 0 is the number of vars in the array and the following elements are the vars themselves
 expression_t *unknown[1024]; // index: var, content: expression to calculate var or NULL
 
 #ifdef DEBUG
 
-static void fail(char *msg, size_t column, size_t linenum, int srcline) __attribute__((noreturn)) {
-  fprintf("(%d) PARSE FAILURE (l.%lu, c.%lu): %s", srdline, linenum, column, msg);
+static void __attribute__((noreturn)) fail(char *msg, size_t column, size_t linenum, int srcline) {
+  fprintf(stderr, "(%d) PARSE FAILURE (l.%lu, c.%lu): %s", srcline, linenum, column, msg);
   abort();
 }
 
@@ -73,14 +79,16 @@ static uint16_t encode_var(char c1, char c2) {
   }
 }
 
+/*
 static char decode_var(uint16_t var, char *c2) {
-  if (v <= 26) {
+  if (var <= 26) {
     return (char)(var + 'a' - 1);
   } else {
     *c2 = (char)((var & (0x1F << 5) >> 5) + 'a' - 1);
     return (char)((var & 0x1F) + 'a' - 1);
   }
 }
+*/
 
 static size_t eval_expr(char *text, size_t i, size_t j, uint16_t *val, bool *ok) {
   if (IS_VAR(text[i])) {
@@ -102,10 +110,218 @@ static size_t eval_expr(char *text, size_t i, size_t j, uint16_t *val, bool *ok)
     *ok = true;
     *val = num;
     return i;
+  } else {
+    FAIL("Attempt to eval but wasn't num or var", i, j);
   }
 }
 
-static size_t parse_assign_or_op(char *text, size_t i, size_t j, expression_t *expr) {
+static uint16_t apply_op(uint16_t v1, uint16_t v2, operation_t op) {
+  switch (op) {
+  case NOT:
+    return ~v1;
+  case LSHIFT:
+    return v1 << v2;
+  case RSHIFT:
+    return v1 >> v2;
+  case AND:
+    return v1 & v2;
+  case OR:
+    return v1 | v2;
+  case EQ:
+    return v1;
+  default:
+    FAIL("Unexpected operation to apply!", 0, 0);
+  }
+}
+
+static bool assign_value(uint16_t var, uint16_t val) {
+  known_val[var] = val;
+  is_known[var] = true;
+  unknown[val] = NULL; // TODO: study if we can remove this line
+  
+  if (var == 1) { // a
+    return true;
+  }
+
+  // iterate each dependency of the newly assigned var
+
+  // variables we need to keep track of stuff
+  uint16_t *vars_found = malloc(1024 * sizeof(uint16_t)); // dependencies we have found a value for
+  uint16_t *vars_values = malloc(1024 * sizeof(uint16_t)); // value we have found for a dependency
+  int removed_elements = 0; // pointer to next value to assign in vars_found and vars_values
+  
+  for (int i=0; i<needs[var][0]; i++) {
+    uint16_t dep = needs[var][i+1];
+    
+    expression_t *expr = unknown[dep];
+    if (expr != NULL) {
+      if (expr->param1_type == VARIABLE && expr->param1 == var) {
+	expr->param1_type = NUMBER;
+	expr->param1 = val;
+      }
+      
+      if (expr->param2_type == VARIABLE && expr->param2 == var) {
+	expr->param2_type = NUMBER;
+	expr->param2 = val;
+      }
+
+      if (expr->param1_type == NUMBER && (expr->param2_type == NUMBER || expr->param2_type == NONE)) {
+	uint16_t newval = apply_op(expr->param1, expr->param2, expr->op);
+	vars_found[removed_elements] = dep;
+        vars_values[removed_elements] = newval;
+	removed_elements++;
+      }
+    }
+  }
+  needs[var][0] = 0; // TODO: Study if we can remove this line
+
+  for (int i=0; i<removed_elements; i++) {
+    if (assign_value(vars_found[i], vars_values[i])) {
+      return true;
+    }
+  }
+
+  free(vars_found);
+  free(vars_values);
+
+  return false;
+}
+
+static void assign_dependency(uint16_t depends, uint16_t is_depended) {
+  uint16_t len = needs[is_depended][0] + 1;
+  needs[is_depended][len] = depends;
+  needs[is_depended][0] = len;
+}
+
+static inline size_t parse_assign(char *text, size_t i, size_t j, expression_t *expr, uint16_t val, bool isnum) {
+  ASSERT(IS_VAR(text[i]), "Expected lowercase character but got something else", i, j);
+  uint16_t var = encode_var(text[i], text[i+1]);
+  if (isspace(text[i+1])) {
+    i += 1;
+  } else {
+    i += 2;
+  }
+
+  ASSERT(!known_val[var], "The destination of a rule is a known value", i, j);
+  if (isnum) {
+    if (assign_value(var, val)) {
+      return 0;
+    }
+  } else {
+    assign_dependency(var, val);
+    expr->param1 = val;
+    expr->param1_type = VARIABLE;
+    expr->param2_type = NONE;
+    expr->op = EQ;
+    unknown[var] = expr;
+  }
+
+  return i;
+}
+
+#ifdef DEBUG
+
+static void assert_op(char *text, size_t i, size_t j, const char *const op_text) {
+  for (int k=0;; k++) {
+    char c = text[i+k];
+    
+    if (c == '\0') {
+      break;
+    }
+    
+    ASSERT(c == op_text[k], "Unexpected operation name", i, j);
+  }
+}
+
+#else
+
+static void assert_op(char *text, size_t i, size_t j, const char *const op_text) {
+  (void)text;
+  (void)i;
+  (void)j;
+  (void)op_text;
+}
+
+#endif
+
+static inline size_t parse_op(char *text, size_t i, size_t j, expression_t *expr, uint16_t val1, bool isnum1) {
+  operation_t op;
+  switch (text[i]) {
+  case 'L':
+    assert_op(text, i, j, "SHIFT");
+    op = LSHIFT;
+    i += 6;
+    break;
+  case 'R':
+    assert_op(text, i, j, "SHIFT");
+    op = RSHIFT;
+    i += 6;
+    break;
+  case 'A':
+    assert_op(text, i, j, "ND");
+    op = AND;
+    i += 3;
+    break;
+  case 'O':
+    assert_op(text, i, j, "R");
+    op = OR;
+    i += 2;
+    break;
+  default:
+    FAIL("Unknown operation", i, j);
+  }
+
+  i = skip_whitespace(text, i);
+
+  uint16_t val2;
+  bool isnum2;
+  i = eval_expr(text, i, j, &val2, &isnum2);
+
+  i = skip_whitespace(text, i);
+
+  ASSERT(text[i] == '-' && text[i+1] == '>', "Expected arrow (->) but didn't find it", i, j);
+  i += 1;
+
+  i = skip_whitespace(text, i);
+
+  ASSERT(IS_VAR(text[i]), "Expected lowercase letter but found something else", i, j);
+  uint16_t var = encode_var(text[i], text[i+1]);
+  if (isspace(text[i+1])) {
+    i += 1;
+  } else {
+    i += 2;
+  }
+
+  ASSERT(!known_val[var], "The destination rule is a known rule", i, j);
+  if (isnum1 && isnum2) {
+    uint16_t val = apply_op(val1, val2, op);
+    if (assign_value(var, val)) {
+      return 0;
+    }
+  } else {
+    expr->param1 = val1;
+    if (isnum1) {
+      expr->param1_type = NUMBER;
+    } else {
+      assign_dependency(var, val1);
+      expr->param1_type = VARIABLE;
+    }
+
+    expr->param2 = val2;
+    if (isnum2) {
+      expr->param2_type = NUMBER;
+    } else {
+      assign_dependency(var, val2);
+      expr->param2_type = VARIABLE;
+    }
+
+    unknown[var] = expr;
+  }
+
+  return i;
+}
+
+static inline size_t parse_assign_or_op(char *text, size_t i, size_t j, expression_t *expr) {
   uint16_t val;
   bool isnum;
   i = eval_expr(text, i, j, &val, &isnum);
@@ -121,10 +337,12 @@ static size_t parse_assign_or_op(char *text, size_t i, size_t j, expression_t *e
     return parse_assign(text, i, j, expr, val, isnum);
   } else if (IS_OP(text[i])) {
     return parse_op(text, i, j, expr, val, isnum);
+  } else {
+    FAIL("Expected an arrow or an operation but got neither", i, j);
   }
 }
 
-static size_t parse_not(char *text, size_t i, size_t j, expression_t *expr) {
+static inline size_t parse_not(char *text, size_t i, size_t j, expression_t *expr) {
   ASSERT(text[i+1] == 'O' && text[i+2] == 'T', "Expected NOT but it wasn't.", i, j);
   i += 3;
 
@@ -154,9 +372,9 @@ static size_t parse_not(char *text, size_t i, size_t j, expression_t *expr) {
 
   ASSERT(!known_val[var], "The destination of a rule is a known value", i, j);
   if (known_value) {
-    assign_value(var, v1); // TODO: Implement var = v1
+    assign_value(var, v1);
   } else {
-    assign_dependency(var, v1); // TODO: Implement needs[var].append(v1), var depends on v1
+    assign_dependency(var, v1);
     expr->param1 = v1;
     expr->param1_type = VARIABLE;
     expr->param2_type = NONE;
@@ -164,10 +382,10 @@ static size_t parse_not(char *text, size_t i, size_t j, expression_t *expr) {
     unknown[var] = expr;
   }
 
-  return i
+  return i;
 }
 
-static size_t parse_line(char *text, size_t i, size_t j) {
+static inline size_t parse_line(char *text, size_t i, size_t j) {
   expression_t *expr = &expressions[j];
 
   if (IS_VAR(text[i]) || IS_NUM(text[i])) {
@@ -180,10 +398,17 @@ static size_t parse_line(char *text, size_t i, size_t j) {
 }
 
 static void solution1(char *input, char *output) {
+  input = "123 -> x\n456 -> y\nx AND y -> d\nx OR y -> e\nx LSHIFT 2 -> f\ny RSHIFT 2 -> g\nNOT x -> h\nNOT y -> i\n";
+  
   for (size_t i = 0, j = 0; input[i] != '\0'; i++, j++) {
     i = parse_line(input, i, j);
+    if (i == 0) {
+      break;
+    }
   }
-  snprintf(output, OUTPUT_BUFFER_SIZE, "NOT SOLVED");
+  
+  ASSERT(is_known[1], "Execution ended but value of A is not known!", 0, 0);
+  snprintf(output, OUTPUT_BUFFER_SIZE, "%d", known_val[1]);
 }
 
 static void solution2(char *input, char *output) {
