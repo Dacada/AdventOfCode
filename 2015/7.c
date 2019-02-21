@@ -46,7 +46,7 @@ expression_t *unknown[1024]; // index: var, content: expression to calculate var
 #ifdef DEBUG
 
 static void __attribute__((noreturn)) fail(char *msg, size_t column, size_t linenum, int srcline) {
-  fprintf(stderr, "(%d) PARSE FAILURE (l.%lu, c.%lu): %s", srcline, linenum, column, msg);
+  fprintf(stderr, "(%d) PARSE FAILURE (l.%lu, c.%lu): %s\n", srcline, linenum, column, msg);
   abort();
 }
 
@@ -137,7 +137,7 @@ static uint16_t apply_op(uint16_t v1, uint16_t v2, operation_t op) {
 static bool assign_value(uint16_t var, uint16_t val) {
   known_val[var] = val;
   is_known[var] = true;
-  unknown[val] = NULL; // TODO: study if we can remove this line
+  unknown[var] = NULL; // TODO: study if we can remove this line
   
   if (var == 1) { // a
     return true;
@@ -223,13 +223,17 @@ static inline size_t parse_assign(char *text, size_t i, size_t j, expression_t *
 
 static void assert_op(char *text, size_t i, size_t j, const char *const op_text) {
   for (int k=0;; k++) {
-    char c = text[i+k];
-    
+    char c = op_text[k];
     if (c == '\0') {
       break;
     }
     
-    ASSERT(c == op_text[k], "Unexpected operation name", i, j);
+    char d = text[i+k];
+    if (d == '\0') {
+      break;
+    }
+    
+    ASSERT(c == d, "Unexpected operation name", i, j);
   }
 }
 
@@ -248,21 +252,25 @@ static inline size_t parse_op(char *text, size_t i, size_t j, expression_t *expr
   operation_t op;
   switch (text[i]) {
   case 'L':
+    i += 1;
     assert_op(text, i, j, "SHIFT");
     op = LSHIFT;
     i += 6;
     break;
   case 'R':
+    i += 1;
     assert_op(text, i, j, "SHIFT");
     op = RSHIFT;
     i += 6;
     break;
   case 'A':
+    i += 1;
     assert_op(text, i, j, "ND");
     op = AND;
     i += 3;
     break;
   case 'O':
+    i += 1;
     assert_op(text, i, j, "R");
     op = OR;
     i += 2;
@@ -280,7 +288,7 @@ static inline size_t parse_op(char *text, size_t i, size_t j, expression_t *expr
   i = skip_whitespace(text, i);
 
   ASSERT(text[i] == '-' && text[i+1] == '>', "Expected arrow (->) but didn't find it", i, j);
-  i += 1;
+  i += 2;
 
   i = skip_whitespace(text, i);
 
@@ -314,6 +322,8 @@ static inline size_t parse_op(char *text, size_t i, size_t j, expression_t *expr
       assign_dependency(var, val2);
       expr->param2_type = VARIABLE;
     }
+
+    expr->op = op;
 
     unknown[var] = expr;
   }
@@ -357,7 +367,7 @@ static inline size_t parse_not(char *text, size_t i, size_t j, expression_t *exp
 
   i = skip_whitespace(text, i);
 
-  ASSERT(text[i] == '-' && text[i] == '>', "Expected arrow (->) but didn't find it", i, j);
+  ASSERT(text[i] == '-' && text[i+1] == '>', "Expected arrow (->) but didn't find it", i, j);
   i += 2;
 
   i = skip_whitespace(text, i);
@@ -398,7 +408,7 @@ static inline size_t parse_line(char *text, size_t i, size_t j) {
 }
 
 static void solution1(char *input, char *output) {
-  input = "123 -> x\n456 -> y\nx AND y -> d\nx OR y -> e\nx LSHIFT 2 -> f\ny RSHIFT 2 -> g\nNOT x -> h\nNOT y -> i\n";
+  //input = "y RSHIFT 2 -> g\nx LSHIFT 2 -> f\nx OR y -> e\n123 -> x\nNOT y -> i\nx AND y -> d\n456 -> y\nNOT x -> h\n";
   
   for (size_t i = 0, j = 0; input[i] != '\0'; i++, j++) {
     i = parse_line(input, i, j);
