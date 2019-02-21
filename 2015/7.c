@@ -7,7 +7,9 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#define DEBUG
+#include <string.h>
+
+//#define DEBUG
 
 #define IS_VAR(c) ((c) >= 'a' && (c) <= 'z')
 #define IS_NUM(c) ((c) >= '0' && (c) <= '9')
@@ -91,6 +93,8 @@ static char decode_var(uint16_t var, char *c2) {
 */
 
 static size_t eval_expr(char *text, size_t i, size_t j, uint16_t *val, bool *ok) {
+  (void)j; // used only in debug mode, suppress warnings otherwise
+  
   if (IS_VAR(text[i])) {
     uint16_t var = encode_var(text[i], text[i+1]);
     if (is_known[var]) {
@@ -137,9 +141,9 @@ static uint16_t apply_op(uint16_t v1, uint16_t v2, operation_t op) {
 static bool assign_value(uint16_t var, uint16_t val) {
   known_val[var] = val;
   is_known[var] = true;
-  unknown[var] = NULL; // TODO: study if we can remove this line
+  unknown[var] = NULL;
   
-  if (var == 1) { // a
+  if (var == encode_var('a', ' ')) {
     return true;
   }
 
@@ -173,7 +177,7 @@ static bool assign_value(uint16_t var, uint16_t val) {
       }
     }
   }
-  needs[var][0] = 0; // TODO: Study if we can remove this line
+  needs[var][0] = 0;
 
   for (int i=0; i<removed_elements; i++) {
     if (assign_value(vars_found[i], vars_values[i])) {
@@ -194,6 +198,8 @@ static void assign_dependency(uint16_t depends, uint16_t is_depended) {
 }
 
 static inline size_t parse_assign(char *text, size_t i, size_t j, expression_t *expr, uint16_t val, bool isnum) {
+  (void)j; // used only in debug mode, suppress warnings otherwise
+  
   ASSERT(IS_VAR(text[i]), "Expected lowercase character but got something else", i, j);
   uint16_t var = encode_var(text[i], text[i+1]);
   if (isspace(text[i+1])) {
@@ -202,18 +208,22 @@ static inline size_t parse_assign(char *text, size_t i, size_t j, expression_t *
     i += 2;
   }
 
-  ASSERT(!known_val[var], "The destination of a rule is a known value", i, j);
-  if (isnum) {
-    if (assign_value(var, val)) {
-      return 0;
+  // Solution 2 breaks this assert
+  //ASSERT(!known_val[var], "The destination of a rule is a known value", i, j);
+  // So we replace it with this if.
+  if (!known_val[var]) {
+    if (isnum) {
+      if (assign_value(var, val)) {
+	return 0;
+      }
+    } else {
+      assign_dependency(var, val);
+      expr->param1 = val;
+      expr->param1_type = VARIABLE;
+      expr->param2_type = NONE;
+      expr->op = EQ;
+      unknown[var] = expr;
     }
-  } else {
-    assign_dependency(var, val);
-    expr->param1 = val;
-    expr->param1_type = VARIABLE;
-    expr->param2_type = NONE;
-    expr->op = EQ;
-    unknown[var] = expr;
   }
 
   return i;
@@ -407,23 +417,48 @@ static inline size_t parse_line(char *text, size_t i, size_t j) {
   }
 }
 
-static void solution1(char *input, char *output) {
-  //input = "y RSHIFT 2 -> g\nx LSHIFT 2 -> f\nx OR y -> e\n123 -> x\nNOT y -> i\nx AND y -> d\n456 -> y\nNOT x -> h\n";
-  
+static void solution(char *input) {
   for (size_t i = 0, j = 0; input[i] != '\0'; i++, j++) {
     i = parse_line(input, i, j);
     if (i == 0) {
       break;
     }
   }
+}
+
+static void solution1(char *input, char *output) {
+  solution(input);
   
-  ASSERT(is_known[1], "Execution ended but value of A is not known!", 0, 0);
-  snprintf(output, OUTPUT_BUFFER_SIZE, "%d", known_val[1]);
+  uint16_t var_a = encode_var('a', ' ');
+  
+  ASSERT(is_known[var_a], "Execution ended but value of A is not known!", 0, 0);
+  snprintf(output, OUTPUT_BUFFER_SIZE, "%d", known_val[var_a]);
 }
 
 static void solution2(char *input, char *output) {
-  (void)input;
-  snprintf(output, OUTPUT_BUFFER_SIZE, "NOT SOLVED");
+  solution(input);
+
+  // Keep value of a
+  uint16_t var_a = encode_var('a', ' ');
+  ASSERT(is_known[var_a], "First execution ended but value of A is not known!", 0, 0);
+  uint16_t val_a = known_val[var_a];
+
+  // Reset state
+  memset(known_val, 0, sizeof(known_val));
+  memset(is_known, 0, sizeof(is_known));
+  memset(needs, 0, sizeof(needs));
+  memset(unknown, 0, sizeof(unknown));
+
+  // Override value of b with value of a
+  uint16_t var_b = encode_var('b', ' ');
+  known_val[var_b] = val_a;
+  is_known[var_b] = true;
+
+  solution(input);
+
+  // Final value of a
+  ASSERT(is_known[var_a], "Second execution ended but value of A is not known!", 0, 0);
+  snprintf(output, OUTPUT_BUFFER_SIZE, "%d", known_val[var_a]);
 }
 
 int main(int argc, char *argv[]) {
