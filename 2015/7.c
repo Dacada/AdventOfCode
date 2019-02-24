@@ -45,29 +45,6 @@ bool is_known[1024]; // index: var, content: the value in known_val is correct f
 uint16_t needs[1024][1024]; // index: var, content: vars which depend on index var in order to be calculated, they might depend on more vars. this array is laid out such that index 0 is the number of vars in the array and the following elements are the vars themselves
 expression_t *unknown[1024]; // index: var, content: expression to calculate var or NULL
 
-#ifdef DEBUG
-
-static void __attribute__((noreturn)) fail(char *msg, size_t column, size_t linenum, int srcline) {
-  fprintf(stderr, "(%d) PARSE FAILURE (l.%lu, c.%lu): %s\n", srcline, linenum, column, msg);
-  abort();
-}
-
-static void failif(bool condition, char *msg, size_t column, size_t linenum, int srcline) {
-  if (condition) {
-    fail(msg, column, linenum, srcline);
-  }
-}
-
-#define FAIL(msg, col, lin) fail(msg, col, lin, __LINE__)
-#define ASSERT(cond, msg, col, lin) failif(!(cond), msg, col, lin, __LINE__)
-
-#else
-
-#define FAIL(msg, col, lin) __builtin_unreachable()
-#define ASSERT(cond, msg, col, lin) if (!(cond)) __builtin_unreachable()
-
-#endif
-
 static size_t skip_whitespace(char *text, size_t i) {
   while (isspace(text[i])) i++;
   return i;

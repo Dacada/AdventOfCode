@@ -3,6 +3,21 @@
 #include <stdlib.h>
 #include <string.h>
 
+#ifdef DEBUG
+
+void aoc_fail(char *msg, size_t column, size_t linenum, int srcline) {
+  fprintf(stderr, "(%d) PARSE FAILURE (l.%lu, c.%lu): %s\n", srcline, linenum, column, msg);
+  abort();
+}
+
+void aoc_failif(bool condition, char *msg, size_t column, size_t linenum, int srcline) {
+  if (condition) {
+    aoc_fail(msg, column, linenum, srcline);
+  }
+}
+
+#endif
+
 // from
 // https://stackoverflow.com/questions/27097915/read-all-data-from-stdin-c
 static char *read_input() {
