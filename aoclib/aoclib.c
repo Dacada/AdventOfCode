@@ -81,3 +81,29 @@ int aoc_run(int argc, char *argv[], aoc_solution_callback solution1, aoc_solutio
   fputs(output, stdout);
   return retcode;
 }
+
+static void swap(int *array, size_t i, size_t j) {
+  int tmp = array[i];
+  array[i] = array[j];
+  array[j] = tmp;
+}
+
+// Heap's algorithm
+// https://en.wikipedia.org/wiki/Heap%27s_algorithm
+void aoc_permute(int *array, size_t size, aoc_permute_callback func, void *args) {
+  if (size == 1) {
+    func(array, args);
+  } else {
+    aoc_permute(array, size - 1, func, args);
+
+    for (size_t i=0; i < size-1; i++) {
+      if (size % 2 == 0) {
+	swap(array, i, size-1);
+      } else {
+	swap(array, 0, size-1);
+      }
+
+      aoc_permute(array, size - 1, func, args);
+    }
+  }
+}

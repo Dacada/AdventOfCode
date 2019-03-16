@@ -1,6 +1,8 @@
 #ifndef _AOCLIB_H
 #define _AOCLIB_H
 
+#include <stddef.h> 
+
 #ifdef DEBUG
 
 #include <stdlib.h>
@@ -22,7 +24,10 @@ void aoc_failif(bool condition, char *msg, size_t column, size_t linenum, int sr
 #define OUTPUT_BUFFER_SIZE 256
 
 typedef void (aoc_solution_callback)(char*, char*);
+typedef void (aoc_permute_callback)(int*, void*);
 
 int aoc_run(int argc, char *argv[], aoc_solution_callback solution1, aoc_solution_callback solution2);
+
+void aoc_permute(int *array, size_t size, aoc_permute_callback func, void *args);
 
 #endif
