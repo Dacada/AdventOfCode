@@ -16,6 +16,7 @@ CACHE_FILENAME = '.cache/{}_{}_input.txt'
 SPECIAL_INPUTS = set((
     (2015, 4),
     (2015, 10),
+    (2015, 11),
 ))
 
 
@@ -226,7 +227,7 @@ def get_process_stats(pid):
     try:
         with open('/proc/uptime') as f:
             stats_str = f.read()
-    except FileNotFoundError:
+    except:
         return None
 
     stats_split = stats_str.split()
