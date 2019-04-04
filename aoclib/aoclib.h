@@ -8,16 +8,16 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
-#define FAIL(msg, col, lin) aoc_fail(msg, col, lin, __LINE__)
-#define ASSERT(cond, msg, col, lin) aoc_failif(!(cond), msg, col, lin, __LINE__)
+#define FAIL(msg) aoc_fail(msg, __LINE__)
+#define ASSERT(cond, msg) aoc_failif(!(cond), msg, __LINE__)
 
-void __attribute__((noreturn)) aoc_fail(char *msg, size_t column, size_t linenum, int srcline);
-void aoc_failif(bool condition, char *msg, size_t column, size_t linenum, int srcline);
+void __attribute__((noreturn)) aoc_fail(char *msg, int srcline);
+void aoc_failif(bool condition, char *msg, int srcline);
 
 #else
 
-#define FAIL(msg, col, lin) __builtin_unreachable()
-#define ASSERT(cond, msg, col, lin) if (!(cond)) __builtin_unreachable()
+#define FAIL(msg) __builtin_unreachable()
+#define ASSERT(cond, msg) if (!(cond)) __builtin_unreachable()
 
 #endif
 

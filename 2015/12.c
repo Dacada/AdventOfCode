@@ -119,7 +119,7 @@ static int sum_without_reds(char *input, jsmntok_t *tokens, size_t count, int *t
 
     return j+1;
   default:
-    FAIL("undefined token", 0, 0);
+    FAIL("undefined token");
     return 0;
   }
 }

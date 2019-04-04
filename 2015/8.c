@@ -11,7 +11,7 @@ static void assert_hex_char(char c) {
   b |= c >= 'A' && c <= 'F';
   b |= c >= 'a' && c <= 'f';
 
-  ASSERT(b, "Expected an hexadecimal character", 0, 0);
+  ASSERT(b, "Expected an hexadecimal character");
 }
 
 static void assert_hex(char c1, char c2) {
@@ -49,7 +49,7 @@ static void solution1(char *input, char *output) {
 	  i += 2;
 	  total_chars += 2;
 	} else {
-	  ASSERT(c == '"' || c == '\\', "Expected quote or backslash to be escaped", i, 0);
+	  ASSERT(c == '"' || c == '\\', "Expected quote or backslash to be escaped");
 	}
 	in_memory_chars++;
 	escaping = false;
@@ -64,12 +64,12 @@ static void solution1(char *input, char *output) {
 	}
       }
     } else {
-      ASSERT(!escaping, "In escaping state while inbetween strings", i, 0);
+      ASSERT(!escaping, "In escaping state while inbetween strings");
       if (c == '"') {
 	total_chars++;
 	in_string = true;
       } else {
-	ASSERT(isspace(c), "Expected only whitespace inbetween strings", i, 0);
+	ASSERT(isspace(c), "Expected only whitespace inbetween strings");
       }
     }
     
@@ -102,7 +102,7 @@ static void solution2(char *input, char *output) {
 	  total_chars += 2;
 	  encoded_chars += 2;
 	} else {
-	  ASSERT(c == '"' || c == '\\', "Expected quote or backslash to be escaped", i, 0);
+	  ASSERT(c == '"' || c == '\\', "Expected quote or backslash to be escaped");
 	  encoded_chars++;
 	}
 	escaping = false;
@@ -116,13 +116,13 @@ static void solution2(char *input, char *output) {
 	}
       }
     } else {
-      ASSERT(!escaping, "In escaping state while inbetween strings", i, 0);
+      ASSERT(!escaping, "In escaping state while inbetween strings");
       if (c == '"') {
 	total_chars++;
 	encoded_chars += 3;
 	in_string = true;
       } else {
-	ASSERT(isspace(c), "Expected only whitespace inbetween strings", i, 0);
+	ASSERT(isspace(c), "Expected only whitespace inbetween strings");
       }
     }
     

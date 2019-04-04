@@ -22,7 +22,7 @@ static int encode_name(char *name) {
       return i;
   }
 
-  FAIL("Too many names", 0, 0);
+  FAIL("Too many names");
 }
 
 static int get_index(int n1, int n2) {
@@ -31,12 +31,12 @@ static int get_index(int n1, int n2) {
 
 int happinesses[MATSIZE];
 static void assign_happiness(int name1, int name2, int happiness) {
-  ASSERT(name1 != name2, "Cant assign happiness for the same name twice", 0, 0);
+  ASSERT(name1 != name2, "Cant assign happiness for the same name twice");
   int i = get_index(name1, name2);
   happinesses[i] = happiness;
 }
 static int get_happiness(int name1, int name2) {
-  ASSERT(name1 != name2, "Cant get happiness for the same name twice", 0, 0);
+  ASSERT(name1 != name2, "Cant get happiness for the same name twice");
   int i = get_index(name1, name2);
   return happinesses[i];
 }
@@ -52,7 +52,7 @@ static int parse_first_name(char *input, int i, char *name) {
   }
   name[j] = '\0';
 
-  ASSERT(strncmp(" would ", input+i+j, 7) == 0, "expected ' would '", i, 0);
+  ASSERT(strncmp(" would ", input+i+j, 7) == 0, "expected ' would '");
   return i+j+7;
 }
 
@@ -62,7 +62,7 @@ static int parse_happiness_gain(char *input, int i, bool *gain_happiness) {
   } else if (strncmp("lose ", input+i, 5) == 0) {
     *gain_happiness = false;
   } else {
-    FAIL("expected 'gain ' or 'lose '", i, 0);
+    FAIL("expected 'gain ' or 'lose '");
   }
   
   return i+5;
@@ -80,7 +80,7 @@ static int parse_happiness_amount(char *input, int i, int *amount) {
   }
 
   *amount = number;
-  ASSERT(strncmp(" happiness units by sitting next to ", input+i+j, 36) == 0, "expected ' happiness units by sitting next to '", i, 0);
+  ASSERT(strncmp(" happiness units by sitting next to ", input+i+j, 36) == 0, "expected ' happiness units by sitting next to '");
   return i+j+36;
 }
 
@@ -124,7 +124,7 @@ static void parse(char *input) {
     }
 
     i = parse_line(input, i);
-    ASSERT(input[i] == '\n', "Did not parse full line", i, 0);
+    ASSERT(input[i] == '\n', "Did not parse full line");
   }
 }
 

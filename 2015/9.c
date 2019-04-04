@@ -22,11 +22,11 @@ static int encode_name(char *name) {
       return i;
   }
 
-  FAIL("Too many names", 0, 0);
+  FAIL("Too many names");
 }
 
 static int get_index(int n1, int n2) {
-  ASSERT(n1 != n2, "Cannot get index if n1 equals n2", 0, 0);
+  ASSERT(n1 != n2, "Cannot get index if n1 equals n2");
   if (n1 > n2) {
     // swap
     n1 = n1 + n2;
@@ -44,7 +44,7 @@ static int get_index(int n1, int n2) {
     case 5: return 4;
     case 6: return 5;
     case 7: return 6;
-    default: FAIL("Unexpected get_index input", n1, n2);
+    default: FAIL("Unexpected get_index input");
     }
   case 1:
     switch (n2) {
@@ -54,7 +54,7 @@ static int get_index(int n1, int n2) {
     case 5: return 10;
     case 6: return 11;
     case 7: return 12;
-    default: FAIL("Unexpected get_index input", n1, n2);
+    default: FAIL("Unexpected get_index input");
     }
   case 2:
     switch (n2) {
@@ -63,7 +63,7 @@ static int get_index(int n1, int n2) {
     case 5: return 15;
     case 6: return 16;
     case 7: return 17;
-    default: FAIL("Unexpected get_index input", n1, n2);
+    default: FAIL("Unexpected get_index input");
     }
   case 3:
     switch (n2) {
@@ -71,29 +71,29 @@ static int get_index(int n1, int n2) {
     case 5: return 19;
     case 6: return 20;
     case 7: return 21;
-    default: FAIL("Unexpected get_index input", n1, n2);
+    default: FAIL("Unexpected get_index input");
     }
   case 4:
     switch (n2) {
     case 5: return 22;
     case 6: return 23;
     case 7: return 24;
-    default: FAIL("Unexpected get_index input", n1, n2);
+    default: FAIL("Unexpected get_index input");
     }
   case 5:
     switch (n2) {
     case 6: return 25;
     case 7: return 26;
-    default: FAIL("Unexpected get_index input", n1, n2);
+    default: FAIL("Unexpected get_index input");
     }
   case 6:
     switch (n2) {
     case 7: return 27;
-    default: FAIL("Unexpected get_index input", n1, n2);
+    default: FAIL("Unexpected get_index input");
     }
   }
 
-  FAIL("Unexpected get_index input", n1, n2);
+  FAIL("Unexpected get_index input");
 }
 
 unsigned int distances[NUMDIST];
@@ -121,7 +121,7 @@ static int parse_first_name(char *input, int i, char *name) {
 	 input[i+1] == 't' &&
 	 input[i+2] == 'o' &&
 	 input[i+3] == ' ' &&
-	 !isspace(input[i+4]), "expected ' to ' but got something else", i, 0);
+	 !isspace(input[i+4]), "expected ' to ' but got something else");
 
   return i+4;
 }
@@ -140,7 +140,7 @@ static int parse_second_name(char *input, int i, char *name) {
   ASSERT(input[i] == ' ' &&
 	 input[i+1] == '=' &&
 	 input[i+2] == ' ' &&
-	 !isspace(input[i+3]), "expected ' = ' but got something else", i, 0);
+	 !isspace(input[i+3]), "expected ' = ' but got something else");
 
   return i+3;
 }
@@ -158,7 +158,7 @@ static int parse_distance(char *input, int i, unsigned int *dist) {
   }
 
   ASSERT(input[i] == '\n' &&
-	 !isspace(input[i+1]), "expected end of line but got something else", i, 0);
+	 !isspace(input[i+1]), "expected end of line but got something else");
 
   return i;
 }
@@ -184,7 +184,7 @@ static void parse(char *input) {
       return;
     
     i = parse_line(input, i);
-    ASSERT(input[i] == '\n', "Did not parse full line", i, 0);
+    ASSERT(input[i] == '\n', "Did not parse full line");
   }
 }
 

@@ -60,7 +60,7 @@ static unsigned int parse1(char *input) {
     }
 
     unsigned int current = parse_line1(input, &i);
-    ASSERT(input[i] == '\n', "Did not parse full line", i, 0);
+    ASSERT(input[i] == '\n', "Did not parse full line");
 
     if (current > max) {
       max = current;
@@ -114,7 +114,7 @@ static void parse2(char *input, struct reindeer *array) {
     parse_line2(input, &i, array + j);
     j++;
     
-    ASSERT(input[i] == '\n', "Did not parse full line", i, 0);
+    ASSERT(input[i] == '\n', "Did not parse full line");
   }
 }
 

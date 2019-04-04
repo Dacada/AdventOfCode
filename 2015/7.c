@@ -92,7 +92,7 @@ static size_t eval_expr(char *text, size_t i, size_t j, uint16_t *val, bool *ok)
     *val = num;
     return i;
   } else {
-    FAIL("Attempt to eval but wasn't num or var", i, j);
+    FAIL("Attempt to eval but wasn't num or var");
   }
 }
 
@@ -111,7 +111,7 @@ static uint16_t apply_op(uint16_t v1, uint16_t v2, operation_t op) {
   case EQ:
     return v1;
   default:
-    FAIL("Unexpected operation to apply!", 0, 0);
+    FAIL("Unexpected operation to apply!");
   }
 }
 
@@ -177,7 +177,7 @@ static void assign_dependency(uint16_t depends, uint16_t is_depended) {
 static inline size_t parse_assign(char *text, size_t i, size_t j, expression_t *expr, uint16_t val, bool isnum) {
   (void)j; // used only in debug mode, suppress warnings otherwise
   
-  ASSERT(IS_VAR(text[i]), "Expected lowercase character but got something else", i, j);
+  ASSERT(IS_VAR(text[i]), "Expected lowercase character but got something else");
   uint16_t var = encode_var(text[i], text[i+1]);
   if (isspace(text[i+1])) {
     i += 1;
@@ -186,7 +186,7 @@ static inline size_t parse_assign(char *text, size_t i, size_t j, expression_t *
   }
 
   // Solution 2 breaks this assert
-  //ASSERT(!known_val[var], "The destination of a rule is a known value", i, j);
+  //ASSERT(!known_val[var], "The destination of a rule is a known value");
   // So we replace it with this if.
   if (!known_val[var]) {
     if (isnum) {
@@ -220,7 +220,7 @@ static void assert_op(char *text, size_t i, size_t j, const char *const op_text)
       break;
     }
     
-    ASSERT(c == d, "Unexpected operation name", i, j);
+    ASSERT(c == d, "Unexpected operation name");
   }
 }
 
@@ -263,7 +263,7 @@ static inline size_t parse_op(char *text, size_t i, size_t j, expression_t *expr
     i += 2;
     break;
   default:
-    FAIL("Unknown operation", i, j);
+    FAIL("Unknown operation");
   }
 
   i = skip_whitespace(text, i);
@@ -274,12 +274,12 @@ static inline size_t parse_op(char *text, size_t i, size_t j, expression_t *expr
 
   i = skip_whitespace(text, i);
 
-  ASSERT(text[i] == '-' && text[i+1] == '>', "Expected arrow (->) but didn't find it", i, j);
+  ASSERT(text[i] == '-' && text[i+1] == '>', "Expected arrow (->) but didn't find it");
   i += 2;
 
   i = skip_whitespace(text, i);
 
-  ASSERT(IS_VAR(text[i]), "Expected lowercase letter but found something else", i, j);
+  ASSERT(IS_VAR(text[i]), "Expected lowercase letter but found something else");
   uint16_t var = encode_var(text[i], text[i+1]);
   if (isspace(text[i+1])) {
     i += 1;
@@ -287,7 +287,7 @@ static inline size_t parse_op(char *text, size_t i, size_t j, expression_t *expr
     i += 2;
   }
 
-  ASSERT(!known_val[var], "The destination rule is a known rule", i, j);
+  ASSERT(!known_val[var], "The destination rule is a known rule");
   if (isnum1 && isnum2) {
     uint16_t val = apply_op(val1, val2, op);
     if (assign_value(var, val)) {
@@ -326,7 +326,7 @@ static inline size_t parse_assign_or_op(char *text, size_t i, size_t j, expressi
   i = skip_whitespace(text, i);
 
   if (text[i] == '-') {
-    ASSERT(text[i+1] == '>', "Expected an arrow (->) but found something else", i, j);
+    ASSERT(text[i+1] == '>', "Expected an arrow (->) but found something else");
     i += 2;
     
     i = skip_whitespace(text, i);
@@ -335,12 +335,12 @@ static inline size_t parse_assign_or_op(char *text, size_t i, size_t j, expressi
   } else if (IS_OP(text[i])) {
     return parse_op(text, i, j, expr, val, isnum);
   } else {
-    FAIL("Expected an arrow or an operation but got neither", i, j);
+    FAIL("Expected an arrow or an operation but got neither");
   }
 }
 
 static inline size_t parse_not(char *text, size_t i, size_t j, expression_t *expr) {
-  ASSERT(text[i+1] == 'O' && text[i+2] == 'T', "Expected NOT but it wasn't.", i, j);
+  ASSERT(text[i+1] == 'O' && text[i+2] == 'T', "Expected NOT but it wasn't.");
   i += 3;
 
   i = skip_whitespace(text, i);
@@ -354,12 +354,12 @@ static inline size_t parse_not(char *text, size_t i, size_t j, expression_t *exp
 
   i = skip_whitespace(text, i);
 
-  ASSERT(text[i] == '-' && text[i+1] == '>', "Expected arrow (->) but didn't find it", i, j);
+  ASSERT(text[i] == '-' && text[i+1] == '>', "Expected arrow (->) but didn't find it");
   i += 2;
 
   i = skip_whitespace(text, i);
 
-  ASSERT(IS_VAR(text[i]), "Expected lowercase letter but found something else", i, j);
+  ASSERT(IS_VAR(text[i]), "Expected lowercase letter but found something else");
   uint16_t var = encode_var(text[i], text[i+1]);
   if (isspace(text[i+1])) {
     i += 1;
@@ -367,7 +367,7 @@ static inline size_t parse_not(char *text, size_t i, size_t j, expression_t *exp
     i += 2;
   }
 
-  ASSERT(!known_val[var], "The destination of a rule is a known value", i, j);
+  ASSERT(!known_val[var], "The destination of a rule is a known value");
   if (known_value) {
     assign_value(var, v1);
   } else {
@@ -390,7 +390,7 @@ static inline size_t parse_line(char *text, size_t i, size_t j) {
   } else if (text[i] == 'N') {
     return parse_not(text, i, j, expr);
   } else {
-    FAIL("Line doesn't start with N, a small case letter or a number.", i, j);
+    FAIL("Line doesn't start with N, a small case letter or a number.");
   }
 }
 
@@ -408,7 +408,7 @@ static void solution1(char *input, char *output) {
   
   uint16_t var_a = encode_var('a', ' ');
   
-  ASSERT(is_known[var_a], "Execution ended but value of A is not known!", 0, 0);
+  ASSERT(is_known[var_a], "Execution ended but value of A is not known!");
   snprintf(output, OUTPUT_BUFFER_SIZE, "%d", known_val[var_a]);
 }
 
@@ -417,7 +417,7 @@ static void solution2(char *input, char *output) {
 
   // Keep value of a
   uint16_t var_a = encode_var('a', ' ');
-  ASSERT(is_known[var_a], "First execution ended but value of A is not known!", 0, 0);
+  ASSERT(is_known[var_a], "First execution ended but value of A is not known!");
   uint16_t val_a = known_val[var_a];
 
   // Reset state
@@ -434,7 +434,7 @@ static void solution2(char *input, char *output) {
   solution(input);
 
   // Final value of a
-  ASSERT(is_known[var_a], "Second execution ended but value of A is not known!", 0, 0);
+  ASSERT(is_known[var_a], "Second execution ended but value of A is not known!");
   snprintf(output, OUTPUT_BUFFER_SIZE, "%d", known_val[var_a]);
 }
 

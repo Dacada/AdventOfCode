@@ -5,14 +5,14 @@
 
 #ifdef DEBUG
 
-void aoc_fail(char *msg, size_t column, size_t linenum, int srcline) {
-  fprintf(stderr, "(%d) PARSE FAILURE (l.%lu, c.%lu): %s\n", srcline, linenum, column, msg);
+void aoc_fail(char *msg, int srcline) {
+  fprintf(stderr, "(line %d) ASSERT ERROR: %s\n", srcline, msg);
   abort();
 }
 
-void aoc_failif(bool condition, char *msg, size_t column, size_t linenum, int srcline) {
+void aoc_failif(bool condition, char *msg, int srcline) {
   if (condition) {
-    aoc_fail(msg, column, linenum, srcline);
+    aoc_fail(msg, srcline);
   }
 }
 

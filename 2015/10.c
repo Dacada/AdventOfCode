@@ -34,7 +34,7 @@ static void look_and_say(void) {
       count++;
       
       if (++i >= NUMLEN) {
-	FAIL("NUMBER GREW TOO BIG!!!!", 0, 0);
+	FAIL("NUMBER GREW TOO BIG!!!!");
       }
     }
     
@@ -42,7 +42,7 @@ static void look_and_say(void) {
     nextnum[j++] = n;
   }
 
-  FAIL("NUMBER GREW TOO BIG!!!!", 0, 0);
+  FAIL("NUMBER GREW TOO BIG!!!!");
 }
 
 static void solution1(char *input, char *output) {

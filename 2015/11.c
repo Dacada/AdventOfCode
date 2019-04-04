@@ -69,7 +69,7 @@ static bool get_next_char(char *password, size_t i) {
 }
 
 static void get_next_valid_password_recurse(char *password, size_t len) {
-  ASSERT(len > 0, "Reached password limit", 0, 0);
+  ASSERT(len > 0, "Reached password limit");
 
   if (get_next_char(password, len-1)) {
     get_next_valid_password_recurse(password, len-1);
