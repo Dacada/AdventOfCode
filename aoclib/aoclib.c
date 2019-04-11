@@ -107,3 +107,50 @@ void aoc_permute(int *array, size_t size, aoc_permute_callback func, void *args)
     }
   }
 }
+
+static void combinations_recursive(size_t offset, int *array, size_t len, int *aux, size_t n, aoc_combinations_callback fun, void *args) {
+  if (n < 1) {
+    FAIL("Attempt to make combinations of less than one element");
+  } else if (n > len) {
+    FAIL("Attempt to make combinations of more elements than the length of the collection itself");
+  } else if (len < 1) {
+    return;
+  } else if (n == len) {
+    memcpy(aux+offset, array, len*sizeof(int));
+    fun(aux, args);
+  } else if (n == 1) {
+    for (size_t i=0; i<len; i++) {
+      aux[offset] = array[i];
+      fun(aux, args);
+    }
+  } else {
+    /*
+     A B C D E
+
+     A B C
+     A B D
+     A B E
+     A C D
+     A C E
+     A D E
+     B C D
+     B C E
+     B D E
+     C D E
+     
+     Iterate so we get A, B, C then in each iteration recurse using
+     the rest of the array as the argument and one less element in
+     the combination: combinations((A,B,C,D,E), 3) = A + combinations((B,C,D,E), 2), B + combinations((C,D,E), 2), C + combinations((D,E), 2)
+     */
+    for (size_t i=0; i<=len-n; i++) {
+      aux[offset] = array[i];
+      combinations_recursive(offset+1, array+i+1, len-i-1, aux, n-1, fun, args);
+    }
+  }
+}
+
+void aoc_combinations(int *array, size_t len, size_t n, aoc_combinations_callback func, void *args) {
+  int *aux = malloc(n * sizeof(int));
+  combinations_recursive(0, array, len, aux, n, func, args);
+  free(aux);
+}
