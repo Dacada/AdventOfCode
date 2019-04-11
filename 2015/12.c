@@ -5,11 +5,11 @@
 #include <stdlib.h>
 #include <string.h>
 
-static int parse_int(char *input, int start, int end) {
+static int parse_int(const char *const input, const int start, const int end) {
   int number = 0;
   bool negative = false;
 
-  char c = input[start];
+  const char c = input[start];
   if (c == '-') {
     negative = true;
   } else {
@@ -26,12 +26,12 @@ static int parse_int(char *input, int start, int end) {
     return number;
 }
 
-static jsmntok_t *get_tokens(char *input, unsigned int *num_tokens) {
+static jsmntok_t *get_tokens(const char *const input, unsigned int *const num_tokens) {
   jsmn_parser parser;
   jsmn_init(&parser);
 
-  size_t len = strlen(input);
-  unsigned int ntokens = jsmn_parse(&parser, input, len, NULL, 0);
+  const size_t len = strlen(input);
+  const unsigned int ntokens = jsmn_parse(&parser, input, len, NULL, 0);
   jsmntok_t *tokens = malloc(ntokens * sizeof(jsmntok_t));
   
   if (tokens == NULL) {
@@ -46,7 +46,7 @@ static jsmntok_t *get_tokens(char *input, unsigned int *num_tokens) {
   return tokens;
 }
 
-static void solution1(char *input, char *output) {
+static void solution1(const char *const input, char *const output) {
   unsigned int num_tokens;
   jsmntok_t *tokens = get_tokens(input, &num_tokens);
 
@@ -66,7 +66,7 @@ static void solution1(char *input, char *output) {
   snprintf(output, OUTPUT_BUFFER_SIZE, "%d", total);
 }
 
-static int sum_without_reds(char *input, jsmntok_t *tokens, size_t count, int *total) {
+static int sum_without_reds(const char *const input, const jsmntok_t *const tokens, const size_t count, int *const total) {
   char c;
   int j, tmp_total;
   bool found_red;
@@ -75,7 +75,7 @@ static int sum_without_reds(char *input, jsmntok_t *tokens, size_t count, int *t
     return 0;
   }
 
-  jsmntok_t token = tokens[0];
+  const jsmntok_t token = tokens[0];
   switch (token.type) {
   case JSMN_PRIMITIVE:
     c = input[token.start];
@@ -103,7 +103,7 @@ static int sum_without_reds(char *input, jsmntok_t *tokens, size_t count, int *t
     for (int i=0; i<token.size; i++) {
       j += sum_without_reds(input, tokens+1+j, count-j, &tmp_total);
       
-      jsmntok_t *value_token = tokens+1+j;
+      const jsmntok_t *value_token = tokens+1+j;
       if (value_token->type == JSMN_STRING &&
 	  strncmp("red", input+value_token->start, value_token->end - value_token->start) == 0) {
 	found_red = true;
@@ -124,7 +124,7 @@ static int sum_without_reds(char *input, jsmntok_t *tokens, size_t count, int *t
   }
 }
 
-static void solution2(char *input, char *output) {
+static void solution2(const char *const input, char *const output) {
   unsigned int num_tokens;
   jsmntok_t *tokens = get_tokens(input, &num_tokens);
 

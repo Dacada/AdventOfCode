@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 
-static void solution1(char *input, char *output) {
+static void solution1(const char *const input, char *const output) {
   int result = 0;
   
   for (size_t i = 0; input[i] != '\0'; i++) {
@@ -42,7 +42,7 @@ static void solution1(char *input, char *output) {
   snprintf(output, OUTPUT_BUFFER_SIZE, "%d", result);
 }
 
-static void solution2(char *input, char *output) {
+static void solution2(const char *const input, char *const output) {
   int result = 0;
 
   for (size_t i = 0; input[i] != '\0'; i++) {

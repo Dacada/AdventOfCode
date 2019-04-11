@@ -10,7 +10,7 @@
 #define MATSIZE (PEOPLE*PEOPLE)
 
 char seen_names[PEOPLE][MAXNAMELEN];
-static int encode_name(char *name) {
+static int encode_name(const char *const name) {
   int i;
   for (i=0; i<PEOPLE; i++) {
     if (seen_names[i][0] == '\0') {
@@ -25,26 +25,26 @@ static int encode_name(char *name) {
   FAIL("Too many names");
 }
 
-static int get_index(int n1, int n2) {
+static int get_index(const int n1, const int n2) {
   return n1*PEOPLE + n2;
 }
 
 int happinesses[MATSIZE];
-static void assign_happiness(int name1, int name2, int happiness) {
+static void assign_happiness(const int name1, const int name2, const int happiness) {
   ASSERT(name1 != name2, "Cant assign happiness for the same name twice");
-  int i = get_index(name1, name2);
+  const int i = get_index(name1, name2);
   happinesses[i] = happiness;
 }
-static int get_happiness(int name1, int name2) {
+static int get_happiness(const int name1, const int name2) {
   ASSERT(name1 != name2, "Cant get happiness for the same name twice");
-  int i = get_index(name1, name2);
+  const int i = get_index(name1, name2);
   return happinesses[i];
 }
 
-static int parse_first_name(char *input, int i, char *name) {
+static int parse_first_name(const char *const input, const int i, char *const name) {
   int j;
   for (j=0; j<MAXNAMELEN; j++) {
-    char c = input[i+j];
+    const char c = input[i+j];
     if (isspace(c)) {
       break;
     }
@@ -56,7 +56,7 @@ static int parse_first_name(char *input, int i, char *name) {
   return i+j+7;
 }
 
-static int parse_happiness_gain(char *input, int i, bool *gain_happiness) {
+static int parse_happiness_gain(const char *const input, const int i, bool *const gain_happiness) {
   if (strncmp("gain ", input+i, 5) == 0) {
     *gain_happiness = true;
   } else if (strncmp("lose ", input+i, 5) == 0) {
@@ -68,11 +68,11 @@ static int parse_happiness_gain(char *input, int i, bool *gain_happiness) {
   return i+5;
 }
 
-static int parse_happiness_amount(char *input, int i, int *amount) {
+static int parse_happiness_amount(const char *const input, const int i, int *const amount) {
   int number = 0;
   int j;
   for (j=0; j<10; j++) {
-    char c = input[i+j];
+    const char c = input[i+j];
     if (isspace(c)) {
       break;
     }
@@ -84,10 +84,10 @@ static int parse_happiness_amount(char *input, int i, int *amount) {
   return i+j+36;
 }
 
-static int parse_second_name(char *input, int i, char *name) {
+static int parse_second_name(const char *const input, const int i, char *const name) {
   int j;
   for (j=0; j<MAXNAMELEN; j++) {
-    char c = input[i+j];
+    const char c = input[i+j];
     if (c == '.') {
       break;
     }
@@ -98,11 +98,11 @@ static int parse_second_name(char *input, int i, char *name) {
   return i+j+1;
 }
 
-static int parse_line(char *input, int i) {
+static int parse_line(const char *const input, int i) {
   char name[MAXNAMELEN];
 
   i = parse_first_name(input, i, name);
-  int n1 = encode_name(name);
+  const int n1 = encode_name(name);
 
   bool gain_happiness;
   i = parse_happiness_gain(input, i, &gain_happiness);
@@ -111,13 +111,13 @@ static int parse_line(char *input, int i) {
   i = parse_happiness_amount(input, i, &happiness);
 
   i = parse_second_name(input, i, name);
-  int n2 = encode_name(name);
+  const int n2 = encode_name(name);
 
   assign_happiness(n1, n2, gain_happiness ? happiness : -happiness);
   return i;
 }
 
-static void parse(char *input) {
+static void parse(const char *const input) {
   for (int i=0;; i++) {
     if (input[i] == '\0') {
       return;
@@ -130,7 +130,7 @@ static void parse(char *input) {
 
 struct t { int result; size_t size; };
 
-static void compute_arrangement_max_happiness(int *arrangement, void *args) {
+static void compute_arrangement_max_happiness(int *const arrangement, void *args) {
   struct t *tuple = args;
   int current_happiness = 0;
 
@@ -171,13 +171,13 @@ static int solve9(void) {
   return tuple.result;
 }
 
-static void solution1(char *input, char *output) {
+static void solution1(const char *const input, char *output) {
   parse(input);
-  int total_happiness = solve8();
+  const int total_happiness = solve8();
   snprintf(output, OUTPUT_BUFFER_SIZE, "%d", total_happiness);
 }
 
-static void solution2(char *input, char *output) {
+static void solution2(const char *const input, char *output) {
   parse(input);
 
   int me = encode_name("Me");
@@ -186,7 +186,7 @@ static void solution2(char *input, char *output) {
     assign_happiness(i, me, 0);
   }
   
-  int total_happiness = solve9();
+  const int total_happiness = solve9();
   snprintf(output, OUTPUT_BUFFER_SIZE, "%d", total_happiness);
 }
 

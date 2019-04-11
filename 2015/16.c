@@ -15,40 +15,40 @@
 
 #define ISNUM(n) ((n) >= '0' && (n) <= '9')
 
-static bool(*akitas_ok)(unsigned int n);
-static bool(*cars_ok)(unsigned int n);
-static bool(*cats_ok)(unsigned int n);
-static bool(*children_ok)(unsigned int n);
-static bool(*goldfish_ok)(unsigned int n);
-static bool(*perfumes_ok)(unsigned int n);
-static bool(*pomeranians_ok)(unsigned int n);
-static bool(*samoyeds_ok)(unsigned int n);
-static bool(*trees_ok)(unsigned int n);
-static bool(*vizslas_ok)(unsigned int n);
+static bool(*akitas_ok)(const unsigned int n);
+static bool(*cars_ok)(const unsigned int n);
+static bool(*cats_ok)(const unsigned int n);
+static bool(*children_ok)(const unsigned int n);
+static bool(*goldfish_ok)(const unsigned int n);
+static bool(*perfumes_ok)(const unsigned int n);
+static bool(*pomeranians_ok)(const unsigned int n);
+static bool(*samoyeds_ok)(const unsigned int n);
+static bool(*trees_ok)(const unsigned int n);
+static bool(*vizslas_ok)(const unsigned int n);
 
-static bool akitas_ok1(unsigned int n)      { return n == AKITAS; }
-static bool cars_ok1(unsigned int n)        { return n == CARS; }
-static bool cats_ok1(unsigned int n)        { return n == CATS; }
-static bool children_ok1(unsigned int n)    { return n == CHILDREN; }
-static bool goldfish_ok1(unsigned int n)    { return n == GOLDFISH; }
-static bool perfumes_ok1(unsigned int n)    { return n == PERFUMES; }
-static bool pomeranians_ok1(unsigned int n) { return n == POMERANIANS; }
-static bool samoyeds_ok1(unsigned int n)    { return n == SAMOYEDS; }
-static bool trees_ok1(unsigned int n)       { return n == TREES; }
-static bool vizslas_ok1(unsigned int n)     { return n == VIZSLAS; }
+static bool akitas_ok1(const unsigned int n)      { return n == AKITAS; }
+static bool cars_ok1(const unsigned int n)        { return n == CARS; }
+static bool cats_ok1(const unsigned int n)        { return n == CATS; }
+static bool children_ok1(const unsigned int n)    { return n == CHILDREN; }
+static bool goldfish_ok1(const unsigned int n)    { return n == GOLDFISH; }
+static bool perfumes_ok1(const unsigned int n)    { return n == PERFUMES; }
+static bool pomeranians_ok1(const unsigned int n) { return n == POMERANIANS; }
+static bool samoyeds_ok1(const unsigned int n)    { return n == SAMOYEDS; }
+static bool trees_ok1(const unsigned int n)       { return n == TREES; }
+static bool vizslas_ok1(const unsigned int n)     { return n == VIZSLAS; }
 
-static bool akitas_ok2(unsigned int n)      { return n == AKITAS; }
-static bool cars_ok2(unsigned int n)        { return n == CARS; }
-static bool cats_ok2(unsigned int n)        { return n > CATS; }
-static bool children_ok2(unsigned int n)    { return n == CHILDREN; }
-static bool goldfish_ok2(unsigned int n)    { return n < GOLDFISH; }
-static bool perfumes_ok2(unsigned int n)    { return n == PERFUMES; }
-static bool pomeranians_ok2(unsigned int n) { return n < POMERANIANS; }
-static bool samoyeds_ok2(unsigned int n)    { return n == SAMOYEDS; }
-static bool trees_ok2(unsigned int n)       { return n > TREES; }
-static bool vizslas_ok2(unsigned int n)     { return n == VIZSLAS; }
+static bool akitas_ok2(const unsigned int n)      { return n == AKITAS; }
+static bool cars_ok2(const unsigned int n)        { return n == CARS; }
+static bool cats_ok2(const unsigned int n)        { return n > CATS; }
+static bool children_ok2(const unsigned int n)    { return n == CHILDREN; }
+static bool goldfish_ok2(const unsigned int n)    { return n < GOLDFISH; }
+static bool perfumes_ok2(const unsigned int n)    { return n == PERFUMES; }
+static bool pomeranians_ok2(const unsigned int n) { return n < POMERANIANS; }
+static bool samoyeds_ok2(const unsigned int n)    { return n == SAMOYEDS; }
+static bool trees_ok2(const unsigned int n)       { return n > TREES; }
+static bool vizslas_ok2(const unsigned int n)     { return n == VIZSLAS; }
 
-static unsigned int parse_number(char *input, unsigned int *i) {
+static unsigned int parse_number(const char *const input, unsigned int *const i) {
   unsigned int j = *i;
   while (!ISNUM(input[j])) {
     j++;
@@ -62,7 +62,7 @@ static unsigned int parse_number(char *input, unsigned int *i) {
   return num;
 }
 
-static bool parse_pair(char *input, unsigned int *i) {
+static bool parse_pair(const char *const input, unsigned int *i) {
   unsigned int j = *i;
   while (input[j] < 'a' || input[j] > 'z') {
     j++;
@@ -117,7 +117,7 @@ static bool parse_pair(char *input, unsigned int *i) {
   return ret;
 }
 
-static void skip_to_eol(char *input, unsigned int *i) {
+static void skip_to_eol(const char *const input, unsigned int *const i) {
   int j = *i;
   while (input[j] != '\n') {
     j++;
@@ -125,7 +125,7 @@ static void skip_to_eol(char *input, unsigned int *i) {
   *i = j;
 }
 
-static unsigned int parse_line(char *input, unsigned int *i) {
+static unsigned int parse_line(const char *const input, unsigned int *const i) {
   unsigned int aunt = parse_number(input, i);
   
   if (!parse_pair(input, i)) {
@@ -145,7 +145,7 @@ static unsigned int parse_line(char *input, unsigned int *i) {
   return aunt;
 }
 
-static unsigned int parse(char *input) {
+static unsigned int parse(const char *const input) {
   for (unsigned int i=0;; i++) {
     if (input[i] == '\0') {
       break;
@@ -161,7 +161,7 @@ static unsigned int parse(char *input) {
   FAIL("Did not find Aunt Sue");
 }
 
-static void solution1(char *input, char *output) {
+static void solution1(const char *const input, char *const output) {
   akitas_ok = akitas_ok1;
   cars_ok = cars_ok1;
   cats_ok = cats_ok1;
@@ -177,7 +177,7 @@ static void solution1(char *input, char *output) {
   snprintf(output, OUTPUT_BUFFER_SIZE, "%u", aunt);
 }
 
-static void solution2(char *input, char *output) {
+static void solution2(const char *const input, char *const output) {
   akitas_ok = akitas_ok2;
   cars_ok = cars_ok2;
   cats_ok = cats_ok2;

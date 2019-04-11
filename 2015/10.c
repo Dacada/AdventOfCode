@@ -45,7 +45,7 @@ static void look_and_say(void) {
   FAIL("NUMBER GREW TOO BIG!!!!");
 }
 
-static void solution1(char *input, char *output) {
+static void solution1(const char *const input, char *const output) {
   strcpy(num, input);
   for (int i=0; i<40; i++) {
     look_and_say();
@@ -53,7 +53,7 @@ static void solution1(char *input, char *output) {
   snprintf(output, OUTPUT_BUFFER_SIZE, "%lu", numlen);
 }
 
-static void solution2(char *input, char *output) {
+static void solution2(const char *const input, char *const output) {
   strcpy(num, input);
   for (int i=0; i<50; i++) {
     look_and_say();

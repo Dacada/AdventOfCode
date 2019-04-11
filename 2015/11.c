@@ -5,7 +5,7 @@
 
 #define PWLEN 8
 
-static bool has_increasing_straight_of_three(char *password) {
+static bool has_increasing_straight_of_three(const char *const password) {
   char last = password[0];
   int found = 1;
   
@@ -25,7 +25,7 @@ static bool has_increasing_straight_of_three(char *password) {
   return false;
 }
 
-static bool has_two_pairs(char *password) {
+static bool has_two_pairs(const char *const password) {
   char last = password[0];
   int pairs_found = 0;
   bool just_found_pair = false;
@@ -47,12 +47,12 @@ static bool has_two_pairs(char *password) {
   return false;
 }
 
-static bool is_valid_password(char *password) {
+static bool is_valid_password(const char *const password) {
   return has_increasing_straight_of_three(password) &&\
     has_two_pairs(password);
 }
 
-static bool get_next_char(char *password, size_t i) {
+static bool get_next_char(char *const password, const size_t i) {
   switch (password[i]) {
   case 'h':
   case 'n':
@@ -68,7 +68,7 @@ static bool get_next_char(char *password, size_t i) {
   }
 }
 
-static void get_next_valid_password_recurse(char *password, size_t len) {
+static void get_next_valid_password_recurse(char *const password, const size_t len) {
   ASSERT(len > 0, "Reached password limit");
 
   if (get_next_char(password, len-1)) {
@@ -76,20 +76,20 @@ static void get_next_valid_password_recurse(char *password, size_t len) {
   }
 }
 
-static void get_next_valid_password(char *password) {
+static void get_next_valid_password(char *const password) {
   do {
     get_next_valid_password_recurse(password, PWLEN);
   } while (!is_valid_password(password));
 }
 
-static void solution1(char *input, char *output) {
+static void solution1(const char *const input, char *const output) {
   char password[PWLEN];
   strcpy(password, input);
   get_next_valid_password(password);
   snprintf(output, OUTPUT_BUFFER_SIZE, "%s", password);
 }
 
-static void solution2(char *input, char *output) {
+static void solution2(const char *const input, char *const output) {
   char password[PWLEN];
   strcpy(password, input);
   get_next_valid_password(password);

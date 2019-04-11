@@ -5,12 +5,12 @@
 
 #ifdef DEBUG
 
-void aoc_fail(char *msg, int srcline) {
+void aoc_fail(const char *const msg, const int srcline) {
   fprintf(stderr, "(line %d) ASSERT ERROR: %s\n", srcline, msg);
   abort();
 }
 
-void aoc_failif(bool condition, char *msg, int srcline) {
+void aoc_failif(const bool condition, const char *const msg, const int srcline) {
   if (condition) {
     aoc_fail(msg, srcline);
   }
@@ -49,7 +49,7 @@ static char *read_input() {
   return ptrString;
 }
 
-int aoc_run(int argc, char *argv[], aoc_solution_callback solution1, aoc_solution_callback solution2) {
+int aoc_run(const int argc, char *const *const argv, aoc_solution_callback *const solution1, aoc_solution_callback *const solution2) {
   char output[OUTPUT_BUFFER_SIZE];
   int retcode = 0;
   
@@ -82,15 +82,15 @@ int aoc_run(int argc, char *argv[], aoc_solution_callback solution1, aoc_solutio
   return retcode;
 }
 
-static void swap(int *array, size_t i, size_t j) {
-  int tmp = array[i];
+static void swap(int *const array, const size_t i, const size_t j) {
+  const int tmp = array[i];
   array[i] = array[j];
   array[j] = tmp;
 }
 
 // Heap's algorithm
 // https://en.wikipedia.org/wiki/Heap%27s_algorithm
-void aoc_permute(int *array, size_t size, aoc_permute_callback func, void *args) {
+void aoc_permute(int *const array, const size_t size, aoc_permute_callback *const func, void *const args) {
   if (size == 1) {
     func(array, args);
   } else {
@@ -108,7 +108,7 @@ void aoc_permute(int *array, size_t size, aoc_permute_callback func, void *args)
   }
 }
 
-static void combinations_recursive(size_t offset, int *array, size_t len, int *aux, size_t n, aoc_combinations_callback fun, void *args) {
+static void combinations_recursive(const size_t offset, const int *const array, const size_t len, int *const aux, const size_t n, aoc_combinations_callback *const fun, void *const args) {
   if (n < 1) {
     FAIL("Attempt to make combinations of less than one element");
   } else if (n > len) {
@@ -149,8 +149,8 @@ static void combinations_recursive(size_t offset, int *array, size_t len, int *a
   }
 }
 
-void aoc_combinations(int *array, size_t len, size_t n, aoc_combinations_callback func, void *args) {
-  int *aux = malloc(n * sizeof(int));
+void aoc_combinations(const int *const array, const size_t len, const size_t n, aoc_combinations_callback *const func, void *const args) {
+  int *const aux = malloc(n * sizeof(int));
   combinations_recursive(0, array, len, aux, n, func, args);
   free(aux);
 }

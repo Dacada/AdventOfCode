@@ -45,12 +45,12 @@ bool is_known[1024]; // index: var, content: the value in known_val is correct f
 uint16_t needs[1024][1024]; // index: var, content: vars which depend on index var in order to be calculated, they might depend on more vars. this array is laid out such that index 0 is the number of vars in the array and the following elements are the vars themselves
 expression_t *unknown[1024]; // index: var, content: expression to calculate var or NULL
 
-static size_t skip_whitespace(char *text, size_t i) {
+static size_t skip_whitespace(const char *const text, size_t i) {
   while (isspace(text[i])) i++;
   return i;
 }
 
-static uint16_t encode_var(char c1, char c2) {
+static uint16_t encode_var(const char c1, const char c2) {
   if (isspace(c2)) {
     return (uint16_t)(c1 - 'a' + 1) & 0x1F;
   } else {
@@ -69,11 +69,11 @@ static char decode_var(uint16_t var, char *c2) {
 }
 */
 
-static size_t eval_expr(char *text, size_t i, size_t j, uint16_t *val, bool *ok) {
+static size_t eval_expr(const char *const text, size_t i, size_t j, uint16_t *const val, bool *const ok) {
   (void)j; // used only in debug mode, suppress warnings otherwise
   
   if (IS_VAR(text[i])) {
-    uint16_t var = encode_var(text[i], text[i+1]);
+    const uint16_t var = encode_var(text[i], text[i+1]);
     if (is_known[var]) {
       *ok = true;
       *val = known_val[var];
@@ -96,7 +96,7 @@ static size_t eval_expr(char *text, size_t i, size_t j, uint16_t *val, bool *ok)
   }
 }
 
-static uint16_t apply_op(uint16_t v1, uint16_t v2, operation_t op) {
+static uint16_t apply_op(const uint16_t v1, const uint16_t v2, const operation_t op) {
   switch (op) {
   case NOT:
     return ~v1;
@@ -115,7 +115,7 @@ static uint16_t apply_op(uint16_t v1, uint16_t v2, operation_t op) {
   }
 }
 
-static bool assign_value(uint16_t var, uint16_t val) {
+static bool assign_value(const uint16_t var, const uint16_t val) {
   known_val[var] = val;
   is_known[var] = true;
   unknown[var] = NULL;
@@ -132,9 +132,9 @@ static bool assign_value(uint16_t var, uint16_t val) {
   int removed_elements = 0; // pointer to next value to assign in vars_found and vars_values
   
   for (int i=0; i<needs[var][0]; i++) {
-    uint16_t dep = needs[var][i+1];
+    const uint16_t dep = needs[var][i+1];
     
-    expression_t *expr = unknown[dep];
+    expression_t *const expr = unknown[dep];
     if (expr != NULL) {
       if (expr->param1_type == VARIABLE && expr->param1 == var) {
 	expr->param1_type = NUMBER;
@@ -147,7 +147,7 @@ static bool assign_value(uint16_t var, uint16_t val) {
       }
 
       if (expr->param1_type == NUMBER && (expr->param2_type == NUMBER || expr->param2_type == NONE)) {
-	uint16_t newval = apply_op(expr->param1, expr->param2, expr->op);
+	const uint16_t newval = apply_op(expr->param1, expr->param2, expr->op);
 	vars_found[removed_elements] = dep;
         vars_values[removed_elements] = newval;
 	removed_elements++;
@@ -168,17 +168,17 @@ static bool assign_value(uint16_t var, uint16_t val) {
   return false;
 }
 
-static void assign_dependency(uint16_t depends, uint16_t is_depended) {
-  uint16_t len = needs[is_depended][0] + 1;
+static void assign_dependency(const uint16_t depends, const uint16_t is_depended) {
+  const uint16_t len = needs[is_depended][0] + 1;
   needs[is_depended][len] = depends;
   needs[is_depended][0] = len;
 }
 
-static inline size_t parse_assign(char *text, size_t i, size_t j, expression_t *expr, uint16_t val, bool isnum) {
+static size_t parse_assign(const char *const text, size_t i, size_t j, expression_t *const expr, const uint16_t val, const bool isnum) {
   (void)j; // used only in debug mode, suppress warnings otherwise
   
   ASSERT(IS_VAR(text[i]), "Expected lowercase character but got something else");
-  uint16_t var = encode_var(text[i], text[i+1]);
+  const uint16_t var = encode_var(text[i], text[i+1]);
   if (isspace(text[i+1])) {
     i += 1;
   } else {
@@ -208,14 +208,14 @@ static inline size_t parse_assign(char *text, size_t i, size_t j, expression_t *
 
 #ifdef DEBUG
 
-static void assert_op(char *text, size_t i, size_t j, const char *const op_text) {
+static void assert_op(const char *const text, const size_t i, const size_t j, const char *const op_text) {
   for (int k=0;; k++) {
-    char c = op_text[k];
+    const char c = op_text[k];
     if (c == '\0') {
       break;
     }
     
-    char d = text[i+k];
+    const char d = text[i+k];
     if (d == '\0') {
       break;
     }
@@ -226,7 +226,7 @@ static void assert_op(char *text, size_t i, size_t j, const char *const op_text)
 
 #else
 
-static void assert_op(char *text, size_t i, size_t j, const char *const op_text) {
+static void assert_op(const char *const text, size_t i, const size_t j, const char *const op_text) {
   (void)text;
   (void)i;
   (void)j;
@@ -235,7 +235,7 @@ static void assert_op(char *text, size_t i, size_t j, const char *const op_text)
 
 #endif
 
-static inline size_t parse_op(char *text, size_t i, size_t j, expression_t *expr, uint16_t val1, bool isnum1) {
+static size_t parse_op(const char *const text, size_t i, size_t j, expression_t *const expr, const uint16_t val1, const bool isnum1) {
   operation_t op;
   switch (text[i]) {
   case 'L':
@@ -280,7 +280,7 @@ static inline size_t parse_op(char *text, size_t i, size_t j, expression_t *expr
   i = skip_whitespace(text, i);
 
   ASSERT(IS_VAR(text[i]), "Expected lowercase letter but found something else");
-  uint16_t var = encode_var(text[i], text[i+1]);
+  const uint16_t var = encode_var(text[i], text[i+1]);
   if (isspace(text[i+1])) {
     i += 1;
   } else {
@@ -289,7 +289,7 @@ static inline size_t parse_op(char *text, size_t i, size_t j, expression_t *expr
 
   ASSERT(!known_val[var], "The destination rule is a known rule");
   if (isnum1 && isnum2) {
-    uint16_t val = apply_op(val1, val2, op);
+    const uint16_t val = apply_op(val1, val2, op);
     if (assign_value(var, val)) {
       return 0;
     }
@@ -318,7 +318,7 @@ static inline size_t parse_op(char *text, size_t i, size_t j, expression_t *expr
   return i;
 }
 
-static inline size_t parse_assign_or_op(char *text, size_t i, size_t j, expression_t *expr) {
+static size_t parse_assign_or_op(const char *const text, size_t i, const size_t j, expression_t *const expr) {
   uint16_t val;
   bool isnum;
   i = eval_expr(text, i, j, &val, &isnum);
@@ -339,7 +339,7 @@ static inline size_t parse_assign_or_op(char *text, size_t i, size_t j, expressi
   }
 }
 
-static inline size_t parse_not(char *text, size_t i, size_t j, expression_t *expr) {
+static size_t parse_not(const char *const text, size_t i, const size_t j, expression_t *const expr) {
   ASSERT(text[i+1] == 'O' && text[i+2] == 'T', "Expected NOT but it wasn't.");
   i += 3;
 
@@ -360,7 +360,7 @@ static inline size_t parse_not(char *text, size_t i, size_t j, expression_t *exp
   i = skip_whitespace(text, i);
 
   ASSERT(IS_VAR(text[i]), "Expected lowercase letter but found something else");
-  uint16_t var = encode_var(text[i], text[i+1]);
+  const uint16_t var = encode_var(text[i], text[i+1]);
   if (isspace(text[i+1])) {
     i += 1;
   } else {
@@ -382,8 +382,8 @@ static inline size_t parse_not(char *text, size_t i, size_t j, expression_t *exp
   return i;
 }
 
-static inline size_t parse_line(char *text, size_t i, size_t j) {
-  expression_t *expr = &expressions[j];
+static size_t parse_line(const char *const text, size_t i, size_t j) {
+  expression_t *const expr = &expressions[j];
 
   if (IS_VAR(text[i]) || IS_NUM(text[i])) {
     return parse_assign_or_op(text, i, j, expr);
@@ -394,7 +394,7 @@ static inline size_t parse_line(char *text, size_t i, size_t j) {
   }
 }
 
-static void solution(char *input) {
+static void solution(const char *const input) {
   for (size_t i = 0, j = 0; input[i] != '\0'; i++, j++) {
     i = parse_line(input, i, j);
     if (i == 0) {
@@ -403,7 +403,7 @@ static void solution(char *input) {
   }
 }
 
-static void solution1(char *input, char *output) {
+static void solution1(const char *const input, char *const output) {
   solution(input);
   
   uint16_t var_a = encode_var('a', ' ');
@@ -412,13 +412,13 @@ static void solution1(char *input, char *output) {
   snprintf(output, OUTPUT_BUFFER_SIZE, "%d", known_val[var_a]);
 }
 
-static void solution2(char *input, char *output) {
+static void solution2(const char *const input, char *const output) {
   solution(input);
 
   // Keep value of a
-  uint16_t var_a = encode_var('a', ' ');
+  const uint16_t var_a = encode_var('a', ' ');
   ASSERT(is_known[var_a], "First execution ended but value of A is not known!");
-  uint16_t val_a = known_val[var_a];
+  const uint16_t val_a = known_val[var_a];
 
   // Reset state
   memset(known_val, 0, sizeof(known_val));
@@ -427,7 +427,7 @@ static void solution2(char *input, char *output) {
   memset(unknown, 0, sizeof(unknown));
 
   // Override value of b with value of a
-  uint16_t var_b = encode_var('b', ' ');
+  const uint16_t var_b = encode_var('b', ' ');
   known_val[var_b] = val_a;
   is_known[var_b] = true;
 

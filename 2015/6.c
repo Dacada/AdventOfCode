@@ -11,7 +11,7 @@ static unsigned int lights[LIGHTS_Y][LIGHTS_X];
 
 typedef enum { TOGGLE, TURNON, TURNOFF } action_t;
 
-static size_t parse_coords(char *string, size_t start, int *x, int *y) {
+static size_t parse_coords(const char *const string, const size_t start, int *const x, int *const y) {
   size_t i = start;
   *x = 0;
   for (; string[i] != ','; i++) {
@@ -27,7 +27,7 @@ static size_t parse_coords(char *string, size_t start, int *x, int *y) {
   return i;
 }
 
-static void action_foreach_light(int coords1[2], int coords2[2], unsigned int(*action)(unsigned int)) {
+static void action_foreach_light(const int *const coords1, const int *const coords2, unsigned int(*const action)(const unsigned int)) {
   for (int i=coords1[0]; i<=coords2[0]; i++) {
     for (int j=coords1[1]; j<=coords2[1]; j++) {
       lights[j][i] = action(lights[j][i]);
@@ -35,7 +35,7 @@ static void action_foreach_light(int coords1[2], int coords2[2], unsigned int(*a
   }
 }
 
-static unsigned int toggle_action(unsigned int input) {
+static unsigned int toggle_action(const unsigned int input) {
   if (input == 0) {
     return 1;
   } else {
@@ -43,25 +43,25 @@ static unsigned int toggle_action(unsigned int input) {
   }
 }
 
-static unsigned int turnon_action(unsigned int input) {
+static unsigned int turnon_action(const unsigned int input) {
   (void)input;
   return 1;
 }
 
-static unsigned int turnoff_action(unsigned int input) {
+static unsigned int turnoff_action(const unsigned int input) {
   (void)input;
   return 0;
 }
 
-static unsigned int inc2_action(unsigned int input) {
+static unsigned int inc2_action(const unsigned int input) {
   return input + 2;
 }
 
-static unsigned int inc1_action(unsigned int input) {
+static unsigned int inc1_action(const unsigned int input) {
   return input + 1;
 }
 
-static unsigned int dec1_action(unsigned int input) {
+static unsigned int dec1_action(const unsigned int input) {
   if (input == 0) {
     return 0;
   } else {
@@ -69,31 +69,31 @@ static unsigned int dec1_action(unsigned int input) {
   }
 }
 
-static void toggle_lighting(int coords1[2], int coords2[2]) {
+static void toggle_lighting(const int *const coords1, const int *const coords2) {
   action_foreach_light(coords1, coords2, toggle_action);
 }
 
-static void turnon_lighting(int coords1[2], int coords2[2]) {
+static void turnon_lighting(const int *const coords1, const int *const coords2) {
   action_foreach_light(coords1, coords2, turnon_action);
 }
 
-static void turnoff_lighting(int coords1[2], int coords2[2]) {
+static void turnoff_lighting(const int *const coords1, const int *const coords2) {
   action_foreach_light(coords1, coords2, turnoff_action);
 }
 
-static void inc2_lighting(int coords1[2], int coords2[2]) {
+static void inc2_lighting(const int *const coords1, const int *const coords2) {
   action_foreach_light(coords1, coords2, inc2_action);
 }
 
-static void inc1_lighting(int coords1[2], int coords2[2]) {
+static void inc1_lighting(const int *const coords1, const int *const coords2) {
   action_foreach_light(coords1, coords2, inc1_action);
 }
 
-static void dec1_lighting(int coords1[2], int coords2[2]) {
+static void dec1_lighting(const int *const coords1, const int *const coords2) {
   action_foreach_light(coords1, coords2, dec1_action);
 }
 
-static void step_lighting_1(int coords1[2], int coords2[2], action_t action) {
+static void step_lighting_1(const int *const coords1, const int *const coords2, const action_t action) {
   switch (action) {
   case TOGGLE:
     toggle_lighting(coords1, coords2);
@@ -107,7 +107,7 @@ static void step_lighting_1(int coords1[2], int coords2[2], action_t action) {
   }
 }
 
-static void step_lighting_2(int coords1[2], int coords2[2], action_t action) {
+static void step_lighting_2(const int *const coords1, const int *const coords2, const action_t action) {
   switch (action) {
   case TOGGLE:
     inc2_lighting(coords1, coords2);
@@ -121,7 +121,7 @@ static void step_lighting_2(int coords1[2], int coords2[2], action_t action) {
   }
 }
 
-static void solution(char *input, void(*step_lighting)(int[2], int[2], action_t)) {
+static void solution(const char *const input, void(*const step_lighting)(const int *const, const int *const, const action_t)) {
   for (size_t i = 0; input[i] != '\0'; i++) {
     action_t action;
     
@@ -153,7 +153,7 @@ static void solution(char *input, void(*step_lighting)(int[2], int[2], action_t)
   }
 }
 
-static void solution1(char *input, char *output) {
+static void solution1(const char *const input, char *const output) {
   solution(input, step_lighting_1);
 
   unsigned long result = 0;
@@ -168,7 +168,7 @@ static void solution1(char *input, char *output) {
   snprintf(output, OUTPUT_BUFFER_SIZE, "%lu", result);
 }
 
-static void solution2(char *input, char *output) {
+static void solution2(const char *const input, char *const output) {
   solution(input, step_lighting_2);
 
   unsigned long result = 0;

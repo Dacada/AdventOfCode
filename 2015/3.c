@@ -22,7 +22,7 @@ static int pair_cmp(const void *e1, const void *e2) {
   else return 0;
 }
 
-static int get_count(pair_t *elements) {
+static int get_count(pair_t *const elements) {
   qsort(elements, 8192, sizeof(pair_t), pair_cmp);
 
   bool found_origin = false;
@@ -50,7 +50,7 @@ static int get_count(pair_t *elements) {
   return count;
 }
 
-static void solution1(char *input, char *output) {
+static void solution1(const char *const input, char *const output) {
   pair_t elements[8192];
   memset(elements, 0, sizeof(elements));
 
@@ -72,11 +72,11 @@ static void solution1(char *input, char *output) {
     elements[i].item2 = y;
   }
 
-  int count = get_count(elements);
+  const int count = get_count(elements);
   snprintf(output, OUTPUT_BUFFER_SIZE, "%d", count);
 }
 
-static void solution2(char *input, char *output) {
+static void solution2(const char *const input, char *const output) {
   pair_t elements[8192];
   memset(elements, 0, sizeof(elements));
 
@@ -85,7 +85,7 @@ static void solution2(char *input, char *output) {
   bool santa = true;
   
   for (size_t i=0; input[i] != '\0'; i++) {
-    char c = input[i];
+    const char c = input[i];
     
     switch (c) {
     case '^':
@@ -117,7 +117,7 @@ static void solution2(char *input, char *output) {
     santa = !santa;
   }
 
-  int count = get_count(elements);
+  const int count = get_count(elements);
   snprintf(output, OUTPUT_BUFFER_SIZE, "%d", count);
 }
 

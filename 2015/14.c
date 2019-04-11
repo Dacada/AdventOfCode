@@ -7,7 +7,7 @@
 
 #define ISNUM(n) ((n) >= '0' && (n) <= '9')
 
-static unsigned int calculate_distance(unsigned int speed, unsigned int run_time, unsigned int stop_time) {
+static unsigned int calculate_distance(const unsigned int speed, const unsigned int run_time, const unsigned int stop_time) {
   unsigned int total_time = run_time + stop_time;
   unsigned int full_iterations = NSECONDS / total_time;
   unsigned int seconds_last_iteration = NSECONDS % total_time;
@@ -21,7 +21,7 @@ static unsigned int calculate_distance(unsigned int speed, unsigned int run_time
   return total_seconds_running * speed;
 }
 
-static unsigned int parse_number(char *input, unsigned int *i) {
+static unsigned int parse_number(const char *const input, unsigned int *const i) {
   unsigned int j = *i;
   
   while (!ISNUM(input[j])) j++;
@@ -36,22 +36,22 @@ static unsigned int parse_number(char *input, unsigned int *i) {
   return number;
 }
 
-static void parse_until_eol(char *input, unsigned int *i) {
+static void parse_until_eol(const char *const input, unsigned int *const i) {
   unsigned int j = *i;
   while (input[j] != '\n') j++;
   *i = j;
 }
 
-static unsigned int parse_line1(char *input, unsigned int *i) {
-  unsigned int speed = parse_number(input, i);
-  unsigned int run_time = parse_number(input, i);
-  unsigned int stop_time = parse_number(input, i);
+static unsigned int parse_line1(const char *const input, unsigned int *const i) {
+  const unsigned int speed = parse_number(input, i);
+  const unsigned int run_time = parse_number(input, i);
+  const unsigned int stop_time = parse_number(input, i);
   parse_until_eol(input, i);
   
   return calculate_distance(speed, run_time, stop_time);
 }
 
-static unsigned int parse1(char *input) {
+static unsigned int parse1(const char *const input) {
   unsigned int max = 0;
   
   for (unsigned int i=0;; i++) {
@@ -70,7 +70,7 @@ static unsigned int parse1(char *input) {
   return max;
 }
 
-static void solution1(char *input, char *output) {
+static void solution1(const char *const input, char *const output) {
   unsigned int distance = parse1(input);
   snprintf(output, OUTPUT_BUFFER_SIZE, "%u", distance);
 }
@@ -87,7 +87,7 @@ struct reindeer {
   bool is_running;
 };
 
-static void parse_line2(char *input, unsigned int *i, struct reindeer *rndr) {
+static void parse_line2(const char *const input, unsigned int *const i, struct reindeer *const rndr) {
   unsigned int speed = parse_number(input, i);
   unsigned int run_time = parse_number(input, i);
   unsigned int stop_time = parse_number(input, i);
@@ -104,7 +104,7 @@ static void parse_line2(char *input, unsigned int *i, struct reindeer *rndr) {
   rndr->is_running = true;
 }
 
-static void parse2(char *input, struct reindeer *array) {
+static void parse2(const char *const input, struct reindeer *const array) {
   unsigned int j = 0;
   for (unsigned int i=0;; i++) {
     if (input[i] == '\0') {
@@ -118,7 +118,7 @@ static void parse2(char *input, struct reindeer *array) {
   }
 }
 
-static void solution2(char *input, char *output) {
+static void solution2(const char *const input, char *const output) {
   struct reindeer rdrs[NREINDEERS];
   parse2(input, rdrs);
 

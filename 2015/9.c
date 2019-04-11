@@ -10,7 +10,7 @@
 #define NUMDIST 28
 
 char names[PLACES][NAMELEN];
-static int encode_name(char *name) {
+static int encode_name(const char *const name) {
   int i;
   for (i=0; i<PLACES; i++) {
     if (names[i][0] == '\0') {
@@ -97,18 +97,18 @@ static int get_index(int n1, int n2) {
 }
 
 unsigned int distances[NUMDIST];
-static void assign_distance(int name1, int name2, unsigned int distance) {
-  int i = get_index(name1, name2);
+static void assign_distance(const int name1, const int name2, const unsigned int distance) {
+  const int i = get_index(name1, name2);
   distances[i] = distance;
 }
-static unsigned int get_distance(int name1, int name2) {
-  int i = get_index(name1, name2);
+static unsigned int get_distance(const int name1, const int name2) {
+  const int i = get_index(name1, name2);
   return distances[i];
 }
 
-static int parse_first_name(char *input, int i, char *name) {
+static int parse_first_name(const char *const input, int i, char *const name) {
   for (int j=0;; j++) {
-    char c = input[i+j];
+    const char c = input[i+j];
     if (isspace(c)) {
       i += j;
       name[j] = '\0';
@@ -126,9 +126,9 @@ static int parse_first_name(char *input, int i, char *name) {
   return i+4;
 }
 
-static int parse_second_name(char *input, int i, char *name) {
+static int parse_second_name(const char *const input, int i, char *const name) {
   for (int j=0;; j++) {
-    char c = input[i+j];
+    const char c = input[i+j];
     if (isspace(c)) {
       i += j;
       name[j] = '\0';
@@ -145,10 +145,10 @@ static int parse_second_name(char *input, int i, char *name) {
   return i+3;
 }
 
-static int parse_distance(char *input, int i, unsigned int *dist) {
+static int parse_distance(const char *const input, int i, unsigned int *const dist) {
   *dist = 0;
   for (int j=0;; j++) {
-    char c = input[i+j];
+    const char c = input[i+j];
     if (isspace(c)) {
       i += j;
       break;
@@ -163,13 +163,13 @@ static int parse_distance(char *input, int i, unsigned int *dist) {
   return i;
 }
 
-static int parse_line(char *input, int i) {
+static int parse_line(const char *const input, int i) {
   char name[NAMELEN];
   i = parse_first_name(input, i, name);
-  int n1 = encode_name(name);
+  const int n1 = encode_name(name);
 
   i = parse_second_name(input, i, name);
-  int n2 = encode_name(name);
+  const int n2 = encode_name(name);
 
   unsigned int dist;
   i = parse_distance(input, i, &dist);
@@ -178,7 +178,7 @@ static int parse_line(char *input, int i) {
   return i;
 }
 
-static void parse(char *input) {
+static void parse(const char *const input) {
   for (int i=0;; i++) {
     if (input[i] == '\0')
       return;
@@ -188,7 +188,7 @@ static void parse(char *input) {
   }
 }
 
-static void compute_path_distance_min(int *path, void *args) {
+static void compute_path_distance_min(int *const path, void *args) {
   unsigned int *result = args;
   unsigned int current_path_distance = 0;
 
@@ -209,7 +209,7 @@ static void compute_path_distance_min(int *path, void *args) {
   *result = current_path_distance;
 }
 
-static void compute_path_distance_max(int *path, void *args) {
+static void compute_path_distance_max(int *const path, void *args) {
   unsigned int *result = args;
   unsigned int current_path_distance = 0;
 
@@ -242,13 +242,13 @@ static unsigned int solve_max(void) {
   return result;
 }
 
-static void solution1(char *input, char *output) {
+static void solution1(const char *const input, char *const output) {
   parse(input);
   unsigned int total_distance = solve_min();
   snprintf(output, OUTPUT_BUFFER_SIZE, "%u", total_distance);
 }
 
-static void solution2(char *input, char *output) {
+static void solution2(const char *const input, char *const output) {
   parse(input);
   unsigned int total_distance = solve_max();
   snprintf(output, OUTPUT_BUFFER_SIZE, "%u", total_distance);

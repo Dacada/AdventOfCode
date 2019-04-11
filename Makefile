@@ -8,15 +8,15 @@ DEBUG_LDFLAGS = -std=c99 -Og -g
 
 LDLIBS =
 
-aoclib/aoclib.o: aoclib/aoclib.c
-	$(CC) $(CFLAGS) -c $^ -o $@
-aoclib/aoclib_dbg.o: aoclib/aoclib.c
-	$(CC) $(DEBUG_CFLAGS) -c $^ -o $@
+aoclib/aoclib.o: aoclib/aoclib.c aoclib/aoclib.h
+	$(CC) $(CFLAGS) -c $< -o $@
+aoclib/aoclib_dbg.o: aoclib/aoclib.c aoclib/aoclib.h
+	$(CC) $(DEBUG_CFLAGS) -c $< -o $@
 
 2015/%.o: 2015/%.c
-	$(CC) $(CFLAGS) -Iaoclib -c $^ -o $@
+	$(CC) $(CFLAGS) -Iaoclib -c $< -o $@
 2015/%_dbg.o: 2015/%.c
-	$(CC) $(DEBUG_CFLAGS) -Iaoclib -c $^ -o $@
+	$(CC) $(DEBUG_CFLAGS) -Iaoclib -c $< -o $@
 
 lib/jsmn/libjsmn.a:
 	$(MAKE) -C lib/jsmn

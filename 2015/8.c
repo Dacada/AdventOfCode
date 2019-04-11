@@ -5,7 +5,7 @@
 
 #ifdef DEBUG
 
-static void assert_hex_char(char c) {
+static void assert_hex_char(const char c) {
   bool b = true;
   b |= c >= '0' && c <= '9';
   b |= c >= 'A' && c <= 'F';
@@ -14,21 +14,21 @@ static void assert_hex_char(char c) {
   ASSERT(b, "Expected an hexadecimal character");
 }
 
-static void assert_hex(char c1, char c2) {
+static void assert_hex(const char c1, const char c2) {
   assert_hex_char(c1);
   assert_hex_char(c2);
 }
 
 #else
 
-static void assert_hex(char c1, char c2) {
+static void assert_hex(const char c1, const char c2) {
   (void)c1;
   (void)c2;
 }
 
 #endif
 
-static void solution1(char *input, char *output) {
+static void solution1(const char *const input, char *const output) {
   unsigned int total_chars = 0;
   unsigned int in_memory_chars = 0;
 
@@ -79,7 +79,7 @@ static void solution1(char *input, char *output) {
   snprintf(output, OUTPUT_BUFFER_SIZE, "%u", total_chars - in_memory_chars);
 }
 
-static void solution2(char *input, char *output) {
+static void solution2(const char *const input, char *const output) {
   unsigned int total_chars = 0;
   unsigned int encoded_chars = 0;
 
