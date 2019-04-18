@@ -1,12 +1,12 @@
 #include <aoclib.h>
 #include <stdio.h>
 
-static void solution1(char *input, char *output) {
+static void solution1(const char *const input, char *const output) {
   (void)input;
   snprintf(output, OUTPUT_BUFFER_SIZE, "NOT SOLVED");
 }
 
-static void solution2(char *input, char *output) {
+static void solution2(const char *const input, char *const output) {
   (void)input;
   snprintf(output, OUTPUT_BUFFER_SIZE, "NOT SOLVED");
 }
