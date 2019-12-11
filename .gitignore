@@ -1,3 +1,4 @@
 .cache
 session.txt
 *.o
+*.clang_complete
