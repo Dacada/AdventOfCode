@@ -2,22 +2,28 @@
 #define _AOCLIB_H
 
 #include <stddef.h> 
-
-#ifdef DEBUG
-
 #include <stdlib.h>
 #include <stdbool.h>
 
-#define FAIL(msg) aoc_fail(msg, __LINE__)
-#define ASSERT(cond, msg) aoc_failif(!(cond), msg, __LINE__)
+#ifdef DEBUG
 
-void __attribute__((noreturn)) aoc_fail(const char *const msg, const int srcline);
-void aoc_failif(const bool condition, const char *const msg, const int srcline);
+
+#define FAIL(msg, ...) aoc_fail(__LINE__, msg, ##__VA_ARGS__)
+#define ASSERT(cond, msg, ...) aoc_failif(!(cond), __LINE__, msg, ##__VA_ARGS__)
+#define DBG(msg, ...) aoc_dbg(__LINE__, msg, ##__VA_ARGS__)
+
+__attribute__((format (printf, 2, 3)))
+void __attribute__((noreturn)) aoc_fail(const int srcline, const char *const msg, ...);
+__attribute__((format (printf, 3, 4)))
+void aoc_failif(const bool condition, const int srcline, const char *const msg, ...);
+__attribute__((format (printf, 2, 3)))
+void aoc_dbg(const int srcline, const char *const msg, ...);
 
 #else
 
-#define FAIL(msg) __builtin_unreachable()
-#define ASSERT(cond, msg) if (!(cond)) __builtin_unreachable()
+#define FAIL(msg, ...) __builtin_unreachable()
+#define ASSERT(cond, msg, ...) if (!(cond)) __builtin_unreachable()
+#define DBG(msg, ...) do{}while(0)
 
 #endif
 

@@ -1,19 +1,40 @@
 #include "aoclib.h"
 #include <stdio.h>
+#include <stdarg.h>
 #include <stdlib.h>
 #include <string.h>
 
 #ifdef DEBUG
 
-void aoc_fail(const char *const msg, const int srcline) {
-  fprintf(stderr, "(line %d) ASSERT ERROR: %s\n", srcline, msg);
-  abort();
+static void aoc_err_prnt(const int srcline, const char *const type, const char *const msg, va_list ap) {
+        fprintf(stderr, "(line %d) %s: ", srcline, type);
+        vfprintf(stderr, msg, ap);
+        fprintf(stderr, "\n");
 }
 
-void aoc_failif(const bool condition, const char *const msg, const int srcline) {
-  if (condition) {
-    aoc_fail(msg, srcline);
-  }
+void aoc_fail(const int srcline, const char *const msg, ...) {
+        va_list ap;
+        va_start(ap, msg);
+        aoc_err_prnt(srcline, "ASSERT ERROR", msg, ap);
+        va_end(ap);
+        abort();
+}
+
+void aoc_failif(const bool condition, const int srcline, const char *const msg, ...) {
+        if (condition) {
+                va_list ap;
+                va_start(ap, msg);
+                aoc_err_prnt(srcline, "ASSERT ERROR", msg, ap);
+                va_end(ap);
+                abort();
+        }
+}
+
+void aoc_dbg(const int srcline, const char *const msg, ...) {
+        va_list ap;
+        va_start(ap, msg);
+        aoc_err_prnt(srcline, "DBG", msg, ap);
+        va_end(ap);
 }
 
 #endif
