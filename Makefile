@@ -33,6 +33,7 @@ aoclib/aoclib_dbg.o: aoclib/aoclib.c aoclib/aoclib.h
 2015/%: 2015/%.o aoclib/aoclib.o
 	$(CC) $(LDFLAGS) $(LDLIBS) $^ -o $@
 
+2019/13: 2019/intcode.o
 2019/%: 2019/%.o aoclib/aoclib.o
 	$(CC) $(LDFLAGS) $(LDLIBS) $^ -o $@
 
@@ -42,5 +43,6 @@ aoclib/aoclib_dbg.o: aoclib/aoclib.c aoclib/aoclib.h
 2015/%_dbg: 2015/%_dbg.o aoclib/aoclib_dbg.o
 	$(CC) $(DEBUG_LDFLAGS) $(LDLIBS) $^ -o $@
 
+2019/13_dbg: 2019/intcode_dbg.o
 2019/%_dbg: 2019/%_dbg.o aoclib/aoclib_dbg.o
 	$(CC) $(DEBUG_LDFLAGS) $(LDLIBS) $^ -o $@
