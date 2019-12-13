@@ -18,8 +18,6 @@ struct IntCodeMachine {
         long output;
 };
 
-long *parse_program(const char *const input, size_t *const size);
-
 void machine_init(struct IntCodeMachine *const machine, const char *const input);
 
 bool machine_recv_output(struct IntCodeMachine *const machine, long *output);

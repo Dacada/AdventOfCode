@@ -5,7 +5,7 @@
 #include <ctype.h>
 #include <string.h>
 
-long *parse_program(const char *const input, size_t *const size) {
+static long *parse_program(const char *const input, size_t *const size) {
         long *program = calloc(32, sizeof(*program));
         if (program == NULL) {
                 return NULL;
@@ -90,7 +90,7 @@ static long get_mode(long modes, size_t i) {
 
 static void ensure_memory_size(struct IntCodeMachine *const machine, size_t index) {
         if (index > 1<<20) {
-                fprintf(stderr, "Cowardly refusing to allocate memory to access index %lu", index);
+                fprintf(stderr, "Cowardly refusing to allocate memory to access index %lu\n", index);
                 abort();
         }
         
@@ -137,7 +137,7 @@ static long get_argument(struct IntCodeMachine *machine, size_t i, long mode) {
         case 2:
                 return read_memory(machine, machine->relative_base + arg);
         default:
-                fprintf(stderr, "Warning: Attempt to get argument in invalid mode %ld. Defaulting to mode 0.", mode);
+                fprintf(stderr, "Warning: Attempt to get argument in invalid mode %ld. Defaulting to mode 0.\n", mode);
                 return read_memory(machine, arg);
         }
 }
@@ -150,14 +150,14 @@ static void set_argument(struct IntCodeMachine *machine, size_t i, long mode, lo
                 write_memory(machine, arg, value);
                 break;
         case 1:
-                fprintf(stderr, "Warning: Attempt to set argument with invalid immediate mode. Defaulting to mode 0.");
+                fprintf(stderr, "Warning: Attempt to set argument with invalid immediate mode. Defaulting to mode 0.\n");
                 write_memory(machine, arg, value);
                 break;
         case 2:
                 write_memory(machine, machine->relative_base + arg, value);
                 break;
         default:
-                fprintf(stderr, "Warning: Attempt to get argument in invalid mode %ld. Defaulting to mode 0.", mode);
+                fprintf(stderr, "Warning: Attempt to get argument in invalid mode %ld. Defaulting to mode 0.\n", mode);
                 write_memory(machine, arg, value);
         }
 }
@@ -260,8 +260,8 @@ void machine_run(struct IntCodeMachine *machine) {
                                 return;
                         }
                 case 4:
-                        if (!machine->has_output) {
-                                fprintf(stderr, "Warning: Machine needs to output data but last output was not acknowleged. Last output will be lost.");
+                        if (machine->has_output) {
+                                fprintf(stderr, "Warning: Machine needs to output data but last output was not acknowleged. Last output will be lost.\n");
                         }
                         machine->has_output = true;
                         machine->output = prog_output(machine, machine->pc, modes);
@@ -289,9 +289,9 @@ void machine_run(struct IntCodeMachine *machine) {
                         machine->running = false;
                         return;
                 default:
-                        fprintf(stderr, "Warning: Ignoring unexpected opcode: %ld (modes: %ld)", opcode, modes);
+                        fprintf(stderr, "Warning: Ignoring unexpected opcode: %ld (modes: %ld)\n", opcode, modes);
                 }
         }
 
-        fprintf(stderr, "Error: Execution extended beyond program size. Halting.");
+        fprintf(stderr, "Error: Execution extended beyond program size. Halting.\n");
 }
