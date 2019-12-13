@@ -28,6 +28,7 @@ aoclib/aoclib_dbg.o: aoclib/aoclib.c aoclib/aoclib.h
 2019/%_dbg.o: 2019/%.c
 	$(CC) $(DEBUG_CFLAGS) -Iaoclib -c $< -o $@
 
+
 2015/4: LDLIBS = -lbsd
 2015/12: lib/jsmn/libjsmn.a
 2015/%: 2015/%.o aoclib/aoclib.o
@@ -43,6 +44,7 @@ aoclib/aoclib_dbg.o: aoclib/aoclib.c aoclib/aoclib.h
 2015/%_dbg: 2015/%_dbg.o aoclib/aoclib_dbg.o
 	$(CC) $(DEBUG_LDFLAGS) $(LDLIBS) $^ -o $@
 
+2019/13_dbg: LDLIBS = -lncurses
 2019/13_dbg: 2019/intcode_dbg.o
 2019/%_dbg: 2019/%_dbg.o aoclib/aoclib_dbg.o
 	$(CC) $(DEBUG_LDFLAGS) $(LDLIBS) $^ -o $@
