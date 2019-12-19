@@ -20,6 +20,10 @@ struct IntCodeMachine {
 
 void machine_init(struct IntCodeMachine *const machine, const char *const input);
 
+void machine_clone(struct IntCodeMachine *const dest, const struct IntCodeMachine *const src);
+
+void machine_free(struct IntCodeMachine *const machine);
+
 bool machine_recv_output(struct IntCodeMachine *const machine, long *output);
 
 bool machine_send_input(struct IntCodeMachine *const machine, long input);

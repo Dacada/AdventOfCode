@@ -59,7 +59,29 @@ void machine_init(struct IntCodeMachine *const machine, const char *const input)
         machine->has_output = false;
 }
 
+void machine_clone(struct IntCodeMachine *const dest, const struct IntCodeMachine *const src) {
+        dest->program = malloc(sizeof(src->program_size) * sizeof(*dest->program));
+        memcpy(dest->program, src->program, dest->program_size * sizeof(*dest->program));
+
+        dest->program_size = src->program_size;
+        dest->relative_base = src->relative_base;
+        dest->running = src->running;
+        dest->pc = src->pc;
+        dest->has_input = src->has_input;
+        dest->input = src->input;
+        dest->has_output= src->has_output;
+        dest->output = src->output;
+}
+
+void machine_free(struct IntCodeMachine *const machine) {
+        free(machine->program);
+}
+
 bool machine_recv_output(struct IntCodeMachine *const machine, long *output) {
+        if (!machine->running) {
+                return false;
+        }
+        
         if (machine->has_output) {
                 machine->has_output = false;
                 *output = machine->output;
@@ -70,6 +92,10 @@ bool machine_recv_output(struct IntCodeMachine *const machine, long *output) {
 }
 
 bool machine_send_input(struct IntCodeMachine *const machine, long input) {
+        if (!machine->running) {
+                return false;
+        }
+        
         if (machine->has_input) {
                 return false;
         } else {
