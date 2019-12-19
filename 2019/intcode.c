@@ -8,6 +8,7 @@
 static long *parse_program(const char *const input, size_t *const size) {
         long *program = calloc(32, sizeof(*program));
         if (program == NULL) {
+                perror("calloc");
                 return NULL;
         }
 
@@ -28,13 +29,17 @@ static long *parse_program(const char *const input, size_t *const size) {
                         
                         program_i++;
                         while (program_i >= program_size) {
-                                program = realloc(program, sizeof(*program) * program_size*2);
-                                memset(program+program_size, 0, program_size*sizeof(*program));
-                                program_size *= 2;
-                                if (program == NULL) {
+                                size_t new_program_size = program_size * 2;
+                                void *new_program = realloc(program, sizeof(*program) * new_program_size);
+                                if (new_program == NULL) {
+                                        free(program);
                                         perror("realloc");
                                         return NULL;
                                 }
+                                program = new_program;
+                                
+                                memset(program+program_size, 0, program_size*sizeof(*program));
+                                program_size = new_program_size;
                         }
                 } else if (c >= '0' && c <= '9') {
                         program[program_i] = program[program_i] * 10 + c - '0';
@@ -60,7 +65,12 @@ void machine_init(struct IntCodeMachine *const machine, const char *const input)
 }
 
 void machine_clone(struct IntCodeMachine *const dest, const struct IntCodeMachine *const src) {
-        dest->program = malloc(src->program_size * sizeof(*dest->program));
+        long *ptr = malloc(src->program_size * sizeof(*dest->program));
+        machine_clone_static(dest, src, ptr);
+}
+
+void machine_clone_static(struct IntCodeMachine *const dest, const struct IntCodeMachine *const src, long *ptr) {
+        dest->program = ptr;
         memcpy(dest->program, src->program, src->program_size * sizeof(*dest->program));
 
         dest->program_size = src->program_size;
@@ -78,9 +88,11 @@ void machine_free(struct IntCodeMachine *const machine) {
 }
 
 bool machine_recv_output(struct IntCodeMachine *const machine, long *output) {
+#ifdef DEBUG
         if (!machine->running) {
                 return false;
         }
+#endif
         
         if (machine->has_output) {
                 machine->has_output = false;
@@ -92,9 +104,11 @@ bool machine_recv_output(struct IntCodeMachine *const machine, long *output) {
 }
 
 bool machine_send_input(struct IntCodeMachine *const machine, long input) {
+#ifdef DEBUG
         if (!machine->running) {
                 return false;
         }
+#endif
         
         if (machine->has_input) {
                 return false;
@@ -115,10 +129,12 @@ static long get_mode(long modes, size_t i) {
 }
 
 static void ensure_memory_size(struct IntCodeMachine *const machine, size_t index) {
+#ifdef DEBUG
         if (index > 1<<20) {
                 fprintf(stderr, "Cowardly refusing to allocate memory to access index %lu\n", index);
                 abort();
         }
+#endif
         
         bool modified_size = false;
         size_t size = machine->program_size;
@@ -163,7 +179,9 @@ static long get_argument(struct IntCodeMachine *machine, size_t i, long mode) {
         case 2:
                 return read_memory(machine, machine->relative_base + arg);
         default:
+#ifdef DEBUG
                 fprintf(stderr, "Warning: Attempt to get argument in invalid mode %ld. Defaulting to mode 0.\n", mode);
+#endif
                 return read_memory(machine, arg);
         }
 }
@@ -176,14 +194,18 @@ static void set_argument(struct IntCodeMachine *machine, size_t i, long mode, lo
                 write_memory(machine, arg, value);
                 break;
         case 1:
+#ifdef DEBUG
                 fprintf(stderr, "Warning: Attempt to set argument with invalid immediate mode. Defaulting to mode 0.\n");
+#endif
                 write_memory(machine, arg, value);
                 break;
         case 2:
                 write_memory(machine, machine->relative_base + arg, value);
                 break;
         default:
+#ifdef DEBUG
                 fprintf(stderr, "Warning: Attempt to get argument in invalid mode %ld. Defaulting to mode 0.\n", mode);
+#endif
                 write_memory(machine, arg, value);
         }
 }
@@ -286,9 +308,11 @@ void machine_run(struct IntCodeMachine *machine) {
                                 return;
                         }
                 case 4:
+#ifdef DEBUG
                         if (machine->has_output) {
                                 fprintf(stderr, "Warning: Machine needs to output data but last output was not acknowleged. Last output will be lost.\n");
                         }
+#endif
                         machine->has_output = true;
                         machine->output = prog_output(machine, machine->pc, modes);
                         machine->pc += 2;
@@ -314,10 +338,14 @@ void machine_run(struct IntCodeMachine *machine) {
                 case 99:
                         machine->running = false;
                         return;
+#ifdef DEBUG
                 default:
                         fprintf(stderr, "Warning: Ignoring unexpected opcode: %ld (modes: %ld)\n", opcode, modes);
+#endif
                 }
         }
 
+#ifdef DEBUG
         fprintf(stderr, "Error: Execution extended beyond program size. Halting.\n");
+#endif
 }
