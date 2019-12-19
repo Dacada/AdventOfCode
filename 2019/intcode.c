@@ -60,8 +60,8 @@ void machine_init(struct IntCodeMachine *const machine, const char *const input)
 }
 
 void machine_clone(struct IntCodeMachine *const dest, const struct IntCodeMachine *const src) {
-        dest->program = malloc(sizeof(src->program_size) * sizeof(*dest->program));
-        memcpy(dest->program, src->program, dest->program_size * sizeof(*dest->program));
+        dest->program = malloc(src->program_size * sizeof(*dest->program));
+        memcpy(dest->program, src->program, src->program_size * sizeof(*dest->program));
 
         dest->program_size = src->program_size;
         dest->relative_base = src->relative_base;
