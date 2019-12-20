@@ -1,10 +1,10 @@
 CC = gcc
 
 CFLAGS = -Ilib -Wall -Wextra -Wformat -Wshadow -Wpointer-arith -Wcast-qual -Wmissing-prototypes -Werror -std=c99 -Ofast
-DEBUG_CFLAGS = -Ilib -Wall -Wextra -Wformat -Wshadow -Wpointer-arith -Wcast-qual -Wmissing-prototypes -Werror -std=c99 -Og -g -DDEBUG
+DEBUG_CFLAGS = -Ilib -Wall -Wextra -Wformat -Wshadow -Wpointer-arith -Wcast-qual -Wmissing-prototypes -Werror -std=c99 -Og -g -DDEBUG -fsanitize=address -fsanitize=undefined
 
 LDFLAGS = -std=c99 -Ofast
-DEBUG_LDFLAGS = -std=c99 -Og -g
+DEBUG_LDFLAGS = -std=c99 -Og -g -fsanitize=address -fsanitize=undefined
 
 LDLIBS =
 
