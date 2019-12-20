@@ -92,6 +92,7 @@ int aoc_run(const int argc, char *const *const argv, aoc_solution_callback *cons
       strcpy(output, "ERROR ARGUMENT NOT 1 OR 2");
       retcode = 3;
     }
+    free(input);
   }
 
   if (output[0] == '\0') {
