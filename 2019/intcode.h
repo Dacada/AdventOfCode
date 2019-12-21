@@ -26,9 +26,15 @@ void machine_clone_static(struct IntCodeMachine *const dest, const struct IntCod
 
 void machine_free(struct IntCodeMachine *const machine);
 
-bool machine_recv_output(struct IntCodeMachine *const machine, long *output);
+bool machine_recv_output(struct IntCodeMachine *const machine, long *const output);
 
 bool machine_send_input(struct IntCodeMachine *const machine, long input);
+
+char *machine_recv_output_string(struct IntCodeMachine *const machine);
+
+void machine_discard_output_string(struct IntCodeMachine *const machine);
+
+bool machine_send_input_string(struct IntCodeMachine *const machine, const char *const input);
 
 void machine_run(struct IntCodeMachine *machine);
 

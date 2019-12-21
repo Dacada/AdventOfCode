@@ -1,9 +1,11 @@
-#include "intcode.h"
+#define _DEFAULT_SOURCE
 
+#include "intcode.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <ctype.h>
 #include <string.h>
+#include <limits.h>
 
 static long *parse_program(const char *const input, size_t *const size) {
         long *program = calloc(32, sizeof(*program));
@@ -87,7 +89,7 @@ void machine_free(struct IntCodeMachine *const machine) {
         free(machine->program);
 }
 
-bool machine_recv_output(struct IntCodeMachine *const machine, long *output) {
+bool machine_recv_output(struct IntCodeMachine *const machine, long *const output) {
 #ifdef DEBUG
         if (!machine->running) {
                 return false;
@@ -116,6 +118,87 @@ bool machine_send_input(struct IntCodeMachine *const machine, long input) {
                 machine->has_input = true;
                 machine->input = input;
                 return true;
+        }
+}
+
+char *machine_recv_output_string(struct IntCodeMachine *const machine) {
+#ifdef DEBUG
+        if (!machine->running) {
+                return NULL;
+        }
+#endif
+
+        char *str = NULL;
+        size_t ri = 0;
+        size_t rs = 0;
+
+        while (machine->has_output) {
+                while (ri >= rs) {
+                        rs = rs == 0 ? 16 : rs * 2;
+                        void *tmp = realloc(str, rs * sizeof *str);
+                        if (tmp == NULL) {
+                                free(str);
+                                perror("realloc");
+                                return NULL;
+                        }
+                        str = tmp;
+                }
+
+                long output = machine->output;
+                machine->has_output = false;
+                machine_run(machine);
+            
+                if (output < 0 || output > CHAR_MAX || !isascii(output)) {
+                        machine->has_output = true; // push back
+                        break;
+                }
+                str[ri++] = (char)output;
+        }
+        
+        if (ri == 0) {
+                return NULL;
+        }
+
+        void *tmp = realloc(str, (ri+1) * sizeof *str);
+        if (tmp == NULL && ri > 0) {
+                free(str);
+                perror("realloc");
+                return NULL;
+        }
+        str = tmp;
+
+        str[ri] = '\0';
+        return str;
+}
+
+void machine_discard_output_string(struct IntCodeMachine *const machine) {
+        while (machine->has_output) {
+                if (machine->output < 0 || machine->output > CHAR_MAX || !isascii(machine->output)) {
+                        // do not acknowledge
+                        break;
+                }
+                machine->has_output = false;
+                machine_run(machine);
+        }
+}
+
+bool machine_send_input_string(struct IntCodeMachine *const machine, const char *const input) {
+#ifdef DEBUG
+        if (!machine->running) {
+                return false;
+        }
+#endif
+
+        for (size_t i=0;; i++) {
+                char c = input[i];
+                if (c == '\0') {
+                        return true;
+                }
+
+                if (!machine_send_input(machine, (long)c)) {
+                        return false;
+                }
+                machine_run(machine);
         }
 }
 
