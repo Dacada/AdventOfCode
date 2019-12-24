@@ -14,41 +14,90 @@
 #define INITIALPOSITION4 TOTALKEYS+3 // part 2, encode the initial position as an extra key
 #define TOTALPOSITIONS (TOTALKEYS+1) // keys a through z plus the initial position
 #define TOTALPOSITIONS2 (TOTALKEYS+4) // keys a through z plus the initial position of each robot
-#define CACHESIZE TOTALPOSITIONS2 * (1<<TOTALKEYS)
+#define CACHESIZE (1<<26) // ideal size found through trial and error (marked improvement from 25 to 26)
 #define STARTTOKEN '@'
 
-static int cache[CACHESIZE];
+struct cache_element{
+        unsigned positions[4];
+        unsigned acquired_keys;
+        int distance;
+};
+static struct cache_element cache[CACHESIZE];
+
+static size_t get_cache_index(unsigned position, unsigned acquired_keys) {
+        size_t i = 23;
+        i = i * 31 + position;
+        i = i * 31 + acquired_keys;
+        return i % CACHESIZE;
+}
+
+static size_t get_cache_index2(unsigned positions[4], unsigned acquired_keys) {
+        size_t i = 23;
+        for (int j=0;j<4;j++)
+                i = i * 31 + positions[j];
+        i = i * 31 + acquired_keys;
+        return i % CACHESIZE;
+}
 
 static int get_cache(unsigned position, unsigned acquired_keys) {
-        // position: a number from 0 to TOTALPOSITIONS
-        ASSERT(position < TOTALPOSITIONS, "incorrect position");
+        size_t i = get_cache_index(position, acquired_keys);
+        struct cache_element e = cache[i];
 
-        // acquired_keys is a bitfield of as many bits as keys
-        ASSERT(acquired_keys < 1<<TOTALKEYS, "incorrect acquired keys");
-
-        // this means we need a cache of size TOTALPOSITIONS *
-        // 1<<TOTALKEYS, this is less than 2GB, reasonable enough
-
-        int n = cache[acquired_keys*TOTALPOSITIONS+position];
-        if (n == 0) {
+        if (e.positions[0] != position || e.acquired_keys != acquired_keys) {
                 return -1;
-        } else if (n == -1) {
+        } else if (e.distance == 0) {
+                return -1;
+        } else if (e.distance == -1) {
                 return 0;
         } else {
-                return n;
+                return e.distance;
+        }
+}
+
+static int get_cache2(unsigned positions[4], unsigned acquired_keys) {
+        size_t i = get_cache_index2(positions, acquired_keys);
+        struct cache_element e = cache[i];
+
+        if (e.positions[0] != positions[0] || e.positions[1] != positions[1] ||
+            e.positions[2] != positions[2] || e.positions[3] != positions[3] ||
+            e.acquired_keys != acquired_keys) {
+                return -1;
+        } else if (e.distance == 0) {
+                return -1;
+        } else if (e.distance == -1) {
+                return 0;
+        } else {
+                return e.distance;
         }
 }
 
 static void set_cache(unsigned position, unsigned acquired_keys, unsigned distance) {
-        ASSERT(position < TOTALPOSITIONS, "incorrect position");
-        ASSERT(acquired_keys < 1<<TOTALKEYS, "incorrect acquired keys");
-        ASSERT(distance <= INT_MAX, "distance too large");
-
+        size_t i = get_cache_index(position, acquired_keys);
+        
         if (distance == 0) {
-                cache[acquired_keys*TOTALPOSITIONS+position] = -1;
+                cache[i].distance = -1;
         } else {
-                cache[acquired_keys*TOTALPOSITIONS+position] = distance;
+                cache[i].distance = distance;
         }
+
+        cache[i].positions[0] = position;
+        cache[i].acquired_keys = acquired_keys;
+}
+
+static void set_cache2(unsigned positions[4], unsigned acquired_keys, unsigned distance) {
+        size_t i = get_cache_index2(positions, acquired_keys);
+        
+        if (distance == 0) {
+                cache[i].distance = -1;
+        } else {
+                cache[i].distance = distance;
+        }
+
+        cache[i].positions[0] = positions[0];
+        cache[i].positions[1] = positions[1];
+        cache[i].positions[2] = positions[2];
+        cache[i].positions[3] = positions[3];
+        cache[i].acquired_keys = acquired_keys;
 }
 
 static bool get_precalc_reachable(unsigned reachable[TOTALPOSITIONS][TOTALPOSITIONS],
@@ -62,7 +111,6 @@ static bool get_precalc_reachable(unsigned reachable[TOTALPOSITIONS][TOTALPOSITI
         return true;
 }
 
-/*
 static bool get_precalc_reachable2(unsigned reachable[TOTALPOSITIONS2][TOTALPOSITIONS2],
                                   unsigned from, unsigned to, unsigned keys) {
         unsigned needed = reachable[from][to];
@@ -73,19 +121,16 @@ static bool get_precalc_reachable2(unsigned reachable[TOTALPOSITIONS2][TOTALPOSI
         }
         return true;
 }
-*/
 
 static unsigned get_precalc_distance(unsigned distances[TOTALPOSITIONS][TOTALPOSITIONS],
                                      unsigned from, unsigned to) {
         return distances[from][to];
 }
 
-/*
 static unsigned get_precalc_distance2(unsigned distances[TOTALPOSITIONS2][TOTALPOSITIONS2],
                                      unsigned from, unsigned to) {
         return distances[from][to];
 }
-*/
 
 static unsigned best_distance_to_get_keys(unsigned distances[TOTALPOSITIONS][TOTALPOSITIONS],
                                           unsigned reachable[TOTALPOSITIONS][TOTALPOSITIONS],
@@ -116,6 +161,47 @@ static unsigned best_distance_to_get_keys(unsigned distances[TOTALPOSITIONS][TOT
         }
 
         set_cache(position, acquired_keys, result);
+        return result;
+}
+
+static unsigned best_distance_to_get_keys2(unsigned distances[TOTALPOSITIONS2][TOTALPOSITIONS2],
+                                           unsigned reachable[TOTALPOSITIONS2][TOTALPOSITIONS2],
+                                           unsigned positions[4], unsigned acquired_keys,
+                                           unsigned num_acquired_keys) {
+        if (num_acquired_keys == TOTALKEYS) {
+                return 0;
+        }
+
+        int dist_cache = get_cache2(positions, acquired_keys);
+        if (dist_cache > -1) {
+                return (unsigned)dist_cache;
+        }
+
+        unsigned result = INT_MAX;
+        for (unsigned i=0; i<TOTALKEYS; i++) {
+                for (unsigned j=0; j<4; j++) {
+                        if (!(acquired_keys & 1<<i) &&
+                            get_precalc_reachable2(reachable, positions[j], i, acquired_keys)) {
+                                unsigned distance  = get_precalc_distance2(distances, positions[j], i);
+
+                                unsigned new_positions[4];
+                                for (unsigned k=0; k<4; k++) {
+                                        new_positions[k] = positions[k];
+                                }
+                                new_positions[j] = i;
+                                
+                                distance += best_distance_to_get_keys2(
+                                        distances, reachable, new_positions, acquired_keys | 1<<i,
+                                        num_acquired_keys + 1);
+                                
+                                if (distance < result) {
+                                        result = distance;
+                                }
+                        }
+                }
+        }
+
+        set_cache2(positions, acquired_keys, result);
         return result;
 }
 
@@ -243,6 +329,43 @@ static void precalculate(char maze[MAZESIZE][MAZESIZE],
         reachable[INITIALPOSITION][INITIALPOSITION] = 0;
 }
 
+static void precalculate2(char maze[MAZESIZE][MAZESIZE],
+                          unsigned distances[TOTALPOSITIONS2][TOTALPOSITIONS2],
+                          unsigned reachable[TOTALPOSITIONS2][TOTALPOSITIONS2],
+                          struct vec2 initial_positions[4], struct vec2 key_positions[TOTALKEYS]) {
+        for (unsigned k1=0; k1<TOTALKEYS; k1++) {
+                for (unsigned k2=0; k2<TOTALKEYS; k2++) {
+                        unsigned distance, keys;
+                        bfs(maze, key_positions[k1], key_positions[k2], &distance, &keys);
+                        distances[k1][k2] = distance;
+                        distances[k2][k1] = distance;
+                        reachable[k1][k2] = keys;
+                        reachable[k2][k1] = keys;
+                }
+        }
+        for (unsigned k=0; k<TOTALKEYS; k++) {
+                for (unsigned p=0; p<4; p++) {
+                        unsigned distance, keys;
+                        bfs(maze, initial_positions[p], key_positions[k], &distance, &keys);
+                        distances[INITIALPOSITION+p][k] = distance;
+                        distances[k][INITIALPOSITION+p] = distance;
+                        reachable[INITIALPOSITION+p][k] = keys;
+                        reachable[k][INITIALPOSITION+p] = keys;
+                }
+        }
+        for (unsigned p1=0; p1<4; p1++) {
+                for (unsigned p2=0; p2<4; p2++) {
+                        if (p1 == p2) {
+                                distances[INITIALPOSITION+p1][INITIALPOSITION+p2] = 0;
+                                reachable[INITIALPOSITION+p2][INITIALPOSITION+p1] = 0;
+                        } else {
+                                distances[INITIALPOSITION+p1][INITIALPOSITION+p2] = INT_MAX;
+                                reachable[INITIALPOSITION+p2][INITIALPOSITION+p1] = INT_MAX;
+                        }
+                }
+        }
+}
+
 static void find_positions(char maze[MAZESIZE][MAZESIZE],
                            struct vec2 *initial_position, struct vec2 key_positions[TOTALKEYS]) {
         for (unsigned y=0; y<MAZESIZE; y++) {
@@ -329,7 +452,7 @@ static void solution2(const char *const input, char *const output) {
         parse_maze(input, maze);
 
         DBG("Finding important positions...");
-        struct vec2 initial_position, key_positions[TOTALKEYS];
+        struct vec2 initial_position={.x=0, .y=0}, key_positions[TOTALKEYS];
         find_positions(maze, &initial_position, key_positions);
 
         DBG("Adjusting for part 2...");
@@ -337,18 +460,17 @@ static void solution2(const char *const input, char *const output) {
         adjust_part2(maze, initial_position, robot_positions);
 
         DBG("Precalculating distances and reachability for part 2...");
-        //static unsigned distances[TOTALPOSITIONS2][TOTALPOSITIONS2];
-        //static unsigned reachable[TOTALPOSITIONS2][TOTALPOSITIONS2];
-        //precalculate2(maze, distances, reachable, robot_positions, key_positions);
+        static unsigned distances[TOTALPOSITIONS2][TOTALPOSITIONS2];
+        static unsigned reachable[TOTALPOSITIONS2][TOTALPOSITIONS2];
+        precalculate2(maze, distances, reachable, robot_positions, key_positions);
 
         DBG("Runing main recusive algorithm...");
-        //unsigned robot_encoded_positions[4] = { INITIALPOSITION1, INITIALPOSITION2,
-        //                                        INITIALPOSITION3, INITIALPOSITION4 };
-        //unsigned result = best_distance_to_get_keys2(distances, reachable, robot_encoded_positions, 0, 0);
+        unsigned robot_encoded_positions[4] = { INITIALPOSITION1, INITIALPOSITION2,
+                                                INITIALPOSITION3, INITIALPOSITION4 };
+        unsigned result = best_distance_to_get_keys2(distances, reachable, robot_encoded_positions, 0, 0);
 
         DBG("Done.");
-        //snprintf(output, OUTPUT_BUFFER_SIZE, "%u", result);
-        (void)output;
+        snprintf(output, OUTPUT_BUFFER_SIZE, "%u", result);
 }
 
 int main(int argc, char *argv[]) {
