@@ -3,8 +3,11 @@ CC = gcc
 CFLAGS = -Ilib -Wall -Wextra -Wformat -Wshadow -Wpointer-arith -Wcast-qual -Wmissing-prototypes -Werror -std=c99 -Ofast
 DEBUG_CFLAGS = -Ilib -Wall -Wextra -Wformat -Wshadow -Wpointer-arith -Wcast-qual -Wmissing-prototypes -Werror -std=c99 -Og -g -DDEBUG -fsanitize=address -fsanitize=undefined
 
+GDB_CFLAGS = -Ilib -Wall -Wextra -Wformat -Wshadow -Wpointer-arith -Wcast-qual -Wmissing-prototypes -Werror -std=c99 -Og -g -DDEBUG
+
 LDFLAGS = -std=c99 -Ofast
 DEBUG_LDFLAGS = -std=c99 -Og -g -fsanitize=address -fsanitize=undefined
+GDB_LDFLAGS = -std=c99 -Og -g
 
 LDLIBS =
 
@@ -16,17 +19,23 @@ aoclib/aoclib.o: aoclib/aoclib.c aoclib/aoclib.h
 	$(CC) $(CFLAGS) -c $< -o $@
 aoclib/aoclib_dbg.o: aoclib/aoclib.c aoclib/aoclib.h
 	$(CC) $(DEBUG_CFLAGS) -c $< -o $@
+aoclib/aoclib_gdb.o: aoclib/aoclib.c aoclib/aoclib.h
+	$(CC) $(GDB_CFLAGS) -c $< -o $@
 
 
 2015/%.o: 2015/%.c
 	$(CC) $(CFLAGS) -Iaoclib -c $< -o $@
 2015/%_dbg.o: 2015/%.c
 	$(CC) $(DEBUG_CFLAGS) -Iaoclib -c $< -o $@
+2015/%_gdb.o: 2015/%.c
+	$(CC) $(GDB_CFLAGS) -Iaoclib -c $< -o $@
 
 2019/%.o: 2019/%.c
 	$(CC) $(CFLAGS) -Iaoclib -c $< -o $@
 2019/%_dbg.o: 2019/%.c
 	$(CC) $(DEBUG_CFLAGS) -Iaoclib -c $< -o $@
+2019/%_gdb.o: 2019/%.c
+	$(CC) $(GDB_CFLAGS) -Iaoclib -c $< -o $@
 
 
 2015/4: LDLIBS = -lbsd
@@ -58,3 +67,19 @@ aoclib/aoclib_dbg.o: aoclib/aoclib.c aoclib/aoclib.h
 2019/23_dbg: 2019/intcode_dbg.o
 2019/%_dbg: 2019/%_dbg.o aoclib/aoclib_dbg.o
 	$(CC) $(DEBUG_LDFLAGS) $(LDLIBS) $^ -o $@
+
+
+2015/4_gdb: LDLIBS = -lbsd
+2015/12_gdb: lib/jsmn/libjsmn.a
+2015/%_gdb: 2015/%_gdb.o aoclib/aoclib_gdb.o
+	$(CC) $(GDB_LDFLAGS) $(LDLIBS) $^ -o $@
+
+2019/13_gdb: LDLIBS = -lncurses
+2019/13_gdb: 2019/intcode_gdb.o
+2019/15_gdb: 2019/intcode_gdb.o
+2019/17_gdb: 2019/intcode_gdb.o
+2019/19_gdb: 2019/intcode_gdb.o
+2019/21_gdb: 2019/intcode_gdb.o
+2019/23_gdb: 2019/intcode_gdb.o
+2019/%_gdb: 2019/%_gdb.o aoclib/aoclib_gdb.o
+	$(CC) $(GDB_LDFLAGS) $(LDLIBS) $^ -o $@
