@@ -2,7 +2,6 @@ CC = gcc
 
 CFLAGS = -Ilib -Wall -Wextra -Wformat -Wshadow -Wpointer-arith -Wcast-qual -Wmissing-prototypes -Werror -std=c99 -Ofast
 DEBUG_CFLAGS = -Ilib -Wall -Wextra -Wformat -Wshadow -Wpointer-arith -Wcast-qual -Wmissing-prototypes -Werror -std=c99 -Og -g -DDEBUG -fsanitize=address -fsanitize=undefined
-
 GDB_CFLAGS = -Ilib -Wall -Wextra -Wformat -Wshadow -Wpointer-arith -Wcast-qual -Wmissing-prototypes -Werror -std=c99 -Og -g -DDEBUG
 
 LDFLAGS = -std=c99 -Ofast
@@ -22,6 +21,10 @@ aoclib/aoclib_dbg.o: aoclib/aoclib.c aoclib/aoclib.h
 aoclib/aoclib_gdb.o: aoclib/aoclib.c aoclib/aoclib.h
 	$(CC) $(GDB_CFLAGS) -c $< -o $@
 
+# Object files may be compiled using:
+#  * Release flags, which disable sanitizers and enable optimizations, asuming the program will not encounter unexpected cases (asserts become no ops)
+#  * DBG flags, which enable sanitizers and allow detecting various errors and bugs easily during runtime thanks to assertions (asserts become aborts)
+#  * GDB flags, which disable sanitizers and allow debugging under tools like GDB, keeping the debug mode for assertions (asserts are still aborts)
 
 2015/%.o: 2015/%.c
 	$(CC) $(CFLAGS) -Iaoclib -c $< -o $@
