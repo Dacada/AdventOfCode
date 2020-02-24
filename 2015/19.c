@@ -20,14 +20,12 @@ struct moleculetree {
         struct moleculetree *next;
 };
 
-static struct moleculetree tree;
-static void tree_init(void) {
-        tree.value = -2;
-        tree.nextcount = 0;
-        tree.nextcap = 0;
-        tree.next = NULL;
+static void tree_init(struct moleculetree *tree) {
+        tree->value = -2;
+        tree->nextcount = 0;
+        tree->nextcap = 0;
+        tree->next = NULL;
 }
-static int tree_count = 0;
 static struct moleculetree *add_to_tree(struct moleculetree *head, int molecule) {
         if (head->nextcount > 0) {
                 for (size_t i=0; i<head->nextcount; i++) {
@@ -58,16 +56,17 @@ static struct moleculetree *add_to_tree(struct moleculetree *head, int molecule)
         new->next = NULL;
         return new;
 }
-static void finish_tree_branch(struct moleculetree *head) {
+static bool finish_tree_branch(struct moleculetree *head) {
         size_t oldcount = head->nextcount;
         add_to_tree(head, -1);
         size_t newcount = head->nextcount;
 
         if (oldcount != newcount) {
-                tree_count++;
                 DBG("Finished: Tree count ++");
+                return true;
         } else {
                 DBG("Finished: Repeat ending token");
+                return false;
         }
 }
 static void tree_free(struct moleculetree *head) {
@@ -77,8 +76,7 @@ static void tree_free(struct moleculetree *head) {
         free(head->next);
 }
 
-static struct compoundlist associations[MAX_MOLECULES];
-static void add_association(int molecule, struct compound compound) {
+static void add_association(struct compoundlist *associations, int molecule, struct compound compound) {
         struct compoundlist *list = &associations[molecule];
         while (list->size <= list->current) {
                 if (list->size == 0)
@@ -168,23 +166,23 @@ static struct compound parse_compound(const char *const input, size_t *const i) 
         return c;
 }
 
-static void parse_line(const char *const input, size_t *i) {
+static void parse_line(struct compoundlist *associations, const char *const input, size_t *i) {
         int molecule = parse_molecule(input, i);
         ASSERT(input[(*i)++] == ' ', "Expected separator");
         ASSERT(input[(*i)++] == '=', "Expected separator");
         ASSERT(input[(*i)++] == '>', "Expected separator");
         ASSERT(input[(*i)++] == ' ', "Expected separator");
         struct compound result = parse_compound(input, i);
-        add_association(molecule, result);
+        add_association(associations, molecule, result);
 }
 
-static struct compound parse(const char *const input) {
+static struct compound parse(struct compoundlist *associations, const char *const input) {
         size_t i;
         for (i=0;; i++) {
                 if (input[i] == '\n') {
                         break;
                 }
-                parse_line(input, &i);
+                parse_line(associations, input, &i);
         }
 
         i++;
@@ -192,9 +190,8 @@ static struct compound parse(const char *const input) {
 }
 
 static void solution1(const char *const input, char *const output) {
-        output[0]=0;
-        struct compound medicine = parse(input);
-        // find all possible exchanges...
+        static struct compoundlist associations[MAX_MOLECULES];
+        struct compound medicine = parse(associations, input);
 
 #ifdef DEBUG
         fprintf(stderr, "Medicine:\n");
@@ -233,8 +230,11 @@ static void solution1(const char *const input, char *const output) {
                 }
         }
 #endif
-
-        tree_init();
+        
+        static struct moleculetree tree;
+        int tree_count = 0;
+        
+        tree_init(&tree);
         // for every molecule in the medicine (i)
         for (size_t i=0; i<medicine.size; i++) {
                 int molecule = medicine.molecules[i];
@@ -290,7 +290,9 @@ static void solution1(const char *const input, char *const output) {
                                                 head = add_to_tree(head, medicine.molecules[k]);
                                         }
                                 }
-                                finish_tree_branch(head);
+                                if (finish_tree_branch(head)) {
+                                        tree_count++;
+                                }
                         }
                 } else {
                         DBG("Has no replacements, skipping.");
