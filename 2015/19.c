@@ -1,8 +1,11 @@
 #include <aoclib.h>
 #include <ctype.h>
 #include <stdio.h>
+#include <limits.h>
+#include <string.h>
 
 #define MAX_MOLECULES 20
+#define STACKSIZE (1<<15)
 
 struct compound {
         int *molecules;
@@ -314,9 +317,167 @@ static void solution1(const char *const input, char *const output) {
         snprintf(output, OUTPUT_BUFFER_SIZE, "%d", tree_count);
 }
 
+struct stack_element {
+        struct compound compound;
+        int steps;
+};
+
+struct stack {
+        struct stack_element elements[STACKSIZE];
+        size_t top;
+};
+
+static void stack_init(struct stack *s) {
+        s->top = 0;
+}
+
+static bool stack_empty(struct stack *s) {
+        return s->top == 0;
+}
+
+static void stack_push(struct stack *s, struct compound c, int steps) {
+        s->elements[s->top].compound = c;
+        s->elements[s->top].steps = steps;
+        s->top++;
+        ASSERT(s->top < STACKSIZE, "Stack overflow!");
+}
+
+static struct compound stack_pop(struct stack *s, int *steps) {
+        ASSERT(s->top > 0, "Pop from empty stack!");
+        s->top--;
+        *steps = s->elements[s->top].steps;
+        return s->elements[s->top].compound;
+}
+
+static void stack_free(struct stack *s) {
+        for (size_t i=0; i<s->top; i++) {
+                free(s->elements[i].compound.molecules);
+        }
+}
+
+static bool compound_equal_window(struct compound *comp1, int *comp2, unsigned window) {
+        if (comp1->size != window) {
+                return false;
+        }
+        for (unsigned i=0; i<window; i++) {
+                if (comp1->molecules[i] != comp2[i]) {
+                        return false;
+                }
+        }
+        return true;
+}
+
+/*
+static void dbg_print_molecules(int *m, unsigned size) {
+        #ifdef DEBUG
+        for (unsigned i=0; i<size; i++) {
+                char mstr[3] = {0,0,0};
+                num2mol(m[i], mstr);
+                fprintf(stderr, "%s", mstr);
+        }
+        fprintf(stderr, "\n");
+        #else
+        (void)m;
+        (void)size;
+        #endif
+}
+
+static void dbg_print_compound(struct compound *c) {
+        dbg_print_molecules(c->molecules, c->size);
+}
+*/
+
 static void solution2(const char *const input, char *const output) {
-        (void)input;
-        snprintf(output, OUTPUT_BUFFER_SIZE, "NOT SOLVED");
+        static struct compoundlist associations[MAX_MOLECULES];
+        struct compound medicine = parse(associations, input);
+
+        unsigned max_len_association = 0;
+        unsigned min_len_association = UINT_MAX;
+        for (int i=0; i<MAX_MOLECULES; i++) {
+                struct compoundlist *list = &associations[i];
+                for (size_t j=0; j<list->current; j++) {
+                        struct compound *comp = &list->compounds[j];
+                        if (comp->size > 0) {
+                                if (comp->size > max_len_association) {
+                                        max_len_association = comp->size;
+                                }
+                                if (comp->size < min_len_association) {
+                                        min_len_association = comp->size;
+                                }
+                        }
+                }
+        }
+
+        int result = -1;
+        static struct stack stack, *s=&stack;
+        stack_init(s);
+        stack_push(s, medicine, 0);
+        while (!stack_empty(s)) {
+                int steps;
+                struct compound c = stack_pop(s, &steps);
+                //DBG("finding next for compound:");
+                //dbg_print_compound(&c);
+                // sliding window
+                for (unsigned window = min_len_association; window <= max_len_association; window++) {
+                        //DBG("\twindow size: %u", window);
+                        for (size_t i=0; i+window<=c.size; i++) {
+                                //DBG("\tstarting at: %lu", i);
+
+                                // find the molecule that corresponds to the compound in that window
+                                for (int match=0; match<MAX_MOLECULES; match++) {
+                                        if (match == mol2num("e") && c.size != window) {
+                                                continue;
+                                        }
+                                        
+                                        struct compoundlist *list = &associations[match];
+                                        for (size_t j=0; j<list->current; j++) {
+                                                struct compound *assoc_match = &list->compounds[j];
+                                                
+                                                if (compound_equal_window(assoc_match, c.molecules+i, window)) {
+                                                        //DBG("\t\tfound a match:");
+                                                        //dbg_print_compound(assoc_match);
+                                                        
+                                                        // found, replace whole subcompound with 1 molecule
+                                                        struct compound newc;
+                                                        newc.size = c.size - window + 1;
+                                                        
+                                                        if (match == mol2num("e") && newc.size == 1) {
+                                                                result = steps+1;
+                                                                free(c.molecules);
+                                                                goto end;
+                                                        }
+                                                        
+                                                        newc.molecules = malloc(newc.size * sizeof(int));
+                                                        memcpy(newc.molecules, c.molecules, i * sizeof(int));
+                                                        newc.molecules[i] = match;
+                                                        memcpy(newc.molecules+i+1, c.molecules+i+window,
+                                                               (c.size - window - i) * sizeof(int));
+                                                        
+                                                        //DBG("\t\tpushed:");
+                                                        //dbg_print_compound(&newc);
+                                                                
+                                                        stack_push(s, newc, steps+1);
+                                                }
+                                        }
+                                }
+                        }
+                }
+                free(c.molecules);
+        }
+
+end:
+        snprintf(output, OUTPUT_BUFFER_SIZE, "%d", result);
+
+        for (size_t i=0; i<MAX_MOLECULES; i++) {
+                struct compoundlist *list = &associations[i];
+                if (list->current > 0) {
+                        for (size_t j=0; j<list->current; j++) {
+                                free(list->compounds[j].molecules);
+                        }
+                }
+                free(list->compounds);
+        }
+        stack_free(s);
 }
 
 int main(int argc, char *argv[]) {
