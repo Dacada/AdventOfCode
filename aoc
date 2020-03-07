@@ -91,28 +91,46 @@ created also on the working directory.  """.strip()
     )
 
     parser.add_argument(
+        '--debug',
+        action='store_true',
+        help="""Add this argument to run the debug verison. No statistics are
+printed.""".strip()
+    )
+    parser.add_argument(
+        '--input',
+        action='store_true',
+        help="""Add this argument to manually enter an input string""".strip()
+    )
+
+    parser.add_argument(
         'year',
-        type=int
+        type=int,
+        help="""Year of the problem"""
     )
     parser.add_argument(
         'day',
-        type=int
+        type=int,
+        help="""Day of the problem"""
     )
     parser.add_argument(
         'problem',
-        type=int
+        type=int,
+        help="""Part of the problem (1 or 2)"""
     )
 
     return parser.parse_args()
 
 
-def get_input(year: int, day: int) -> str:
-    input = get_input_from_cache(year, day)
-    if input is None:
-        input = get_input_from_aoc(year, day)
-        if input is not None:
-            save_input_to_cache(year, day, input)
-    return input
+def get_input(year: int, day: int, manual_input: bool) -> str:
+    if manual_input:
+        return input()
+
+    inputstr = get_input_from_cache(year, day)
+    if inputstr is None:
+        inputstr = get_input_from_aoc(year, day)
+        if inputstr is not None:
+            save_input_to_cache(year, day, inputstr)
+    return inputstr
 
 
 def get_input_from_cache(year: int, day: int) -> str:
@@ -127,6 +145,10 @@ def get_input_from_cache(year: int, day: int) -> str:
 def get_session() -> str:
     with open('session.txt') as f:
         return f.read().strip()
+
+
+def get_filename(year: int, day: int, debug: bool) -> str:
+    return '{}/{}{}'.format(year, day, '_dbg' if debug else '_rel')
 
 
 def get_input_from_aoc(year: int, day: int) -> str:
@@ -150,12 +172,13 @@ def save_input_to_cache(year: int, day: int, input: str):
         f.write(input)
 
 
-def launch_solution(year: int, day: int, problem: int, input: str):
+def launch_solution(year: int, day: int, problem: int,
+                    debug: bool, input: str):
     def communicate_thread(process, input):
         output, _ = process.communicate(input.encode('ascii'))
         return output.decode('ascii')
 
-    process_name = '{}/{}'.format(year, day)
+    process_name = get_filename(year, day, debug)
     process = subprocess.Popen(
         [process_name, str(problem)],
         stdin=subprocess.PIPE,
@@ -170,6 +193,16 @@ def launch_solution(year: int, day: int, problem: int, input: str):
     return thread, process.pid
 
 
+def show_result(thread):
+    thread.join()
+    print("Result: {}".format(str(thread.return_value).strip()))
+
+
+def show_results_only(thread, pid):
+    thread.start()
+    show_result(thread)
+
+
 def show_stats_loop(thread, pid):
     t = time.perf_counter()
     thread.start()
@@ -180,8 +213,8 @@ def show_stats_loop(thread, pid):
         print_process_stats(pid)
 
     print()
-    print("Result: {}".format(str(thread.return_value).strip()))
     print("Time: {:.5f}".format((time.perf_counter() - t)))
+    show_result(thread)
 
 
 def print_process_stats(pid, clear=True):
@@ -247,21 +280,29 @@ def get_process_stats(pid):
                      int(size), int(resident), float(uptime))
 
 
-def prepare_solution(year, day):
-    subprocess.run(['make', '{}/{}'.format(year, day)])
+def prepare_solution(year, day, debug):
+    subprocess.run(['make', get_filename(year, day, debug)])
 
 
-def unprepare_solution(year, day):
-    subprocess.run(['rm', '{}/{}'.format(year, day)])
+def unprepare_solution(year, day, debug):
+    subprocess.run(['rm', get_filename(year, day, debug)])
 
 
 def main():
     args = parse_args()
-    input = get_input(args.year, args.day)
-    prepare_solution(args.year, args.day)
-    thread, pid = launch_solution(args.year, args.day, args.problem, input)
-    show_stats_loop(thread, pid)
-    unprepare_solution(args.year, args.day)
+
+    input = get_input(args.year, args.day, args.input)
+    prepare_solution(args.year, args.day, args.debug)
+    thread, pid = launch_solution(args.year, args.day, args.problem,
+                                  args.debug, input)
+
+    try:
+        if args.debug:
+            show_results_only(thread, pid)
+        else:
+            show_stats_loop(thread, pid)
+    finally:
+        unprepare_solution(args.year, args.day, args.debug)
 
 
 if __name__ == "__main__":
