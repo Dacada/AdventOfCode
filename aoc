@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 
 import os
+import sys
 import time
 import argparse
 import threading
@@ -123,7 +124,7 @@ printed.""".strip()
 
 def get_input(year: int, day: int, manual_input: bool) -> str:
     if manual_input:
-        return input()
+        return sys.stdin.read()
 
     inputstr = get_input_from_cache(year, day)
     if inputstr is None:
