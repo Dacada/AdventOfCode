@@ -18,6 +18,7 @@ SPECIAL_INPUTS = set((
     (2015, 10),
     (2015, 11),
     (2015, 20),
+    (2016, 5),
     (2019, 4),
 ))
 
@@ -101,6 +102,12 @@ printed.""".strip()
         '--input',
         action='store_true',
         help="""Add this argument to manually enter an input string""".strip()
+    )
+    parser.add_argument(
+        '--simple',
+        action='store_true',
+        help="""Just spawn the process in the same terminal and let it go
+wild""".strip()
     )
 
     parser.add_argument(
@@ -192,6 +199,15 @@ def launch_solution(year: int, day: int, problem: int,
     )
 
     return thread, process.pid
+
+
+def launch_solution_simple(year: int, day: int, problem: int, debug:
+                           bool, input: str):
+    process_name = get_filename(year, day, debug)
+    process = subprocess.Popen([process_name, str(problem)],
+                               stdin=subprocess.PIPE)
+    process.communicate(input.encode('ascii'))
+    process.wait()
 
 
 def show_result(thread):
@@ -294,6 +310,12 @@ def main():
 
     input = get_input(args.year, args.day, args.input)
     prepare_solution(args.year, args.day, args.debug)
+
+    if args.simple:
+        launch_solution_simple(args.year, args.day, args.problem,
+                               args.debug, input)
+        return
+
     thread, pid = launch_solution(args.year, args.day, args.problem,
                                   args.debug, input)
 
