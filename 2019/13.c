@@ -117,7 +117,7 @@ static void solution2(const char *const input, char *const output) {
 
                 if (tile == BLOCK) {
                         firstblock = true;
-                        if (!blocks[y][x]) {
+                        if (x > -1 && !blocks[y][x]) {
                                 blocks[y][x] = true;
                                 count++;
                         
@@ -126,7 +126,7 @@ static void solution2(const char *const input, char *const output) {
                                 #endif
                         }
                 } else {
-                        if (blocks[y][x]) {
+                        if (x > -1 && blocks[y][x]) {
                                 blocks[y][x] = false;
                                 count--;
                         
