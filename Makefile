@@ -53,6 +53,12 @@ aoclib/aoclib_gdb.o: aoclib/aoclib.c aoclib/aoclib.h
 2015/12_dbg: lib/jsmn/libjsmn.a
 2015/12_gdb: lib/jsmn/libjsmn.a
 
+
+2016/5_rel: LDLIBS = -lbsd
+2016/5_dbg: LDLIBS = -lbsd -lncurses
+2016/5_gdb: LDLIBS = -lbsd -lncurses
+
+
 2019/13_rel: 2019/intcode.o
 2019/13_dbg: LDLIBS = -lncurses
 2019/13_dbg: 2019/intcode_dbg.o
@@ -82,6 +88,7 @@ aoclib/aoclib_gdb.o: aoclib/aoclib.c aoclib/aoclib.h
 2019/25_rel: 2019/intcode.o
 2019/25_dbg: 2019/intcode_dbg.o
 2019/25_gdb: 2019/intcode_gdb.o
+
 
 %_rel: %_rel.o aoclib/aoclib_rel.o
 	$(CC) $(LDFLAGS) $(LDLIBS) $^ -o $@
