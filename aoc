@@ -1,13 +1,8 @@
 #!/usr/bin/python3
 
 import os
-import sys
-import time
 import argparse
-import threading
 import subprocess
-from dataclasses import dataclass
-
 import requests
 
 
@@ -23,58 +18,16 @@ SPECIAL_INPUTS = set((
     (2020, 15),
 ))
 
-
-class ReturnValueThread(threading.Thread):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.return_value = None
-
-    def run(self):
-        """
-        Copied verbatim from the threading module, plus the added return_value.
-        """
-        try:
-            if self._target:
-                self.return_value = self._target(*self._args, **self._kwargs)
-        finally:
-            # Avoid a refcycle if the thread is running a function with
-            # an argument that has a member that points to the thread.
-            del self._target, self._args, self._kwargs
-
-
-@dataclass
-class ProcStats:
-    pid: int
-    utime: int  # time scheduled in user mode (in clock ticks)
-    stime: int  # time scheduled in kernel mode (in clock ticks)
-    num_threads: int
-    starttime: int  # time process started (since boot, in clock ticks)
-    vsize: int  # virtual memory size
-    rss: int  # resident set size
-    processor: int
-    size: int  # total program size
-    resident: int  # resident set size
-    uptime: float  # time since last boot
-
-    @property
-    def _clk_tck(self):
-        return os.sysconf(os.sysconf_names['SC_CLK_TCK'])
-
-    @property
-    def utime_seconds(self):
-        return self.utime / self._clk_tck
-
-    @property
-    def stime_seconds(self):
-        return self.stime / self._clk_tck
-
-    @property
-    def starttime_seconds(self):
-        return self.starttime / self._clk_tck
-
-    @property
-    def runtime(self):
-        return self.uptime - self.starttime_seconds
+GNUTIME_BINARY = '/bin/time'
+TIMESTRING = """
+Total elapsed time: %e s.
+  System: %S
+  User:   %U
+Page faults (mjr/mnr): %F/%R
+Swaps: %W
+Context switches (inv/vol): %c/%w
+Exit status: %x
+""".strip()
 
 
 def parse_args():
@@ -181,120 +134,33 @@ def save_input_to_cache(year: int, day: int, input: str):
 
 
 def launch_solution(year: int, day: int, problem: int,
-                    debug: bool, input: str):
-    def communicate_thread(process, input):
-        output, _ = process.communicate(input.encode('ascii'))
-        return output.decode('ascii')
-
+                    debug: bool, input: str, simple: bool):
     process_name = get_filename(year, day, debug)
-    process = subprocess.Popen(
-        [process_name, str(problem)],
-        stdin=subprocess.PIPE,
-        stdout=subprocess.PIPE
-    )
 
-    thread = ReturnValueThread(
-        target=communicate_thread,
-        args=(process, input)
-    )
+    if simple:
+        process = subprocess.Popen(
+            [process_name, str(problem)],
+            stdin=subprocess.PIPE
+        )
+    else:
+        process = subprocess.Popen(
+            [
+                GNUTIME_BINARY,
+                '-f', TIMESTRING,
+                process_name,
+                str(problem)
+            ],
+            stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE
+        )
 
-    return thread, process.pid
+    out, err = process.communicate(input.encode('ascii'))
 
-
-def launch_solution_simple(year: int, day: int, problem: int, debug:
-                           bool, input: str):
-    process_name = get_filename(year, day, debug)
-    process = subprocess.Popen([process_name, str(problem)],
-                               stdin=subprocess.PIPE)
-    process.communicate(input.encode('ascii'))
-    process.wait()
-
-
-def show_result(thread):
-    thread.join()
-    print("Result: {}".format(str(thread.return_value).strip()))
-
-
-def show_results_only(thread, pid):
-    thread.start()
-    show_result(thread)
-
-
-def show_stats_loop(thread, pid):
-    t = time.perf_counter()
-    thread.start()
-    print_process_stats(pid, clear=False)
-
-    while thread.is_alive():
-        time.sleep(0.1)
-        print_process_stats(pid)
-
-    print()
-    print("Time: {:.5f}".format((time.perf_counter() - t)))
-    show_result(thread)
-
-
-def print_process_stats(pid, clear=True):
-    stats = get_process_stats(pid)
-    if stats is not None:
-        if clear:
-            clear_process_stats()
-        s = """
-PID:                  {}
-User mode time (s):   {:.5f}
-Kernel mode time (s): {:.5f}
-Threads:              {}
-Size:                 {}
-Runtime (s):          {:.5f}
-""".strip()
-        s = '\n'.join(l + '\033[K' for l in s.splitlines())
-        s = s.format(stats.pid, stats.utime_seconds, stats.stime_seconds,
-                     stats.num_threads, stats.size, stats.runtime)
-        print(s)
-
-
-def clear_process_stats():
-    print(''.join(['\033[F']*6), end='')
-
-
-def get_process_stats(pid):
-    try:
-        with open('/proc/{}/stat'.format(pid)) as f:
-            stats_str = f.read()
-    except IOError:
-        return None
-
-    stats_split = stats_str.split()
-    _, comm, state, ppid, pgrp, session, tty_nr, tpgid, flags, minflt,\
-        cminflt, majflt, cmajflt, utime, stime, cutime, cstime, priority,\
-        nice, num_threads, itrealvalue, starttime, vsize, rss, rsslim,\
-        startcode, endcode, startstack, kstkesp, kstkeip, signal, blocked,\
-        sigignore, sigcatch, wchan, nswap, cnswap, exit_signal, processor,\
-        rt_priority, policy, delayacct_blkio_ticks, guest_time, cguest_time,\
-        start_data, end_data, start_brk, arg_start, arg_end, env_start,\
-        env_end, exit_code = stats_split
-
-    try:
-        with open('/proc/{}/statm'.format(pid)) as f:
-            stats_str = f.read()
-    except IOError:
-        return None
-
-    stats_split = stats_str.split()
-    size, resident, shared, text, lib, data, dt = stats_split
-
-    try:
-        with open('/proc/uptime') as f:
-            stats_str = f.read()
-    except IOError:
-        return None
-
-    stats_split = stats_str.split()
-    uptime, idletime = stats_split
-
-    return ProcStats(int(pid), int(utime), int(stime), int(num_threads),
-                     int(starttime), int(vsize), int(rss), int(processor),
-                     int(size), int(resident), float(uptime))
+    if simple:
+        return None, None
+    else:
+        return out.decode('ascii'), err.decode('ascii')
 
 
 def prepare_solution(year, day, debug):
@@ -305,6 +171,15 @@ def unprepare_solution(year, day, debug):
     subprocess.run(['rm', get_filename(year, day, debug)])
 
 
+def print_results(result, summary):
+    if summary is not None:
+        print()
+        print('Summary:')
+        print(summary)
+    if result is not None:
+        print('Result:', result)
+
+
 def main():
     args = parse_args()
 
@@ -312,23 +187,15 @@ def main():
         input = get_input(args.year, args.day)
     else:
         input = args.input.read()
+
     prepare_solution(args.year, args.day, args.debug)
-
-    if args.simple:
-        launch_solution_simple(args.year, args.day, args.problem,
-                               args.debug, input)
-        return
-
-    thread, pid = launch_solution(args.year, args.day, args.problem,
-                                  args.debug, input)
-
     try:
-        if args.debug:
-            show_results_only(thread, pid)
-        else:
-            show_stats_loop(thread, pid)
+        result, summary = launch_solution(args.year, args.day, args.problem,
+                                          args.debug, input, args.simple)
     finally:
         unprepare_solution(args.year, args.day, args.debug)
+
+    print_results(result, summary)
 
 
 if __name__ == "__main__":
