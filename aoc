@@ -160,7 +160,9 @@ def launch_solution(year: int, day: int, problem: int,
     if simple:
         return None, None
     else:
-        return out.decode('ascii'), err.decode('ascii')
+        return \
+            out.decode('ascii', errors='backslashreplace'), \
+            err.decode('ascii', errors='backslashreplace')
 
 
 def prepare_solution(year, day, debug):
