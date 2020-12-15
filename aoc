@@ -99,10 +99,12 @@ created also on the working directory.  """.strip()
         help="""Add this argument to run the debug verison. No statistics are
 printed.""".strip()
     )
+
     parser.add_argument(
         '--input',
-        action='store_true',
-        help="""Add this argument to manually enter an input string""".strip()
+        type=argparse.FileType('r'),
+        help="""Use given file as input. If - is passed, read input from
+stdin.""".strip()
     )
     parser.add_argument(
         '--simple',
@@ -130,10 +132,7 @@ wild""".strip()
     return parser.parse_args()
 
 
-def get_input(year: int, day: int, manual_input: bool) -> str:
-    if manual_input:
-        return sys.stdin.read()
-
+def get_input(year: int, day: int) -> str:
     inputstr = get_input_from_cache(year, day)
     if inputstr is None:
         inputstr = get_input_from_aoc(year, day)
@@ -309,7 +308,10 @@ def unprepare_solution(year, day, debug):
 def main():
     args = parse_args()
 
-    input = get_input(args.year, args.day, args.input)
+    if args.input is None:
+        input = get_input(args.year, args.day)
+    else:
+        input = args.input.read()
     prepare_solution(args.year, args.day, args.debug)
 
     if args.simple:
