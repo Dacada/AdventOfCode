@@ -1,8 +1,9 @@
 CC = gcc
 
-CFLAGS = -Iaoclib -Ilib -Wall -Wextra -Wformat -Wshadow -Wpointer-arith -Wcast-qual -Wmissing-prototypes -Werror -std=c99 -Ofast
-DEBUG_CFLAGS = -Iaoclib -Ilib -Wall -Wextra -Wformat -Wshadow -Wpointer-arith -Wcast-qual -Wmissing-prototypes -Werror -std=c99 -Og -g -DDEBUG -fsanitize=address -fsanitize=undefined
-GDB_CFLAGS = -Iaoclib -Ilib -Wall -Wextra -Wformat -Wshadow -Wpointer-arith -Wcast-qual -Wmissing-prototypes -Werror -std=c99 -Og -g -DDEBUG
+GENERIC_CFLAGS = -Iaoclib -Ilib -Wall -Wextra -Wformat -Wshadow -Wpointer-arith -Wcast-qual -Wmissing-prototypes -Werror -std=c99
+CFLAGS = $(GENERIC_CFLAGS) -Ofast
+DEBUG_CFLAGS = $(GENERIC_CFLAGS) -Og -g -DDEBUG -fsanitize=address -fsanitize=undefined
+GDB_CFLAGS = $(GENERIC_CFLAGS) -Og -g -DDEBUG
 
 LDFLAGS = -std=c99 -Ofast
 DEBUG_LDFLAGS = -std=c99 -Og -g -fsanitize=address -fsanitize=undefined
@@ -38,11 +39,11 @@ aoclib/aoclib_gdb.o: aoclib/aoclib.c aoclib/aoclib.h
 #    are still aborts)
 
 %_rel.o: %.c
-	$(CC) $(CFLAGS) -Iaoclib -c $< -o $@
+	$(CC) $(CFLAGS) -c $< -o $@
 %_dbg.o: %.c
-	$(CC) $(DEBUG_CFLAGS) -Iaoclib -c $< -o $@
+	$(CC) $(DEBUG_CFLAGS) -c $< -o $@
 %_gdb.o: %.c
-	$(CC) $(GDB_CFLAGS) -Iaoclib -c $< -o $@
+	$(CC) $(GDB_CFLAGS) -c $< -o $@
 
 
 2015/4_rel: LDLIBS = -lbsd
