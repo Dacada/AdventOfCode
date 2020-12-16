@@ -142,6 +142,15 @@ def launch_solution(year: int, day: int, problem: int,
             [process_name, str(problem)],
             stdin=subprocess.PIPE
         )
+    elif debug:
+        process = subprocess.Popen(
+            [
+                process_name,
+                str(problem)
+            ],
+            stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE
+        )
     else:
         process = subprocess.Popen(
             [
@@ -159,6 +168,10 @@ def launch_solution(year: int, day: int, problem: int,
 
     if simple:
         return None, None
+    elif debug:
+        return \
+            out.decode('ascii', errors='backslashreplace'), \
+            None
     else:
         return \
             out.decode('ascii', errors='backslashreplace'), \
