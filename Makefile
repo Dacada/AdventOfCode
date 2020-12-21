@@ -91,6 +91,11 @@ aoclib/aoclib_gdb.o: aoclib/aoclib.c aoclib/aoclib.h
 2019/25_gdb: 2019/intcode_gdb.o
 
 
+2020/20_rel: LDLIBS = -lm
+2020/20_dbg: LDLIBS = -lm
+2020/20_gdb: LDLIBS = -lm
+
+
 %_rel: %_rel.o aoclib/aoclib_rel.o
 	$(CC) $(LDFLAGS) $(LDLIBS) $^ -o $@
 %_dbg: %_dbg.o aoclib/aoclib_dbg.o
