@@ -1,7 +1,7 @@
 CC = gcc
 
 GENERIC_CFLAGS = -Iaoclib -Ilib -Wall -Wextra -Wformat -Wshadow -Wpointer-arith -Wcast-qual -Wmissing-prototypes -Werror -std=c99
-CFLAGS = $(GENERIC_CFLAGS) -Ofast
+CFLAGS = $(GENERIC_CFLAGS) -Ofast -march=native
 DEBUG_CFLAGS = $(GENERIC_CFLAGS) -Og -g -DDEBUG -fsanitize=address -fsanitize=undefined
 GDB_CFLAGS = $(GENERIC_CFLAGS) -Og -g -DDEBUG
 
