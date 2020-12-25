@@ -153,7 +153,7 @@ static void solution1(const char *const input, char *const output) {
         memory_tree_free(&memory);
 }
 
-static bool parse_input_2(const char *const input, size_t *const i, char mask[MASKSIZE],
+static bool parse_input_2(const char *const input, size_t *const i, char mask[MASKSIZE+1],
                           uint64_t *const address, uint64_t *const value) {
         if (strncmp(input+*i, "mask", 4) == 0) {
                 *i += 4;
@@ -241,7 +241,7 @@ static void solution2(const char *const input, char *const output) {
         unsigned long total = 0;
         struct memory_tree memory;
         memory_tree_init(&memory);
-        char mask[MASKSIZE];
+        char mask[MASKSIZE+1];
 
         for (size_t i=0; input[i]!=0; i++) {
                 uint64_t addr, val;

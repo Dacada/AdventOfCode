@@ -52,7 +52,7 @@ static bool val_hgt(const char *const content, const size_t len) {
                 n = n*10 + c - '0';
         }
 
-        char unit[2];
+        char unit[3];
         strncpy(unit, content+len-2, 2);
         if (strncmp(unit, "cm", 2) == 0) {
                 return n >= 150 && n <= 193;
@@ -110,7 +110,7 @@ static int count_valid(const char *const input) {
                 memset(found, 0, sizeof(found));
 
                 while (input[i] != '\n' && input[i] != '\0') {
-                        char field[3];
+                        char field[4];
                         strncpy(field, input+i, 3);
                         i += 3;
                         ASSERT(input[i++] == ':', "invalid input");
