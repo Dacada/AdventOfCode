@@ -10,7 +10,7 @@
 #endif
 
 static void solution1(const char *const input, char *const output) {
-        size_t len = strlen(input);
+        size_t len = strlen(input)-1;
         MD5_CTX base_ctx, iter_ctx;
 
         MD5Init(&base_ctx);
@@ -49,7 +49,7 @@ static void endwin_wrapper(void) {
 #endif
 
 static void solution2(const char *const input, char *const output) {
-        size_t len = strlen(input);
+        size_t len = strlen(input)-1;
         MD5_CTX base_ctx, iter_ctx;
 
         MD5Init(&base_ctx);

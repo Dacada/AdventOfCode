@@ -83,15 +83,15 @@ static void get_next_valid_password(char *const password) {
 }
 
 static void solution1(const char *const input, char *const output) {
-  char password[PWLEN];
-  strcpy(password, input);
+  char password[PWLEN+1];
+  strncpy(password, input, PWLEN);
   get_next_valid_password(password);
   snprintf(output, OUTPUT_BUFFER_SIZE, "%s", password);
 }
 
 static void solution2(const char *const input, char *const output) {
-  char password[PWLEN];
-  strcpy(password, input);
+  char password[PWLEN+1];
+  strncpy(password, input, PWLEN);
   get_next_valid_password(password);
   get_next_valid_password(password);
   snprintf(output, OUTPUT_BUFFER_SIZE, "%s", password);
