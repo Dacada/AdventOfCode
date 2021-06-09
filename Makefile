@@ -60,6 +60,11 @@ aoclib/aoclib_gdb.o: aoclib/aoclib.c aoclib/aoclib.h
 2016/5_gdb: LDLIBS = -lbsd -lncurses
 
 
+2016/14_rel: LDLIBS = -lbsd
+2016/14_dbg: LDLIBS = -lbsd
+2016/14_gdb: LDLIBS = -lbsd
+
+
 2019/13_rel: 2019/intcode.o
 2019/13_dbg: LDLIBS = -lncurses
 2019/13_dbg: 2019/intcode_dbg.o
