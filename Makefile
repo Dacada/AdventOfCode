@@ -59,15 +59,17 @@ aoclib/aoclib_gdb.o: aoclib/aoclib.c aoclib/aoclib.h
 2016/5_dbg: LDLIBS = -lbsd -lncurses
 2016/5_gdb: LDLIBS = -lbsd -lncurses
 
-
 2016/14_rel: LDLIBS = -lbsd
 2016/14_dbg: LDLIBS = -lbsd
 2016/14_gdb: LDLIBS = -lbsd
 
-
 2016/17_rel: LDLIBS = -lbsd
 2016/17_dbg: LDLIBS = -lbsd
 2016/17_gdb: LDLIBS = -lbsd
+
+2016/19_rel: LDLIBS = -lm
+2016/19_dbg: LDLIBS = -lm
+2016/19_gdb: LDLIBS = -lm
 
 
 2019/13_rel: 2019/intcode.o
@@ -101,13 +103,14 @@ aoclib/aoclib_gdb.o: aoclib/aoclib.c aoclib/aoclib.h
 2019/25_gdb: 2019/intcode_gdb.o
 
 
-2016/19_rel: LDLIBS = -lm
-2016/19_dbg: LDLIBS = -lm
-2016/19_gdb: LDLIBS = -lm
-
 2020/20_rel: LDLIBS = -lm
 2020/20_dbg: LDLIBS = -lm
 2020/20_gdb: LDLIBS = -lm
+
+
+2021/7_rel: LDLIBS = -lm
+2021/7_dbg: LDLIBS = -lm
+2021/7_gdb: LDLIBS = -lm
 
 
 %_rel: %_rel.o aoclib/aoclib_rel.o
