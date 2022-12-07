@@ -61,7 +61,6 @@ static char *read_input() {
   }
 
   if (ptrString != NULL) {
-          DBG("%lu", i);
     ptrString[i] = '\0';
     ptrString = realloc(ptrString, strlen(ptrString) + 1);
   } else {
