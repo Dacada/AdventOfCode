@@ -45,12 +45,12 @@ static char *read_input() {
   int c;
   size_t p4kB = 4096, i = 0;
   void *newPtr = NULL;
-  char *ptrString = malloc(p4kB * sizeof(char));
+  char *ptrString = malloc((p4kB+1) * sizeof(char));
 
   while (ptrString != NULL && (c = getchar()) != EOF) {
     if (i == p4kB * sizeof(char)) {
       p4kB += 4096;
-      if ((newPtr = realloc(ptrString, p4kB * sizeof (char))) != NULL) {
+      if ((newPtr = realloc(ptrString, (p4kB+1) * sizeof (char))) != NULL) {
 	ptrString = (char*) newPtr;
       } else {
 	free(ptrString);
@@ -61,6 +61,7 @@ static char *read_input() {
   }
 
   if (ptrString != NULL) {
+          DBG("%lu", i);
     ptrString[i] = '\0';
     ptrString = realloc(ptrString, strlen(ptrString) + 1);
   } else {
