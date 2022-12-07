@@ -5,8 +5,6 @@
 #include <string.h>
 #include <ctype.h>
 
-#define MAX_STACK_CAPACITY 1024
-
 struct entry {
         char *name;
         struct entry *parent;
@@ -193,7 +191,7 @@ static struct entry *parse_input(const char *input) {
 
 #undef ASSERT_STR
 
-// return total size of entry, keep track of smaller entries in arguments
+// return total size of entry, keep track of each dir size in arguments
 static size_t find_directory_sizes(struct entry *const entry,
                                    size_t **dirs, int *ndirs, int *cdirs) {
         if (entry->size > 0) {  // a file
@@ -215,7 +213,7 @@ static size_t find_directory_sizes(struct entry *const entry,
         return result;
 }
 
-static size_t small_dirs(const char *const input, int *ndirs, size_t **dirs) {
+static size_t size_dirs(const char *const input, int *ndirs, size_t **dirs) {
         struct entry *root = parse_input(input);
         *ndirs = 0;
         int cdirs = 16;
@@ -228,7 +226,7 @@ static size_t small_dirs(const char *const input, int *ndirs, size_t **dirs) {
 static void solution1(const char *const input, char *const output) {
         int ndirs;
         size_t *dirs;
-        small_dirs(input, &ndirs, &dirs);
+        size_dirs(input, &ndirs, &dirs);
         
         size_t total = 0;
         for (int i=0; i<ndirs; i++) {
@@ -244,7 +242,7 @@ static void solution1(const char *const input, char *const output) {
 static void solution2(const char *const input, char *const output) {
         int ndirs;
         size_t *dirs;
-        size_t current_size = small_dirs(input, &ndirs, &dirs);
+        size_t current_size = size_dirs(input, &ndirs, &dirs);
         size_t unused_size = 70000000 - current_size;
         size_t required_size = 30000000 - unused_size;
         
