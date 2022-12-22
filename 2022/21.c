@@ -7,7 +7,10 @@
 
 enum monkey_type {
         MONKEY_NUMBER,
+        MONKEY_FAKE_NUMBER,
         MONKEY_OPERATION,
+        MONKEY_DONE,
+        MONKEY_FAKE_DONE,
 };
 
 enum monkey_operation {
@@ -17,15 +20,24 @@ enum monkey_operation {
         OPERATION_DIVISION,
 };
 
+enum monkey_operand_type {
+        OPERAND_REFERENCE,
+        OPERAND_NUMBER,
+        OPERAND_FAKE_NUMBER,
+};
+
+struct monkey_operand {
+        enum monkey_operand_type type;
+        long value;
+};
+
 struct monkey {
         enum monkey_type type;
         union {
-                int number;
+                long number;
                 struct {
-                        int monkey1;
-                        int monkey2;
-                        bool idx1;
-                        bool idx2;
+                        struct monkey_operand operand1;
+                        struct monkey_operand operand2;
                         enum monkey_operation operation;
                 } operation;
         };
@@ -47,17 +59,22 @@ static int parse_int(const char **input) {
         return r;
 }
 
+int human;
+static char *seen_names[1<<11] = {"root"};
 static int parse_monkey_name(const char **input) {
-        static char *seen[1<<10] = {"root"};
         static int nseen = 1;
 
         int i;
         for (i=0; i<nseen; i++) {
-                if (strncmp(*input, seen[i], 4) == 0) {
+                if (strncmp(*input, seen_names[i], 4) == 0) {
                         goto end;
                 }
         }
-        seen[i] = strndup(*input, 4);
+        seen_names[i] = strndup(*input, 4);
+        if (strcmp(seen_names[i], "humn") == 0) {
+                human = i;
+        }
+        nseen++;
 
 end:
         *input += 4;
@@ -77,9 +94,8 @@ static void parse_monkey(const char **input, struct monkey *monkey) {
         }
 
         monkey->type = MONKEY_OPERATION;
-        monkey->operation.idx1 = true;
-        monkey->operation.idx2 = true;
-        monkey->operation.monkey1 = parse_monkey_name(input);
+        monkey->operation.operand1.type = OPERAND_REFERENCE;
+        monkey->operation.operand1.value = parse_monkey_name(input);
         ASSERT(**input == ' ', "parse error");
         *input += 1;
 
@@ -103,31 +119,32 @@ static void parse_monkey(const char **input, struct monkey *monkey) {
 
         ASSERT(**input == ' ', "parse error");
         *input += 1;
-        monkey->operation.monkey2 = parse_monkey_name(input);
+        monkey->operation.operand2.type = OPERAND_REFERENCE;
+        monkey->operation.operand2.value = parse_monkey_name(input);
 }
 
 static int parse_input(const char *input, struct monkey **monkeys) {
-        int len = 1;
+        int len = 0;
         int cap = 16;
         *monkeys = malloc(sizeof(**monkeys)*cap);
 
         while (*input != '\0') {
+                int i = parse_monkey_name(&input);
+                if (i + 1 > len) {
+                        len = i + 1;
+                }
                 if (len >= cap) {
                         cap *= 2;
                         *monkeys = realloc(*monkeys, sizeof(**monkeys)*cap);
                 }
-                int i = parse_monkey_name(&input);
                 parse_monkey(&input, *monkeys + i);
                 skip_newlines(&input);
-                if (i != 0) {
-                        len++;
-                }
         }
 
         return len;
 }
 
-static int operate(enum monkey_operation operation, int a, int b) {
+static long operate(enum monkey_operation operation, long a, long b) {
         switch(operation) {
         case OPERATION_ADDITION:
                 return a + b;
@@ -142,10 +159,7 @@ static int operate(enum monkey_operation operation, int a, int b) {
         }
 }
 
-static void solution1(const char *const input, char *const output) {
-        struct monkey *monkeys;
-        int len = parse_input(input, &monkeys);
-
+static void resolve(struct monkey *monkeys, int len, bool part2) {
         int *needed_by = malloc(sizeof(*needed_by)*len*len);
         for (int i=0; i<len; i++) {
                 needed_by[i*len + 0] = 1;
@@ -153,62 +167,192 @@ static void solution1(const char *const input, char *const output) {
         for (int i=0; i<len; i++) {
                 struct monkey *m = &monkeys[i];
                 if (m->type == MONKEY_OPERATION) {
-                        DBG("%d needs %d", m->operation.monkey1, i);
-                        int j = m->operation.monkey1;
+                        ASSERT(m->operation.operand1.type == OPERAND_REFERENCE, "expected reference operand");
+                        int j = m->operation.operand1.value;
                         int size = needed_by[j*len + 0];
                         needed_by[j*len + size] = i;
                         needed_by[j*len + 0]++;
 
-                        DBG("%d needs %d", m->operation.monkey2, i);
-                        j = m->operation.monkey2;
+                        ASSERT(m->operation.operand2.type == OPERAND_REFERENCE, "expected reference operand");
+                        j = m->operation.operand2.value;
                         size = needed_by[j*len + 0];
                         needed_by[j*len + size] = i;
                         needed_by[j*len + 0]++;
                 }
         }
 
+        if (part2) {
+                monkeys[human].type = MONKEY_FAKE_NUMBER;
+                monkeys[human].operation.operand1.type = OPERAND_FAKE_NUMBER;
+                monkeys[human].operation.operand1.value = -1;
+                monkeys[human].operation.operand2.type = OPERAND_FAKE_NUMBER;
+                monkeys[human].operation.operand2.value = -1;
+        }
+        
         bool done = false;
-        int cock = 0;
         while (!done) {
                 done = true;
                 for (int i=0; i<len; i++) {
                         struct monkey *m = &monkeys[i];
-                        if (m->type == MONKEY_NUMBER) {
+                        if (m->type == MONKEY_DONE || m->type == MONKEY_FAKE_DONE) {
+                                continue;
+                        }
+                        if (m->type == MONKEY_NUMBER || m->type == MONKEY_FAKE_NUMBER) {
                                 int size = needed_by[i*len + 0];
                                 for (int j=1; j<size; j++) {
                                         int k = needed_by[i*len + j];
                                         struct monkey *mm = &monkeys[k];
-                                        ASSERT(mm->type == MONKEY_OPERATION, "should be oepration");
-                                        if (mm->operation.idx1 && mm->operation.monkey1 == i) {
-                                                mm->operation.idx1 = false;
-                                                mm->operation.monkey1 = m->number;
-                                        } else if (mm->operation.idx2 && mm->operation.monkey2 == i) {
-                                                mm->operation.idx2 = false;
-                                                mm->operation.monkey2 = m->number;
+                                        ASSERT(mm->type == MONKEY_OPERATION, "should be oepration not %d", mm->type);
+                                        if (mm->operation.operand1.type == OPERAND_REFERENCE &&
+                                            mm->operation.operand1.value == i) {
+                                                if (m->type == MONKEY_NUMBER) {
+                                                        if (k == 0) {
+                                                                DBG("operator 1 of root is %ld", m->number);
+                                                        }
+                                                        mm->operation.operand1.type = OPERAND_NUMBER;
+                                                        mm->operation.operand1.value = m->number;
+                                                } else {
+                                                        mm->operation.operand1.type = OPERAND_FAKE_NUMBER;
+                                                        mm->operation.operand1.value = i;
+                                                }
+                                        } else if (mm->operation.operand2.type == OPERAND_REFERENCE &&
+                                                   mm->operation.operand2.value == i) {
+                                                if (m->type == MONKEY_NUMBER) {
+                                                        if (k == 0) {
+                                                                DBG("operator 2 of root is %ld", m->number);
+                                                        }
+                                                        mm->operation.operand2.type = OPERAND_NUMBER;
+                                                        mm->operation.operand2.value = m->number;
+                                                } else {
+                                                        mm->operation.operand2.type = OPERAND_FAKE_NUMBER;
+                                                        mm->operation.operand2.value = i;
+                                                }
                                         } else {
-                                                FAIL("not needed by");
+                                                FAIL("%d should be needed by %d yet %d only needs %ld(type=%d) "
+                                                     "and %ld(type=%d)", i, k, k, mm->operation.operand1.value,
+                                                     mm->operation.operand1.type, mm->operation.operand2.value,
+                                                     mm->operation.operand2.type);
                                         }
-                                        if (!mm->operation.idx1 && !mm->operation.idx2) {
-                                                DBG("%d",cock++);
-                                                int r = operate(mm->operation.operation, mm->operation.monkey1, mm->operation.monkey2);
-                                                mm->type = MONKEY_NUMBER;
-                                                mm->number = r;
+                                        if ((mm->operation.operand1.type == OPERAND_NUMBER ||
+                                             mm->operation.operand1.type == OPERAND_FAKE_NUMBER) &&
+                                            (mm->operation.operand2.type == OPERAND_NUMBER ||
+                                             mm->operation.operand2.type == OPERAND_FAKE_NUMBER)) {
+                                                if (mm->operation.operand1.type == OPERAND_NUMBER &&
+                                                    mm->operation.operand2.type == OPERAND_NUMBER) {
+                                                        long r = operate(mm->operation.operation,
+                                                                         mm->operation.operand1.value,
+                                                                         mm->operation.operand2.value);
+                                                        mm->type = MONKEY_NUMBER;
+                                                        mm->number = r;
+                                                } else {
+                                                        mm->type = MONKEY_FAKE_NUMBER;
+                                                }
                                         }
+                                }
+                                if (m->type == MONKEY_NUMBER) {
+                                        m->type = MONKEY_DONE;
+                                } else {
+                                        m->type = MONKEY_FAKE_DONE;
                                 }
                         } else {
                                 done = false;
                         }
                 }
         }
-        
-        snprintf(output, OUTPUT_BUFFER_SIZE, "%d", monkeys[0].number);
-        free(monkeys);
         free(needed_by);
 }
 
+static void solution1(const char *const input, char *const output) {
+        struct monkey *monkeys;
+        int len = parse_input(input, &monkeys);
+
+#ifdef DEBUG
+        for (int i=0; i<len; i++) {
+                fprintf(stderr, "%d: ", i);
+                if (monkeys[i].type == MONKEY_OPERATION) {
+                        fprintf(stderr, "%ld %c %ld\n", monkeys[i].operation.operand1.value, "+-*/"[monkeys[i].operation.operation], monkeys[i].operation.operand2.value);
+                } else {
+                        fprintf(stderr, "%ld\n", monkeys[i].number);
+                }
+        }
+#endif
+
+        resolve(monkeys, len, false);
+        
+        snprintf(output, OUTPUT_BUFFER_SIZE, "%ld", monkeys[0].number);
+        free(monkeys);
+}
+
+static long reverse_operate(long operand, long result, bool first_operand, enum monkey_operation operation) {
+        switch(operation) {
+        case OPERATION_ADDITION:
+                DBG("a %ld + %ld = %ld", operand, result - operand, result);
+                return result - operand;
+        case OPERATION_SUBTRACTION:
+                if (first_operand) {
+                        DBG("b %ld - %ld = %ld", operand, operand - result, result);
+                        return operand - result;
+                } else {
+                        DBG("c %ld - %ld = %ld", result + operand, operand, result);
+                        return result + operand;
+                }
+        case OPERATION_MULTIPLICATION:
+                DBG("d %ld * %ld = %ld", operand, result / operand, result);
+                ASSERT(result % operand == 0, "bad division!");
+                return result / operand;
+        case OPERATION_DIVISION:
+                if (first_operand) {
+                        DBG("e %ld / %ld = %ld", operand, operand / result, result);
+                        ASSERT(operand % result == 0, "bad division!");
+                        return operand / result;
+                } else {
+                        DBG("f %ld / %ld = %ld", result * operand, operand, result);
+                        return result * operand;
+                }
+        default:
+                FAIL("invalid operation");
+        }
+}
+
+static long make_monkey_output(int monkey, long value, const struct monkey *monkeys) {
+        DBG("Monkey %s should output %ld", seen_names[monkey], value);
+        const struct monkey *m = monkeys + monkey;
+
+        if (m->operation.operand1.type == OPERAND_FAKE_NUMBER &&
+            m->operation.operand2.type == OPERAND_FAKE_NUMBER) {
+                return value;
+        }
+        
+        ASSERT(m->type == MONKEY_FAKE_DONE, "bad type");
+        
+        long goal;
+        int next;
+        if (m->operation.operand1.type == OPERAND_NUMBER) {
+                long v = m->operation.operand1.value;
+                next = m->operation.operand2.value;
+                goal = reverse_operate(v, value, true, m->operation.operation);
+        } else if (m->operation.operand2.type == OPERAND_NUMBER) {
+                next = m->operation.operand1.value;
+                long v = m->operation.operand2.value;
+                goal = reverse_operate(v, value, false, m->operation.operation);
+        } else {
+                FAIL("no goal");
+        }
+
+        return make_monkey_output(next, goal, monkeys);
+}
+
 static void solution2(const char *const input, char *const output) {
-        (void)input;
-        snprintf(output, OUTPUT_BUFFER_SIZE, "NOT SOLVED");
+        struct monkey *monkeys;
+        int len = parse_input(input, &monkeys);
+
+        resolve(monkeys, len, true);
+
+        monkeys[0].operation.operation = OPERATION_SUBTRACTION;
+        long res = make_monkey_output(0, 0, monkeys);
+        
+        snprintf(output, OUTPUT_BUFFER_SIZE, "%ld", res);
+        free(monkeys);
 }
 
 int main(int argc, char *argv[]) {
