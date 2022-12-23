@@ -155,11 +155,15 @@ static void mix(long *numbers, int len, int times) {
                 DBG("After %d rounds of mixing:", t+1);
                 struct linked_list_node *node = list.first;
                 for (int j=0; j<len; j++) {
+#ifdef DEBUG
                         fprintf(stderr, "%ld, ", node->value);
+#endif
                         node = node->next;
                 }
+#ifdef DEBUG
                 fputc('\n', stderr);
                 fputc('\n', stderr);
+#endif
         }
         linked_list_to_array(&list, numbers);
         linked_list_free(&list);
