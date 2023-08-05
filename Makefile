@@ -46,26 +46,26 @@ aoclib/aoclib_gdb.o: aoclib/aoclib.c aoclib/aoclib.h
 	$(CC) $(GDB_CFLAGS) -c $< -o $@
 
 
-2015/4_rel: LDLIBS = -lbsd
-2015/4_dbg: LDLIBS = -lbsd
-2015/4_gdb: LDLIBS = -lbsd
+2015/4_rel: LDLIBS = -lmd
+2015/4_dbg: LDLIBS = -lmd
+2015/4_gdb: LDLIBS = -lmd
 
 2015/12_rel: lib/jsmn/libjsmn.a
 2015/12_dbg: lib/jsmn/libjsmn.a
 2015/12_gdb: lib/jsmn/libjsmn.a
 
 
-2016/5_rel: LDLIBS = -lbsd
-2016/5_dbg: LDLIBS = -lbsd -lncurses
-2016/5_gdb: LDLIBS = -lbsd -lncurses
+2016/5_rel: LDLIBS = -lmd
+2016/5_dbg: LDLIBS = -lmd -lncurses
+2016/5_gdb: LDLIBS = -lmd -lncurses
 
-2016/14_rel: LDLIBS = -lbsd
-2016/14_dbg: LDLIBS = -lbsd
-2016/14_gdb: LDLIBS = -lbsd
+2016/14_rel: LDLIBS = -lmd
+2016/14_dbg: LDLIBS = -lmd
+2016/14_gdb: LDLIBS = -lmd
 
-2016/17_rel: LDLIBS = -lbsd
-2016/17_dbg: LDLIBS = -lbsd
-2016/17_gdb: LDLIBS = -lbsd
+2016/17_rel: LDLIBS = -lmd
+2016/17_dbg: LDLIBS = -lmd
+2016/17_gdb: LDLIBS = -lmd
 
 2016/19_rel: LDLIBS = -lm
 2016/19_dbg: LDLIBS = -lm
