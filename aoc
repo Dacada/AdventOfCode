@@ -18,6 +18,9 @@ Swaps: %W
 Context switches (inv/vol): %c/%w
 Exit status: %x
 """.strip()
+SIMPLE_TIMESTRING = """
+%e,%S,%U,%F,%R,%W,%c,%w,%x
+""".strip()
 
 class NoSessionFile(Exception):
     pass
@@ -55,11 +58,18 @@ printed.""".strip()
         help="""Use given file as input. If - is passed, read input from
 stdin.""".strip()
     )
+
     parser.add_argument(
         '--simple',
         action='store_true',
         help="""Just spawn the process in the same terminal and let it go
 wild""".strip()
+    )
+
+    parser.add_argument(
+        '--plain-output',
+        action='store_true',
+        help="""Return a very simplified output that is suitable to being parsed""".strip()
     )
 
     parser.add_argument(
@@ -127,7 +137,8 @@ def save_input_to_cache(year: int, day: int, input: str):
 
 
 def launch_solution(year: int, day: int, problem: int,
-                    debug: bool, input: str, simple: bool):
+                    debug: bool, input: str, simple: bool,
+                    plain_output: bool):
     process_name = get_filename(year, day, debug)
 
     if simple:
@@ -145,11 +156,15 @@ def launch_solution(year: int, day: int, problem: int,
             stdout=subprocess.PIPE
         )
     else:
+        if plain_output:
+            timestring = SIMPLE_TIMESTRING
+        else:
+            timestring = TIMESTRING
         try:
             process = subprocess.Popen(
                 [
                     GNUTIME_BINARY,
-                    '-f', TIMESTRING,
+                    '-f', timestring,
                     process_name,
                     str(problem)
                 ],
@@ -206,8 +221,10 @@ def main():
         return 1
         
     try:
-        result, summary = launch_solution(args.year, args.day, args.problem,
-                                          args.debug, input, args.simple)
+        result, summary = launch_solution(
+            args.year, args.day, args.problem,
+            args.debug, input, args.simple, args.plain_output
+        )
     except NoGNUTimeBinary:
         print("No GNU time binary installed in this system")
         return 1
