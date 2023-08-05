@@ -156,16 +156,21 @@ static bool assign_value(const uint16_t var, const uint16_t val) {
   }
   needs[var][0] = 0;
 
+  bool retval;
+
   for (int i=0; i<removed_elements; i++) {
     if (assign_value(vars_found[i], vars_values[i])) {
-      return true;
+      retval = true;
+      goto end;
     }
   }
+  retval = false;
 
+ end:
   free(vars_found);
   free(vars_values);
 
-  return false;
+  return retval;
 }
 
 static void assign_dependency(const uint16_t depends, const uint16_t is_depended) {

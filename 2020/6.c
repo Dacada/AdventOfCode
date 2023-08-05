@@ -6,6 +6,7 @@
 #define NQUESTIONS ('z'-'a'+1)
 typedef uint32_t questions;
 
+__attribute__((const))
 static int count_set_bits(questions x) {
         int count = 0;
         for (int i=0; i<NQUESTIONS; i++) {

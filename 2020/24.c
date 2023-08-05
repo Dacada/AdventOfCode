@@ -27,6 +27,7 @@ static void point_add(struct point *const p1, const struct point p2) {
         p1->r += p2.r;
 }
 
+__attribute__((pure))
 static struct point direction(const enum direction direction) {
         struct point p;
         switch (direction) {

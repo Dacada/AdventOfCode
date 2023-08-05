@@ -45,6 +45,7 @@ static void solution1(const char *const input, char *const output) {
         }
         
         snprintf(output, OUTPUT_BUFFER_SIZE, "%d", count);
+	machine_free(&machine);
 }
 
 static int fitsx(struct IntCodeMachine *machine, long *x, long y) {
@@ -131,6 +132,7 @@ static void solution2(const char *const input, char *const output) {
                 }
                 
                 snprintf(output, OUTPUT_BUFFER_SIZE, "%ld", result);
+		machine_free(&machine);
                 return;
         }
 }

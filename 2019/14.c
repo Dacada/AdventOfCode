@@ -117,7 +117,7 @@ static void parse_input_line(const char *const input, size_t *const i) {
 
         struct recipe *r = materials[ingridient].recipes;
         unsigned j = materials[ingridient].total;
-        r = realloc(r, ++materials[ingridient].total);
+        r = realloc(r, sizeof(*r) * (++materials[ingridient].total));
         if (r == NULL) {
                 perror("realloc");
                 abort();

@@ -196,6 +196,8 @@ static void solution2(const char *const input, char *const output) {
         }
         
         snprintf(output, OUTPUT_BUFFER_SIZE, "%d", machine.accumulator);
+	free_machine(&machine);
+	free(program);
 }
 
 int main(int argc, char *argv[]) {

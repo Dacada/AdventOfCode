@@ -6,6 +6,7 @@
 
 #ifdef DEBUG
 
+__attribute__((format (printf, 3, 0)))
 static void aoc_err_prnt(const int srcline, const char *const type, const char *const msg, va_list ap) {
         fprintf(stderr, "(line %d) %s: ", srcline, type);
         vfprintf(stderr, msg, ap);

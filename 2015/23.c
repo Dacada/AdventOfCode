@@ -221,6 +221,7 @@ return b;
 
  */
 
+__attribute((const))
 static unsigned collatz(unsigned n) {
         unsigned c = 0;
         while (n != 1) {

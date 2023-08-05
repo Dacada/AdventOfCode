@@ -8,6 +8,7 @@ enum cucumber {
         CUCUMBER_SOUTH,
 };
 
+__attribute__((pure))
 static enum cucumber identify_cucumber(const char c) {
         if (c == '.') {
                 return CUCUMBER_NONE;

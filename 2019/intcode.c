@@ -222,7 +222,7 @@ static void ensure_memory_size(struct IntCodeMachine *const machine, size_t inde
         bool modified_size = false;
         size_t size = machine->program_size;
         
-        while (index > size) {
+        while (index >= size) {
                 size *= 2;
                 modified_size = true;
         }

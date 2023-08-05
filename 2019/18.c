@@ -240,6 +240,7 @@ static struct vec4 queue_dequeue(struct queue *q) {
         return e;
 }
 
+__attribute__((pure))
 static struct vec4 advance(struct vec4 pos, unsigned dir) {
         if (dir == 0) {
                 pos.y--;

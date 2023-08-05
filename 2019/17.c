@@ -34,10 +34,9 @@ static char *parse_map(struct IntCodeMachine *const machine, size_t *const rows,
                 } else {
                         while (map_i >= map_size) {
                                 map_size *= 2;
-                                void *new_map = realloc(map, sizeof(*map) * map_size);
-                                if (new_map == NULL) {
+                                map = realloc(map, sizeof(*map) * map_size);
+                                if (map == NULL) {
                                         perror("realloc");
-                                        free(map);
                                         return NULL;
                                 }
                         }
@@ -63,7 +62,7 @@ static char *parse_map(struct IntCodeMachine *const machine, size_t *const rows,
                 free(map);
                 return NULL;
         }
-        return map;
+        return new_map;
 }
 
 static void show_map(const char *const map, size_t rows, size_t columns) {
@@ -97,6 +96,8 @@ static void solution1(const char *const input, char *const output) {
         }
         
         snprintf(output, OUTPUT_BUFFER_SIZE, "%d", result);
+	machine_free(&machine);
+	free(map);
 }
 
 enum direction { NORTH, EAST, SOUTH, WEST };
@@ -572,6 +573,9 @@ static void solution2(const char *const input, char *const output) {
         }
 
         snprintf(output, OUTPUT_BUFFER_SIZE, "%ld", out);
+	machine_free(&machine);
+	machine_free(&machine2);
+	free(map);
 }
 
 int main(int argc, char *argv[]) {

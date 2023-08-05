@@ -214,6 +214,7 @@ static char *parse_maze(const char *const input,
         return maze;
 }
 
+__attribute__((pure))
 static struct vec2 advance(struct vec2 pos, int dir) {
         if (dir == 0) {
                 pos.y-=1;

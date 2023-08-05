@@ -71,7 +71,7 @@ static size_t deque_length(const struct deque *const deque) {
 
 static int deque_peekat(const struct deque *const deque, size_t idx) {
         ASSERT(idx < deque_length(deque), "peek out of range");
-        return deque->data[deque->head+idx];
+        return deque->data[(deque->head+idx) % MAXDECKSIZE];
 }
 
 static bool deque_full(const struct deque *const deque) {

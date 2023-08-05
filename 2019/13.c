@@ -44,6 +44,7 @@ static void solution1(const char *const input, char *const output) {
         }
         
         snprintf(output, OUTPUT_BUFFER_SIZE, "%d", count);
+	machine_free(&machine);
 }
 
 #ifdef DEBUG
@@ -189,6 +190,7 @@ static void solution2(const char *const input, char *const output) {
         endwin();
         #endif
         snprintf(output, OUTPUT_BUFFER_SIZE, "%ld", score);
+	machine_free(&machine);
 }
 
 int main(int argc, char *argv[]) {

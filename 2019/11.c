@@ -415,6 +415,9 @@ static void solution1(const char *const input, char *const output) {
         }
         
         snprintf(output, OUTPUT_BUFFER_SIZE, "%d", count);
+	free(machine.program);
+	free(grid);
+	free(paintedgrid);
 }
 
 static void solution2(const char *const input, char *const output) {
@@ -523,6 +526,9 @@ static void solution2(const char *const input, char *const output) {
         }
 
         snprintf(output, OUTPUT_BUFFER_SIZE, "READ ABOVE");
+	free(machine.program);
+	free(grid);
+	free(paintedgrid);
 }
 
 int main(int argc, char *argv[]) {

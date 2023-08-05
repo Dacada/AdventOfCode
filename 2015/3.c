@@ -14,8 +14,8 @@ static int pair_cmp(const void *e1, const void *e2) {
   const pair_t *pair1 = e1;
   const pair_t *pair2 = e2;
 
-  uint32_t n1 = (((uint16_t)pair1->item1) << 16) | ((uint16_t)pair1->item2);
-  uint32_t n2 = (((uint16_t)pair2->item1) << 16) | ((uint16_t)pair2->item2);
+  uint32_t n1 = (((uint32_t)pair1->item1) << 16) | ((uint16_t)pair1->item2);
+  uint32_t n2 = (((uint32_t)pair2->item1) << 16) | ((uint16_t)pair2->item2);
 
   if (n1 > n2) return 1;
   else if (n1 < n2) return -1;

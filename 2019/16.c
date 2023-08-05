@@ -85,6 +85,8 @@ static void solution1(const char *const input, char *const output) {
                 output[i] = c;
         }
         output[8] = '\0';
+	free(numbers1);
+	free(numbers2);
 }
 
 static void solution2(const char *const input, char *const output) {
@@ -123,6 +125,9 @@ static void solution2(const char *const input, char *const output) {
                 output[i] = c;
         }
         output[8] = '\0';
+
+	free(numbers);
+	free(res);
 }
 
 int main(int argc, char *argv[]) {

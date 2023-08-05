@@ -52,6 +52,7 @@ static int *parse_program(const char *const input, size_t *const size) {
         return program;
 }
 
+__attribute__((const))
 static int get_mode(int modes, int i) {
         while (i > 1) {
                 modes /= 10;

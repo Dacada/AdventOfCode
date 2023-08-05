@@ -300,6 +300,7 @@ static void solution2(const char *const input, char *const output) {
 
         // valid_ticket: the ith ticket is valid if valid_ticket[i] is true
         bool *valid_ticket = malloc(sizeof(*valid_ticket)*ntickets);
+	memset(valid_ticket, 0, sizeof(*valid_ticket)*ntickets);
         
         filter_fields(&problem, valid_ticket);
 

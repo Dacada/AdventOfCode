@@ -66,6 +66,7 @@ static void rotation_identity(struct rotation *const r) {
         r->up = 2;
 }
 
+__attribute__((pure))
 static unsigned dice_reverse(const unsigned d) {
         switch (d) {
         case 1:
@@ -85,6 +86,7 @@ static unsigned dice_reverse(const unsigned d) {
         }
 }
 
+__attribute__((pure))
 static unsigned dice_getZ(const unsigned front, const unsigned up) {
         switch (front) {
         case 1:

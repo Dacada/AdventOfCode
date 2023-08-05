@@ -183,6 +183,7 @@ static void get_map(const char *const input, int map[MAPSIZE][MAPSIZE], const st
                                 map[j][i] = 0;
                 }
         }
+	machine_free(&machine);
 }
 
 struct queue {

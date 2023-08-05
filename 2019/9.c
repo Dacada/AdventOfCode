@@ -333,6 +333,7 @@ static void solution(const char *const input, char *const output, long flag) {
         }
         
         snprintf(output, OUTPUT_BUFFER_SIZE, "%ld", o);
+	free(machine.program);
 }
 
 static void solution1(const char *const input, char *const output) {

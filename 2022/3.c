@@ -11,6 +11,7 @@ struct rucksack {
         int size;
 };
 
+__attribute__((pure))
 static int parse_item(const char item) {
         if (item >= 'a' && item <= 'z') {
                 return item - 'a';
