@@ -190,14 +190,18 @@ def launch_solution(year: int, day: int, problem: int,
 
 
 def prepare_solution(year, day, debug):
-    subprocess.run(['make', get_filename(year, day, debug)])
+    subprocess.run(['make', '-s', get_filename(year, day, debug)])
 
 
 def unprepare_solution(year, day, debug):
     subprocess.run(['rm', get_filename(year, day, debug)])
 
 
-def print_results(result, summary):
+def print_results(result, summary, plain):
+    if plain:
+        print(summary.strip())
+        return
+
     if summary is not None:
         print()
         print('Summary:')
@@ -231,7 +235,7 @@ def main():
     finally:
         unprepare_solution(args.year, args.day, args.debug)
 
-    print_results(result, summary)
+    print_results(result, summary, args.plain_output)
     return 0
 
 
