@@ -50,6 +50,7 @@ static void line_segment_collection_init(struct line_segment_collection *c, stru
 }
 
 static void line_segment_collection_print(const struct line_segment_collection *c) {
+#ifdef DEBUG
         if (c->len == 0) {
                 fputs("<empty>\n\n", stderr);
                 return;
@@ -59,6 +60,9 @@ static void line_segment_collection_print(const struct line_segment_collection *
                 fprintf(stderr, "%d to %d\n", c->segments[i].start, c->segments[i].end);
         }
         fputc('\n', stderr);
+#else
+	(void)c;
+#endif
 }
 
 static void line_segment_collection_add(struct line_segment_collection *c, const struct line_segment *s) {
