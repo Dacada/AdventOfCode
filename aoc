@@ -199,7 +199,7 @@ def unprepare_solution(year, day, debug):
 
 def print_results(result, summary, plain):
     if plain:
-        print(summary.strip())
+        print(summary.strip() + "," + result)
         return
 
     if summary is not None:
