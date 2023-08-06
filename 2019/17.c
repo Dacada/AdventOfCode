@@ -66,6 +66,7 @@ static char *parse_map(struct IntCodeMachine *const machine, size_t *const rows,
 }
 
 static void show_map(const char *const map, size_t rows, size_t columns) {
+#ifdef DEBUG
         for (size_t j=0; j<rows; j++) {
                 for (size_t i=0; i<columns; i++) {
                         char c = map[j*columns+i];
@@ -73,6 +74,11 @@ static void show_map(const char *const map, size_t rows, size_t columns) {
                 }
                 fprintf(stderr, "\n");
         }
+#else
+	(void)map;
+	(void)rows;
+	(void)columns;
+#endif
 }
 
 static void solution1(const char *const input, char *const output) {
@@ -223,10 +229,15 @@ static size_t compress1(char *const mov, size_t num) {
 }
 
 static void print_str(const char *const str, const size_t size) {
+#ifdef DEBUG
         static char buff[2<<10];
         strncpy(buff, str, MIN(size, (2<<10)-1));
         buff[size] = '\0';
         fprintf(stderr, "%s", buff);
+#else
+	(void)str;
+	(void)size;
+#endif
 }
 
 /*
@@ -460,12 +471,16 @@ static void solution2(const char *const input, char *const output) {
         static char movements[1<<10];
         size_t num_movements = get_path(map, rows, columns, startx, starty, movements);
         print_str(movements, num_movements);
+#ifdef DEBUG
         fprintf(stderr, "\n");
+#endif
         DBG("Shown movements uncompressed\n");
 
         num_movements = compress1(movements, num_movements);
         print_str(movements, num_movements);
+#ifdef DEBUG
         fprintf(stderr, "\n");
+#endif
         DBG("Shown movements a bit compressed\n");
 
         char *strings[3];
@@ -476,10 +491,12 @@ static void solution2(const char *const input, char *const output) {
         strcpy(movements, "A,B,A,B,C,A,B,C,A,C");
         num_movements = 19;
         print_str(movements, num_movements);
+#ifdef DEBUG
         fprintf(stderr, "\n");
         for (int i=0; i<3; i++) {
                 fprintf(stderr, "%c = %s\n", 'A'+i, strings[i]);
         }
+#endif
         DBG("Shown movements fully compressed\n");
 
         // initialize machine to run actual program on
@@ -491,29 +508,41 @@ static void solution2(const char *const input, char *const output) {
         while (machine2.has_output) {
                 long out;
                 machine_recv_output(&machine2, &out);
+#ifdef DEBUG
                 fputc(out, stderr);
+#endif
                 machine_run(&machine2);
         }
+#ifdef DEBUG
         fprintf(stderr, "> ");
+#endif
 
         // main movement routine
         machine_run(&machine2);
         for (size_t i=0; i<num_movements; i++) {
+#ifdef DEBUG
                 fputc(movements[i], stderr);
+#endif
                 ASSERT(machine_send_input(&machine2, movements[i]), "Machine did not take input?");
                 machine_run(&machine2);
         }
+#ifdef DEBUG
         fputc('\n', stderr);
+#endif
         ASSERT(machine_send_input(&machine2, '\n'), "Machine did not take input?");
 
         machine_run(&machine2);
         while (machine2.has_output) {
                 long out;
                 machine_recv_output(&machine2, &out);
+#ifdef DEBUG
                 fputc(out, stderr);
+#endif
                 machine_run(&machine2);
         }
+#ifdef DEBUG
         fprintf(stderr, "> ");
+#endif
 
         // movement functions
         for (int j=0; j<3; j++) {
@@ -522,25 +551,35 @@ static void solution2(const char *const input, char *const output) {
                         if (strings[j][i] == '\0') {
                                 break;
                         }
+#ifdef DEBUG
                         fputc(strings[j][i], stderr);
+#endif
                         ASSERT(machine_send_input(&machine2, strings[j][i]), "Machine did not take input?");
                         machine_run(&machine2);
                 }
+#ifdef DEBUG
                 fputc('\n', stderr);
+#endif
                 ASSERT(machine_send_input(&machine2, '\n'), "Machine did not take input?");
 
                 machine_run(&machine2);
                 while (machine2.has_output) {
                         long out;
                         machine_recv_output(&machine2, &out);
+#ifdef DEBUG
                         fputc(out, stderr);
+#endif
                         machine_run(&machine2);
                 }
+#ifdef DEBUG
                 fprintf(stderr, "> ");
+#endif
         }
 
         // give me a live feed
+#ifdef DEBUG
         fprintf(stderr, "n\n");
+#endif
         machine_run(&machine2);
         ASSERT(machine_send_input(&machine2, 'n'), "Machine did not take input?");
         machine_run(&machine2);
@@ -556,8 +595,10 @@ static void solution2(const char *const input, char *const output) {
                         if (out > 255) {
                                 break;
                         }
-                        
+			
+#ifdef DEBUG
                         fputc(out, stderr);
+#endif			
                         machine_run(&machine2);
 
                         if (out == '\n' && last == '\n') {
