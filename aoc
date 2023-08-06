@@ -18,7 +18,7 @@ Swaps: %W
 Context switches (inv/vol): %c/%w
 Exit status: %x
 """.strip()
-SIMPLE_TIMESTRING = """
+PLAIN_TIMESTRING = """
 %e,%S,%U,%F,%R,%W,%c,%w,%x
 """.strip()
 
@@ -157,7 +157,7 @@ def launch_solution(year: int, day: int, problem: int,
         )
     else:
         if plain_output:
-            timestring = SIMPLE_TIMESTRING
+            timestring = PLAIN_TIMESTRING
         else:
             timestring = TIMESTRING
         try:
