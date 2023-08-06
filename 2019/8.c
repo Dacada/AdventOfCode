@@ -66,6 +66,12 @@ static void solution2(const char *const input, char *const output) {
 
         char image[nrows*npixels];
 
+	size_t buffer_cap = 50;
+	char *buffer = malloc(sizeof(*buffer)*buffer_cap);
+	size_t buffer_len = 0;
+	size_t buffer_width = 0;
+	size_t buffer_height = 0;
+	
         for (size_t layer=0; layer<nlayers; layer++) {
                 for (size_t row=0; row<nrows; row++) {
                         for (size_t pixel=0; pixel<npixels; pixel++) {
@@ -77,26 +83,45 @@ static void solution2(const char *const input, char *const output) {
                                 }
 
                                 if (layer == nlayers-1) {
+				  if (buffer_len >= buffer_cap) {
+				    buffer_cap *= 2;
+				    buffer = realloc(buffer, sizeof(*buffer)*buffer_cap);
+				  }
                                         switch(image[i]) {
                                         case '0':
-                                                fprintf(stderr, " ");
+					  buffer[buffer_len++] = ' ';
                                                 break;
                                         case '1':
-                                                fprintf(stderr, "*");
+					  buffer[buffer_len++] = '#';
                                                 break;
                                         case '2':
-                                                fprintf(stderr, "?");
+					  buffer[buffer_len++] = '?';
                                                 break;
                                         }
                                 }
                         }
                         if (layer == nlayers-1) {
-                                fprintf(stderr, "\n");
+			  if (buffer_height == 0) {
+			    buffer_width = buffer_len;
+			  }
+			  buffer_height++;
                         }
                 }
         }
-        
-        snprintf(output, OUTPUT_BUFFER_SIZE, "See above.");
+
+	#ifdef DEBUG
+	for (size_t j=0; j<buffer_height; j++) {
+	  for (size_t i=0; i<buffer_width; i++) {
+	    fputc(buffer[j*buffer_width+i], stderr);
+	  }
+	  fputc('\n', stderr);
+	}
+	#endif
+
+	char *result = aoc_ocr(buffer, buffer_width, buffer_height);
+        snprintf(output, OUTPUT_BUFFER_SIZE, "%s", result);
+	free(buffer);
+	free(result);
 }
 
 int main(int argc, char *argv[]) {

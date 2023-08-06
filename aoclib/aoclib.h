@@ -47,4 +47,8 @@ void aoc_permute(int *const array, const size_t size, aoc_permute_callback *cons
 // The given array is unmodified. Incorrect parameters will call the FAIL macro.
 void aoc_combinations(const int *const array, const size_t len, const size_t n, aoc_combinations_callback *const func, void *const args);
 
+// Read the characters in the given "image" and return them as a
+// dynamically allocated string. Skip columns of blank characters.
+char *aoc_ocr(const char *image, size_t image_width, size_t image_height);
+
 #endif

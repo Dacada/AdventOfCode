@@ -511,24 +511,49 @@ static void solution2(const char *const input, char *const output) {
         }
         endx += 1;
 
+	size_t buffer_cap = 50;
+	char *buffer = malloc(sizeof(*buffer)*buffer_cap);
+	size_t buffer_len = 0;
+	size_t buffer_width = 0;
+	size_t buffer_height = 0;
+
         for (int j=endy; j>=starty; j--) { // It's inverted :^)
                 for (int i=startx; i<endx; i++) {
+		  if (buffer_len >= buffer_cap) {
+		    buffer_cap *= 2;
+		    buffer = realloc(buffer, sizeof(*buffer)*buffer_cap);
+		  }
                         int n = grid[j*gridsize+i];
                         if (n == 0) {
-                                fprintf(stderr, "  ");
+			  buffer[buffer_len++] = ' ';
                         } else if (n == 1) {
-                                fprintf(stderr, "* ");
+			  buffer[buffer_len++] = '#';
                         } else {
-                                fprintf(stderr, "? ");
+			  buffer[buffer_len++] = '?';
                         }
                 }
-                fprintf(stderr, "\n");
+		if (buffer_height == 0) {
+		  buffer_width = buffer_len;
+		}
+		buffer_height++;
         }
 
-        snprintf(output, OUTPUT_BUFFER_SIZE, "READ ABOVE");
+	#ifdef DEBUG
+	for (size_t j=1; j<buffer_height; j++) {
+	  for (size_t i=0; i<buffer_width; i++) {
+	    fputc(buffer[j*buffer_width+i], stderr);
+	  }
+	  fputc('\n', stderr);
+	}
+	#endif
+
+	char *result = aoc_ocr(buffer+buffer_width, buffer_width, buffer_height-1);
+        snprintf(output, OUTPUT_BUFFER_SIZE, "%s", result);
 	free(machine.program);
 	free(grid);
 	free(paintedgrid);
+	free(buffer);
+	free(result);
 }
 
 int main(int argc, char *argv[]) {

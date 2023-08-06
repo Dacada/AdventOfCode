@@ -3,6 +3,7 @@
 #include <stdarg.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 
 #ifdef DEBUG
 
@@ -176,4 +177,290 @@ void aoc_combinations(const int *const array, const size_t len, const size_t n, 
   int *const aux = malloc(n * sizeof(int));
   combinations_recursive(0, array, len, aux, n, func, args);
   free(aux);
+}
+
+struct aoc_ocr_letter {
+  bool init;
+  size_t width;
+  const char *letter;
+};
+
+const struct aoc_ocr_letter alphabet[26] = {
+  {
+    .init=true,
+    .width=4,
+    .letter=
+    " ## "
+    "#  #"
+    "#  #"
+    "####"
+    "#  #"
+    "#  #",
+  },
+  {
+    .init=true,
+    .width=4,
+    .letter=
+    "### "
+    "#  #"
+    "### "
+    "#  #"
+    "#  #"
+    "### ",
+  },
+  {
+    .init=true,
+    .width=4,
+    .letter=
+    " ## "
+    "#  #"
+    "#   "
+    "#   "
+    "#  #"
+    " ## ",
+  },
+  {
+    .init=false,
+  },
+  {
+    .init=true,
+    .width=4,
+    .letter=
+    "####"
+    "#   "
+    "### "
+    "#   "
+    "#   "
+    "####",
+  },
+  {
+    .init=true,
+    .width=4,
+    .letter=
+    "####"
+    "#   "
+    "### "
+    "#   "
+    "#   "
+    "#   ",
+  },
+  {
+    .init=true,
+    .width=4,
+    .letter=
+    " ## "
+    "#  #"
+    "#   "
+    "# ##"
+    "#  #"
+    " ###",
+  },
+  {
+    .init=false,
+  },
+  {
+    .init=true,
+    .width=3,
+    .letter=
+    "###"
+    " # "
+    " # "
+    " # "
+    " # "
+    "###",
+  },
+  {
+    .init=true,
+    .width=4,
+    .letter=
+    "  ##"
+    "   #"
+    "   #"
+    "   #"
+    "#  #"
+    " ## ",
+  },
+  {
+    .init=true,
+    .width=4,
+    .letter=
+    "#  #"
+    "# # "
+    "##  "
+    "# # "
+    "# # "
+    "#  #",
+  },
+  {
+    .init=true,
+    .width=4,
+    .letter=
+    "#   "
+    "#   "
+    "#   "
+    "#   "
+    "#   "
+    "####",
+  },
+  {
+    .init=false,
+  },
+  {
+    .init=false,
+  },
+  {
+    .init=false,
+  },
+  {
+    .init=true,
+    .width=4,
+    .letter=
+    "### "
+    "#  #"
+    "#  #"
+    "### "
+    "#   "
+    "#   ",
+  },
+  {
+    .init=false,
+  },
+  {
+    .init=true,
+    .width=4,
+    .letter=
+    "### "
+    "#  #"
+    "#  #"
+    "### "
+    "# # "
+    "#  #",
+  },
+  {
+    .init=false,
+  },
+  {
+    .init=false,
+  },
+  {
+    .init=true,
+    .width=4,
+    .letter=
+    "#  #"
+    "#  #"
+    "#  #"
+    "#  #"
+    "#  #"
+    " ## ",
+  },
+  {
+    .init=false,
+  },
+  {
+    .init=false,
+  },
+  {
+    .init=false,
+  },
+  {
+    .init=true,
+    .width=5,
+    .letter=
+    "#   #"
+    "#   #"
+    " # # "
+    "  #  "
+    "  #  "
+    "  #  ",
+  },
+  {
+    .init=true,
+    .width=4,
+    .letter=
+    "####"
+    "   #"
+    "  # "
+    " #  "
+    "#   "
+    "####",
+  },
+};
+
+// Return whether the image has the given letter in the given offset
+// matching exactly
+static bool aoc_ocr_letter_match(const char *image, size_t image_height, size_t image_width, size_t image_width_offset, struct aoc_ocr_letter letter) {
+  for (size_t i=0; i<letter.width; i++) {
+    if (i+image_width_offset >= image_width) {
+      return false;
+    }
+    
+    for (size_t j=0; j<image_height; j++) {
+      char c = image[image_width*j + i+image_width_offset];
+      char l = letter.letter[letter.width*j + i];
+
+      bool equal = (isblank(c) && isblank(l)) || c == l;
+      if (!equal) {
+	return false;
+      }
+    }
+  }
+
+  return true;
+}
+
+// Return whether the image has a blank (all spaces) column in the
+// given width offset
+static bool aoc_ocr_blank_column(const char *image, size_t image_height, size_t image_width, size_t image_width_offset) {
+  for (size_t j=0; j<image_height; j++) {
+    char c = image[image_width*j + image_width_offset];
+    if (!isblank(c)) {
+      return false;
+    }
+  }
+  return true;
+}
+
+// Read a single character from image using alphabet, skip blank
+// columns first
+static char aoc_ocr_letter(const char *image, size_t image_width, size_t image_height, size_t *image_width_offset) {
+  // Skip any blank columns
+  while (aoc_ocr_blank_column(image, image_height, image_width, *image_width_offset)) {
+    *image_width_offset += 1;
+  }
+
+  for (size_t i=0; i<26; i++) {
+    if (!alphabet[i].init) {
+      continue;
+    }
+    
+    if (aoc_ocr_letter_match(image, image_height, image_width, *image_width_offset, alphabet[i])) {
+      *image_width_offset += alphabet[i].width;
+      return 'A' + i;
+    }
+  }
+
+  return '\0';
+}
+
+char *aoc_ocr(const char *image, size_t image_width, size_t image_height) {
+  size_t result_cap = 4;
+  char *result = malloc(sizeof(char)*result_cap);
+  size_t result_len = 0;
+
+  size_t image_width_offset = 0;
+
+  for (;;) {
+    if (result_len >= result_cap) {
+      result_cap *= 10;
+      result = realloc(result, sizeof(char)*result_cap);
+    }
+
+    char c = aoc_ocr_letter(image, image_width, image_height, &image_width_offset);
+    result[result_len++] = c;
+    if (c == '\0') {
+      break;
+    }
+  }
+
+  return result;
 }

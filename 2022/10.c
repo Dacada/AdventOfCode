@@ -127,6 +127,12 @@ static void solution2(const char *const input, char *const output) {
         int *values;
         parse_input(input, &cycles, &values);
 
+	size_t buffer_cap = 50;
+	char *buffer = malloc(sizeof(*buffer)*buffer_cap);
+	size_t buffer_len = 0;
+	size_t buffer_width = 0;
+	size_t buffer_height = 0;
+
         int k = 0;
         int value = 1;
         for (int j=0; j<6; j++) {
@@ -143,14 +149,34 @@ static void solution2(const char *const input, char *const output) {
                         } else {
                                 c = ' ';
                         }
-                        fputc(c, stderr);
+			
+			if (buffer_len >= buffer_cap) {
+			  buffer_cap *= 2;
+			  buffer = realloc(buffer, sizeof(*buffer)*buffer_cap);
+			}
+			buffer[buffer_len++] = c;
                 }
-                fputc('\n', stderr);
+		if (buffer_height == 0) {
+		  buffer_width = buffer_len;
+		}
+		buffer_height++;
         }
-        
-        snprintf(output, OUTPUT_BUFFER_SIZE, "SEE STDERR OUTPUT");
+
+	#ifdef DEBUG
+	for (size_t j=0; j<buffer_height; j++) {
+	  for (size_t i=0; i<buffer_width; i++) {
+	    fputc(buffer[j*buffer_width+i], stderr);
+	  }
+	  fputc('\n', stderr);
+	}
+	#endif
+
+	char *result = aoc_ocr(buffer, buffer_width, buffer_height);
+        snprintf(output, OUTPUT_BUFFER_SIZE, "%s", result);
         free(cycles);
         free(values);
+	free(buffer);
+	free(result);
 }
 
 int main(int argc, char *argv[]) {

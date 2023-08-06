@@ -173,7 +173,7 @@ static size_t apply_fold(struct dot *const dots, const size_t ndots, const struc
         return remove_duplicates(dots, ndots);
 }
 
-static void print_dots(const struct dot *const dots, const size_t ndots) {
+static char *print_dots(const struct dot *const dots, const size_t ndots, size_t *buff_w, size_t *buff_h) {
         struct dot max = {.x=INT_MIN, .y=INT_MIN};
         struct dot min = {.x=INT_MAX, .y=INT_MAX};
         
@@ -193,6 +193,12 @@ static void print_dots(const struct dot *const dots, const size_t ndots) {
                 }
         }
 
+	size_t buffer_cap = 50;
+	char *buffer = malloc(sizeof(*buffer)*buffer_cap);
+	size_t buffer_len = 0;
+	size_t buffer_width = 0;
+	size_t buffer_height = 0;
+
         for (int j=min.y; j<=max.y; j++) {
                 for (int i=min.x; i<=max.x; i++) {
                         struct dot d = {.x=i, .y=j};
@@ -203,16 +209,27 @@ static void print_dots(const struct dot *const dots, const size_t ndots) {
                                         found = true;
                                 }
                         }
+			
+		  if (buffer_len >= buffer_cap) {
+		    buffer_cap *= 2;
+		    buffer = realloc(buffer, sizeof(*buffer)*buffer_cap);
+		  }
 
                         if (found) {
-                                fprintf(stderr, "#");
+			  buffer[buffer_len++] = '#';
                         } else {
-                                fprintf(stderr, " ");
+			  buffer[buffer_len++] = ' ';
                         }
                 }
-                fprintf(stderr, "\n");
+		if (buffer_height == 0) {
+		  buffer_width = buffer_len;
+		}
+		buffer_height++;
         }
-        fprintf(stderr, "\n");
+
+	*buff_w = buffer_width;
+	*buff_h = buffer_height;
+	return buffer;
 }
 
 static void solution1(const char *input, char *const output) {
@@ -235,11 +252,24 @@ static void solution2(const char *input, char *const output) {
         for (size_t i=0; i<nfolds; i++) {
                 ndots = apply_fold(dots, ndots, folds[i]);
         }
-        print_dots(dots, ndots);
+
+	size_t buffer_width, buffer_height;
+        char *buffer = print_dots(dots, ndots, &buffer_width, &buffer_height);
+	#ifdef DEBUG
+	for (size_t j=0; j<buffer_height; j++) {
+	  for (size_t i=0; i<buffer_width; i++) {
+	    fputc(buffer[j*buffer_width+i], stderr);
+	  }
+	  fputc('\n', stderr);
+	}
+	#endif
+	char *result = aoc_ocr(buffer, buffer_width, buffer_height);
         
-        snprintf(output, OUTPUT_BUFFER_SIZE, "SEE STDERR OUTPUT");
+        snprintf(output, OUTPUT_BUFFER_SIZE, "%s", result);
         free(dots);
         free(folds);
+	free(buffer);
+	free(result);
 }
 
 int main(int argc, char *argv[]) {

@@ -25,18 +25,27 @@ static inline bool screen_get(const unsigned x, const unsigned y) {
 static inline void screen_set(const unsigned x, const unsigned y, const bool val) {
         screen[y*WIDTH+x] = val;
 }
-static void print_screen(void) {
+static void print_screen(char *buffer) {
         for (unsigned j=0; j<HEIGHT; j++) {
                 for (unsigned i=0; i<WIDTH; i++) {
                         if (screen_get(i, j)) {
-                                printf("# ");
+			  if (buffer == NULL) {
+			    fputc('#', stderr);
+			  } else {
+			    buffer[WIDTH*j + i] = '#';
+			  }
                         } else {
-                                printf("  ");
+			  if (buffer == NULL) {
+			    fputc(' ', stderr);
+			  } else {
+			    buffer[WIDTH*j + i] = ' ';
+			  }
                         }
                 }
-                printf("\n");
+		if (buffer == NULL) {
+		  fputc('\n', stderr);
+		}
         }
-        printf("\n");
 }
 
 static void run_instruction(const struct instruction *instr) {
@@ -84,7 +93,7 @@ static void run_instruction(const struct instruction *instr) {
         }
 
 #ifdef DEBUG
-        print_screen();
+        print_screen(NULL);
 #endif
 }
 
@@ -194,8 +203,21 @@ static void solution1(const char *const input, char *const output) {
 
 static void solution2(const char *const input, char *const output) {
         run(input);
-        print_screen();
-        snprintf(output, OUTPUT_BUFFER_SIZE, "output printed");
+	char buffer[WIDTH*HEIGHT];
+	
+        print_screen(buffer);
+	#ifdef DEBUG
+	for (unsigned j=0; j<HEIGHT; j++) {
+	  for (unsigned i=0; i<WIDTH; i++) {
+	    fputc(buffer[j*WIDTH+i], stderr);
+	  }
+	  fputc('\n', stderr);
+	}
+	#endif
+	char *result = aoc_ocr(buffer, WIDTH, HEIGHT);
+	
+        snprintf(output, OUTPUT_BUFFER_SIZE, "%s", result);
+	free(result);
 }
 
 int main(int argc, char *argv[]) {
