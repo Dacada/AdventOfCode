@@ -98,6 +98,10 @@ static void solution2(const char *const input, char *const output) {
                         #ifdef DEBUG
                         mvprintw(1, 50, "Score: %ld", score);
                         #endif
+
+			if (count <= 0 && firstblock) {
+			  break;
+			}
                 }
 
                 enum tile tile = t;
@@ -135,9 +139,6 @@ static void solution2(const char *const input, char *const output) {
                                 mvprintw(6, 50, "Blocks: %d    ", count);
                                 #endif
                         }
-                }
-                if (count <= 0 && firstblock) {
-                        break;
                 }
 
                 if (ballx > 0 && paddlex > 0) {
