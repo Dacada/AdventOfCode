@@ -143,6 +143,7 @@ static void run_algo(struct image *const image, bool algo[ALGOSIZE]) {
         image->lit = new_lit;
 }
 
+__attribute__((pure))
 static unsigned count_pixels(const struct image *const image) {
         ASSERT(!image->lit, "count infinite pixels!");
         unsigned count = 0;

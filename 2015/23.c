@@ -236,6 +236,7 @@ static unsigned collatz(unsigned n) {
         return c;
 }
 
+__attribute__((pure))
 static unsigned get_reg_value(const struct instruction *p, unsigned initial) {
         unsigned reg = initial;
         for (; p->instr == INSTR_INC || p->instr == INSTR_TPL; p++) {

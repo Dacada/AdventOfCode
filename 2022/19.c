@@ -115,6 +115,7 @@ static void robot_gather(struct state *state) {
         state->obsidian += state->obsidian_robots;
 }
 
+__attribute__((pure))
 static int geods(const struct blueprint *blueprint, const struct state *prev, const int minutes, bool stop_ore, bool stop_clay, bool stop_obsidian, bool stop_geods) {
         if (minutes == 0) {
                 return 0;

@@ -52,6 +52,8 @@ static void list_free(struct list *l) {
 }
 
 static int element_cmp(const struct element *left, const struct element *right);
+
+__attribute__((pure))
 static int list_cmp(const struct list *left, const struct list *right) {
         int len = MAX(left->len, right->len);
         for (int i=0; i<len; i++) {
@@ -206,6 +208,7 @@ static void *init_divider(struct list *list, int n) {
         return ptr;
 }
 
+__attribute__((pure))
 static int list_cmp_wrp(const void *a, const void *b) {
         return list_cmp(a, b);
 }

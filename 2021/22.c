@@ -138,6 +138,7 @@ static unsigned long volume_cuboid(const struct cuboid *const cube) {
         return dx*dy*dz;
 }
 
+__attribute__((pure))
 static unsigned long total_volume(const struct cubeCollection *const cubes) {
         long res = 0;
 

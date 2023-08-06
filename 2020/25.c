@@ -19,6 +19,7 @@ static unsigned long parse_int(const char **const input) {
         return n;
 }
 
+__attribute__((pure))
 static struct problem parse(const char *input) {
         struct problem problem;
         problem.card = parse_int(&input);
@@ -28,6 +29,7 @@ static struct problem parse(const char *input) {
         return problem;
 }
 
+__attribute__((const))
 static unsigned long fast_modular_power(unsigned long base, unsigned long exponent, unsigned long modulo) {
 	unsigned long result = 1;
 	if (exponent & 1U) {

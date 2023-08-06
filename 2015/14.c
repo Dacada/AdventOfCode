@@ -51,6 +51,7 @@ static unsigned int parse_line1(const char *const input, unsigned int *const i) 
   return calculate_distance(speed, run_time, stop_time);
 }
 
+__attribute__((pure))
 static unsigned int parse1(const char *const input) {
   unsigned int max = 0;
   

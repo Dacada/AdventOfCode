@@ -227,6 +227,7 @@ static struct packet *parse_input(const char *input) {
         return packets;
 }
 
+__attribute__((pure))
 static unsigned add_up_versions(struct packet *packet) {
         unsigned sum = packet->version;
 
@@ -260,6 +261,7 @@ static void solution1(const char *const input, char *const output) {
         free_packet(packets);
 }
 
+__attribute__((pure))
 static unsigned long eval(struct packet *packet) {
         if (packet->type == PACKET_LITERAL) {
                 return ((struct literalPacket*)packet)->number;

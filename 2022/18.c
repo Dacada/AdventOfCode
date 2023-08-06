@@ -1,6 +1,7 @@
 #include <aoclib.h>
 #include <stdio.h>
 #include <ctype.h>
+#include <string.h>
 
 #define IDX(cube,dim) ((cube).x + (cube).y*(dim) + (cube).z*(dim)*(dim))
 #define STACK_SIZE (1<<14)
@@ -206,9 +207,7 @@ static void solution2(const char *const input, char *const output) {
 
         int dim = get_area_dimensions(cubes, len);
         bool *cube_map = malloc(sizeof(*cube_map)*dim*dim*dim);
-        for (int i=0; i<dim*dim*dim; i++) {
-                cube_map[i] = false;
-        }
+	memset(cube_map, 0, sizeof(*cube_map)*dim*dim*dim);
         for (int i=0; i<len; i++) {
                 cube_map[IDX(cubes[i],dim)] = true;
         }

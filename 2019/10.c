@@ -68,6 +68,7 @@ static void draw_line(int x1,int y1, int x2,int y2, int *xr,int *yr) {
         make_coprime(dx, dy, xr, yr);
 }
 
+__attribute__((pure))
 static bool visible(const int goalx, const int goaly,
                     const int origx, const int origy,
                     const char *const map, const int rows, const int cols) {

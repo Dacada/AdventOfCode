@@ -7,6 +7,7 @@
 
 #define INDEX(layer,row,pixel) (layer*nrows*npixels + row*npixels + pixel)
 
+__attribute__((pure))
 static size_t parse_image(const char *const input) {
         size_t layer;
         for (layer=0;; layer++) {

@@ -184,6 +184,7 @@ static long cycle_time(struct vec3 *vs, struct vec3 *ovs, int n, char axis) {
         return t+1;
 }
 
+__attribute__((pure))
 static long lgcd(long a, long b) {
         int remainder = 0;
         
@@ -196,6 +197,7 @@ static long lgcd(long a, long b) {
         return a;
 }
 
+__attribute__((pure))
 static long llcm2(long a, long b) {
         if (a == 0 || b == 0) {
                 return 0;
@@ -203,6 +205,7 @@ static long llcm2(long a, long b) {
         return a*b/lgcd(a,b);
 }
 
+__attribute__((pure))
 static long llcm3(long a, long b, long c) {
         return llcm2(llcm2(a,b),c);
 }

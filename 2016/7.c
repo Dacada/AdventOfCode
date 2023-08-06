@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <string.h>
 
+__attribute__((pure))
 static bool istls(const char *const ip) {
         bool inbrackets = false;
         bool found_abba = false;
@@ -48,6 +49,7 @@ static bool istls(const char *const ip) {
         }
 }
 
+__attribute__((pure))
 static bool isssl(const char *const ip) {
         char abas[256][3];
         char babs[256][3];

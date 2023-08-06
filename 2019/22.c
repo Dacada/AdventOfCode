@@ -87,6 +87,7 @@ static __int128 start;
 static __int128 increment;
 
 // https://en.wikipedia.org/wiki/Modular_exponentiation#Right-to-left_binary_method
+__attribute__((const))
 static __int128 modpow(__int128 base, __int128 exponent, __int128 modulus) {
         if (modulus == 1) {
                 return 0;

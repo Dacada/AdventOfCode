@@ -238,6 +238,7 @@ static struct problem parse_problem(const char *input) {
         return p;
 }
 
+__attribute__((pure))
 static bool follows_rule(const int field, const struct rule *const rule) {
         for (size_t l=0; l<rule->ranges_len; l++) {
                 struct range *range = rule->ranges+l;

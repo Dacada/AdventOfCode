@@ -10,6 +10,7 @@ struct disk {
         int initial;
 };
 
+__attribute__((pure))
 static bool is_disk_at_position_on_time(const struct disk *const disk,
                                         int position, int time) {
         while (position < 0) {

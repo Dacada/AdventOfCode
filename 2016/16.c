@@ -78,6 +78,7 @@ checksum
 
  */
 
+__attribute__((pure))
 static unsigned linelen(const char *const str) {
         for (unsigned i=0;; i++) {
                 if (str[i] == '\n' || str[i] == '\0') {

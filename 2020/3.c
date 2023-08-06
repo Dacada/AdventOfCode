@@ -23,6 +23,7 @@ static void parse_map(const char *const input) {
         ASSERT(input[MAP_HEIGHT*(MAP_WIDTH+1)+0] == '\0', "unexpected input");
 }
 
+__attribute__((pure))
 static int tree_count(int advi, int advj) {
         int i = 0;
         int j = 0;

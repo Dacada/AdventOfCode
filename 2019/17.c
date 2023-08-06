@@ -454,7 +454,7 @@ static void solution2(const char *const input, char *const output) {
         show_map(map, rows, columns);
         DBG("Shown map\n");
 
-        size_t startx, starty;
+        size_t startx=0, starty=0;
         get_starting_location(map, rows, columns, &startx, &starty);
 
         static char movements[1<<10];

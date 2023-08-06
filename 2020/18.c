@@ -151,6 +151,7 @@ static void special_push(struct stack *const operators, struct stack *const oper
         special_push(operators, operands, r);
 }
 
+__attribute__((pure))
 static long evaluate1(const struct token *token) {
         struct stack operators;
         struct stack operands;
@@ -208,6 +209,7 @@ static void process(struct stack *const operators, struct stack *const operands)
         stack_push(operands, r);
 }
 
+__attribute__((pure))
 static long evaluate2(const struct token *token) {
         struct stack operators;
         struct stack operands;

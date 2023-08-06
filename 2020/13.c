@@ -67,6 +67,7 @@ static void solution1(const char *const input, char *const output) {
 }
 
 // Adepted from https://rosettacode.org/wiki/Modular_inverse#C
+__attribute__((const))
 static unsigned long modular_multiplicative_inverse(long a, long b) {
         long b0 = b, t, q;
 	long x0 = 0, x1 = 1;

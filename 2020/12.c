@@ -168,6 +168,7 @@ static struct position rotate_rel_once(struct position relpos, enum direction ro
         return relpos;
 }
 
+__attribute__((pure))
 static struct position rotate_rel(struct position relpos, enum direction rotation, const unsigned amount) {
         ASSERT(amount % 90 == 0, "unexpected rotation amount %u", amount);
         for (unsigned i=0; i<amount/90; i++) {

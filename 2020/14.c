@@ -230,6 +230,7 @@ static void memory_set_2(struct memory_tree *const memory, const char mask[MASKS
         *total += value*n;
 }
 
+__attribute__((pure))
 static unsigned long memory_tree_sum(const struct memory_tree *const tree) {
         if (tree->empty) {
                 return 0;

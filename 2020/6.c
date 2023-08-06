@@ -18,6 +18,7 @@ static int count_set_bits(questions x) {
         return count;
 }
 
+__attribute__((pure))
 static int solution(const char *const input, bool all) {
         int count = 0;
         

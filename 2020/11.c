@@ -86,6 +86,7 @@ static unsigned count_occupied_neighbors_1(size_t i, size_t j) {
         return count;
 }
 
+__attribute__((pure))
 static unsigned count_occupied_neighbors_2(size_t ui, size_t uj) {
         int i = ui;
         int j = uj;
@@ -147,6 +148,7 @@ static bool step(unsigned(*do_count)(size_t,size_t), unsigned neighbor_limit) {
         return changed;
 }
 
+__attribute__((pure))
 static unsigned count_occupied_seats(void) {
         unsigned count = 0;
         for (size_t j=0; j<leny; j++) {

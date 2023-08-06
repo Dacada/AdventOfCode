@@ -3,6 +3,7 @@
 #include <string.h>
 #include <ctype.h>
 
+__attribute__((pure))
 static int find_cycle(int cycle, int *cycles, int len) {
         if (len <= 0) {
                 FAIL("logic error");
@@ -29,6 +30,7 @@ static int find_cycle(int cycle, int *cycles, int len) {
         }
 }
 
+__attribute__((pure))
 static int signal_value(int *cycles, int *values, int len, int cycle) {
         int i = find_cycle(cycle, cycles, len);
         return values[i];

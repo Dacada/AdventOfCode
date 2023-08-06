@@ -49,7 +49,7 @@ static void solution2(const char *input, char *const output) {
                 { 0 ,  0 , 'D',  0 ,  0 }
         };
         
-        char code[6]={0};
+        char code[8]={0};
         int i=0;
         int x=0,y=2;
         int nx,ny;

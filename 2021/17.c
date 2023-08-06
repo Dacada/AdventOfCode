@@ -39,6 +39,7 @@ static int parse_number(const char **const input) {
         return n;
 }
 
+__attribute__((pure))
 static struct rectangle parse_input(const char *input) {
         struct rectangle res;
         assert_msg(&input, "target area: x=");

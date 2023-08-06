@@ -118,6 +118,7 @@ static void solution1(const char *const input, char *const output) {
         snprintf(output, OUTPUT_BUFFER_SIZE, "%u", count);
 }
 
+__attribute__((pure))
 static unsigned search(struct node grid[NODESY][NODESX], unsigned goal_x, unsigned goal_y) {
         // we're moving a hole around basically, pretty print the grid (node
         // with used=0 as '_', goal as '@', node with used>100 as '#') and you

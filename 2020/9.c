@@ -80,6 +80,7 @@ static unsigned solution1_result() {
         return num;
 }
 
+__attribute__((pure))
 static unsigned solution2_result(unsigned goal) {
         for (size_t start=0; start<all_numbers_length; start++) {
                 unsigned min, max, sum;

@@ -37,6 +37,7 @@ static struct number *number_sum(struct number *const first, struct number *cons
         return res;
 }
 
+__attribute__((pure))
 static struct number *find_explode(struct number *const number, unsigned current_depth) {
         ASSERT(current_depth <= 4, "pairs too deeply neseted");
 
@@ -70,10 +71,12 @@ static struct number *find_explode(struct number *const number, unsigned current
                 return n;                                               \
         }
 
+__attribute__((pure))
 static struct number *find_left_from(struct number *const number) {
         find_x_from(number, x, y, find_left_from);
 }
 
+__attribute__((pure))
 static struct number *find_right_from(struct number *const number) {
         find_x_from(number, y, x, find_right_from);
 }
@@ -111,6 +114,7 @@ static bool explode(struct number *const number) {
         return true;
 }
 
+__attribute__((pure))
 static struct number *find_split(struct number *const number) {
         if (number->leaf) {
                 if (number->value.n >= 10) {
@@ -219,6 +223,7 @@ static struct number **parse_input(const char *input, size_t *const len) {
         return list;
 }
 
+__attribute__((pure))
 static unsigned magnitude(const struct number *const number) {
         if (number->leaf) {
                 return number->value.n;
