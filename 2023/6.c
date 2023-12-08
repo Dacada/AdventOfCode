@@ -56,6 +56,7 @@ static int parse_input(const char *input, int **times, int **distances) {
 	return len;
 }
 
+__attribute__((const))
 static long isqrt(long n) {
 	long x = n;
 	long y = (x + 1) / 2;
@@ -66,6 +67,7 @@ static long isqrt(long n) {
 	return x;
 }
 
+__attribute__((const))
 static long number_of_ways(long x, long t) {
 	/* solve (t-i)*i=x for t */
 	long i1 = (t + isqrt(t*t - 4*x)) / 2;

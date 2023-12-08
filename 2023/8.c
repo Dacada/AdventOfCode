@@ -162,6 +162,7 @@ static long gcd(long a, long b) {
 	return a;
 }
 
+__attribute__((const))
 static long lcm(long a, long b) {
 	return (a * b) / gcd(a, b);
 }
