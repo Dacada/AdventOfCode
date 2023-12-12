@@ -17,6 +17,9 @@ def count(s, t):
             break
     return n
 
+# for implementing this in c (the hashing of the arguments):
+# github.com/python/cpython/blob/3.7/Objects/tupleobject.c#L348
+# www.cse.yorku.ca/~oz/hash.html
 @functools.cache
 def arrangements(springs, nums):
     if not nums:
