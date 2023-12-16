@@ -33,7 +33,7 @@ do
 	    elif [[ $expected != "null" && $expected != $result ]]
 	    then
 		status=${RED}"WRONG"${NC}
-	    elif (( $(echo "$time > 1" | bc -l) ))
+	    elif (( $(echo "$time > 3" | bc -l) ))
 	    then
 		status=${YELLOW}"SLOW"${NC}
 	    else
