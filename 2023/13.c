@@ -225,6 +225,7 @@ static void solution1(const char *const input, char *const output) {
 	int npatterns;
 	struct pattern *patterns = parse_input(input, &npatterns);
 
+#ifdef DEBUG
 	for (int x=0; x<npatterns; x++) {
 		struct pattern *pattern = patterns + x;
 		for (int j=0; j<pattern->height; j++) {
@@ -235,6 +236,7 @@ static void solution1(const char *const input, char *const output) {
 		}
 		fputc('\n', stderr);
 	}
+#endif
 
 	int *reflections = malloc(sizeof(*reflections)*npatterns);
 	get_reflections(patterns, npatterns, reflections);
