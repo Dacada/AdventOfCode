@@ -4,10 +4,8 @@
 
 #define IDX(buff, i, j, cols) ((buff)[(j) * (cols) + (i)])
 
-static inline bool is_xmas(char *buff, int i, int j, int cols, int rows, int di,
-                           int dj) {
-  if (i + di * 3 < 0 || i + di * 3 >= cols || j + dj * 3 < 0 ||
-      j + dj * 3 >= rows) {
+static inline bool is_xmas(char *buff, int i, int j, int cols, int rows, int di, int dj) {
+  if (i + di * 3 < 0 || i + di * 3 >= cols || j + dj * 3 < 0 || j + dj * 3 >= rows) {
     return false;
   }
 
@@ -49,13 +47,11 @@ static inline bool is_x_mas(char *buff, int i, int j, int cols, int rows) {
   }
 
   bool first_ok = false;
-  if (IDX(buff, i - 1, j - 1, cols) == 'M' &&
-      IDX(buff, i + 1, j + 1, cols) == 'S') {
+  if (IDX(buff, i - 1, j - 1, cols) == 'M' && IDX(buff, i + 1, j + 1, cols) == 'S') {
     first_ok = true;
   }
 
-  if (IDX(buff, i + 1, j + 1, cols) == 'M' &&
-      IDX(buff, i - 1, j - 1, cols) == 'S') {
+  if (IDX(buff, i + 1, j + 1, cols) == 'M' && IDX(buff, i - 1, j - 1, cols) == 'S') {
     first_ok = true;
   }
 
@@ -64,13 +60,11 @@ static inline bool is_x_mas(char *buff, int i, int j, int cols, int rows) {
   }
 
   bool second_ok = false;
-  if (IDX(buff, i + 1, j - 1, cols) == 'M' &&
-      IDX(buff, i - 1, j + 1, cols) == 'S') {
+  if (IDX(buff, i + 1, j - 1, cols) == 'M' && IDX(buff, i - 1, j + 1, cols) == 'S') {
     second_ok = true;
   }
 
-  if (IDX(buff, i - 1, j + 1, cols) == 'M' &&
-      IDX(buff, i + 1, j - 1, cols) == 'S') {
+  if (IDX(buff, i - 1, j + 1, cols) == 'M' && IDX(buff, i + 1, j - 1, cols) == 'S') {
     second_ok = true;
   }
 
@@ -162,6 +156,4 @@ static void solution2(const char *const input, char *const output) {
   free(buff);
 }
 
-int main(int argc, char *argv[]) {
-  return aoc_run(argc, argv, solution1, solution2);
-}
+int main(int argc, char *argv[]) { return aoc_run(argc, argv, solution1, solution2); }

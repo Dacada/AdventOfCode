@@ -13,19 +13,18 @@
 
 __attribute__((format(printf, 2, 3))) void __attribute__((noreturn))
 aoc_fail(const int srcline, const char *const msg, ...);
-__attribute__((format(printf, 3, 4))) void
-aoc_failif(const bool condition, const int srcline, const char *const msg, ...);
-__attribute__((format(printf, 2, 3))) void aoc_dbg(const int srcline,
-                                                   const char *const msg, ...);
+__attribute__((format(printf, 3, 4))) void aoc_failif(const bool condition, const int srcline, const char *const msg,
+                                                      ...);
+__attribute__((format(printf, 2, 3))) void aoc_dbg(const int srcline, const char *const msg, ...);
 
 #else
 
 #define FAIL(msg, ...) __builtin_unreachable()
-#define ASSERT(cond, msg, ...)                                                 \
-  if (!(cond))                                                                 \
+#define ASSERT(cond, msg, ...)                                                                                         \
+  if (!(cond))                                                                                                         \
   __builtin_unreachable()
-#define DBG(msg, ...)                                                          \
-  do {                                                                         \
+#define DBG(msg, ...)                                                                                                  \
+  do {                                                                                                                 \
   } while (0)
 
 #endif
@@ -56,22 +55,20 @@ typedef void(aoc_parse_grid_callback)(const char **, void *, int, int, void *);
 
 // Process arguments and call either solution function
 // which should take an input and an output it must write to
-int aoc_run(const int argc, char *const *const argv,
-            aoc_solution_callback *const solution1,
+int aoc_run(const int argc, char *const *const argv, aoc_solution_callback *const solution1,
             aoc_solution_callback *const solution2);
 
 // Permute the given array of given size and call func with each permutation and
 // with args
-void aoc_permute(int *const array, const size_t size,
-                 aoc_permute_callback *const func, void *const args);
+void aoc_permute(int *const array, const size_t size, aoc_permute_callback *const func, void *const args);
 
 // Find combinations of n elements in an array of len size.
 // When a combination is found call func with two parameters:
 //   * pointer to first element of an array of n elements of type int
 //   * the args void pointer
 // The given array is unmodified. Incorrect parameters will call the FAIL macro.
-void aoc_combinations(const int *const array, const size_t len, const size_t n,
-                      aoc_combinations_callback *const func, void *const args);
+void aoc_combinations(const int *const array, const size_t len, const size_t n, aoc_combinations_callback *const func,
+                      void *const args);
 
 // Read the characters in the given "image" and return them as a
 // dynamically allocated string. Skip columns of blank characters.
@@ -107,7 +104,7 @@ char *aoc_ocr(const char *image, size_t image_width, size_t image_height);
 // NULL);
 //
 // Access elements: numbers[row * ncols + col]
-void *aoc_parse_grid(const char *input, aoc_parse_grid_callback callback,
-                     size_t size, int *nrows, int *ncols, void *args);
+void *aoc_parse_grid(const char *input, aoc_parse_grid_callback callback, size_t size, int *nrows, int *ncols,
+                     void *args);
 
 #endif

@@ -1,8 +1,8 @@
 #include <aoclib.h>
-#include <stdio.h>
 #include <ctype.h>
-#include <string.h>
 #include <limits.h>
+#include <stdio.h>
+#include <string.h>
 
 #define PLACES 8
 #define NAMELEN 16
@@ -12,12 +12,12 @@
 char names[PLACES][NAMELEN];
 static int encode_name(const char *const name) {
   int i;
-  for (i=0; i<PLACES; i++) {
+  for (i = 0; i < PLACES; i++) {
     if (names[i][0] == '\0') {
       strcpy(names[i], name);
       return i;
     }
-    
+
     if (strcmp(names[i], name) == 0)
       return i;
   }
@@ -37,59 +37,94 @@ static int get_index(int n1, int n2) {
   switch (n1) {
   case 0:
     switch (n2) {
-    case 1: return 0;
-    case 2: return 1;
-    case 3: return 2;
-    case 4: return 3;
-    case 5: return 4;
-    case 6: return 5;
-    case 7: return 6;
-    default: FAIL("Unexpected get_index input");
+    case 1:
+      return 0;
+    case 2:
+      return 1;
+    case 3:
+      return 2;
+    case 4:
+      return 3;
+    case 5:
+      return 4;
+    case 6:
+      return 5;
+    case 7:
+      return 6;
+    default:
+      FAIL("Unexpected get_index input");
     }
   case 1:
     switch (n2) {
-    case 2: return 7;
-    case 3: return 8;
-    case 4: return 9;
-    case 5: return 10;
-    case 6: return 11;
-    case 7: return 12;
-    default: FAIL("Unexpected get_index input");
+    case 2:
+      return 7;
+    case 3:
+      return 8;
+    case 4:
+      return 9;
+    case 5:
+      return 10;
+    case 6:
+      return 11;
+    case 7:
+      return 12;
+    default:
+      FAIL("Unexpected get_index input");
     }
   case 2:
     switch (n2) {
-    case 3: return 13;
-    case 4: return 14;
-    case 5: return 15;
-    case 6: return 16;
-    case 7: return 17;
-    default: FAIL("Unexpected get_index input");
+    case 3:
+      return 13;
+    case 4:
+      return 14;
+    case 5:
+      return 15;
+    case 6:
+      return 16;
+    case 7:
+      return 17;
+    default:
+      FAIL("Unexpected get_index input");
     }
   case 3:
     switch (n2) {
-    case 4: return 18;
-    case 5: return 19;
-    case 6: return 20;
-    case 7: return 21;
-    default: FAIL("Unexpected get_index input");
+    case 4:
+      return 18;
+    case 5:
+      return 19;
+    case 6:
+      return 20;
+    case 7:
+      return 21;
+    default:
+      FAIL("Unexpected get_index input");
     }
   case 4:
     switch (n2) {
-    case 5: return 22;
-    case 6: return 23;
-    case 7: return 24;
-    default: FAIL("Unexpected get_index input");
+    case 5:
+      return 22;
+    case 6:
+      return 23;
+    case 7:
+      return 24;
+    default:
+      FAIL("Unexpected get_index input");
     }
   case 5:
     switch (n2) {
-    case 6: return 25;
-    case 7: return 26;
-    default: FAIL("Unexpected get_index input");
+    case 6:
+      return 25;
+    case 7:
+      return 26;
+    default:
+      FAIL("Unexpected get_index input");
     }
   case 6:
     switch (n2) {
-    case 7: return 27;
-    default: FAIL("Unexpected get_index input");
+    case 7:
+      return 27;
+    default:
+      FAIL("Unexpected get_index input");
     }
   }
 
@@ -107,8 +142,8 @@ static unsigned int get_distance(const int name1, const int name2) {
 }
 
 static int parse_first_name(const char *const input, int i, char *const name) {
-  for (int j=0;; j++) {
-    const char c = input[i+j];
+  for (int j = 0;; j++) {
+    const char c = input[i + j];
     if (isspace(c)) {
       i += j;
       name[j] = '\0';
@@ -117,18 +152,15 @@ static int parse_first_name(const char *const input, int i, char *const name) {
     name[j] = c;
   }
 
-  ASSERT(input[i] == ' ' &&
-	 input[i+1] == 't' &&
-	 input[i+2] == 'o' &&
-	 input[i+3] == ' ' &&
-	 !isspace(input[i+4]), "expected ' to ' but got something else");
+  ASSERT(input[i] == ' ' && input[i + 1] == 't' && input[i + 2] == 'o' && input[i + 3] == ' ' && !isspace(input[i + 4]),
+         "expected ' to ' but got something else");
 
-  return i+4;
+  return i + 4;
 }
 
 static int parse_second_name(const char *const input, int i, char *const name) {
-  for (int j=0;; j++) {
-    const char c = input[i+j];
+  for (int j = 0;; j++) {
+    const char c = input[i + j];
     if (isspace(c)) {
       i += j;
       name[j] = '\0';
@@ -137,18 +169,16 @@ static int parse_second_name(const char *const input, int i, char *const name) {
     name[j] = c;
   }
 
-  ASSERT(input[i] == ' ' &&
-	 input[i+1] == '=' &&
-	 input[i+2] == ' ' &&
-	 !isspace(input[i+3]), "expected ' = ' but got something else");
+  ASSERT(input[i] == ' ' && input[i + 1] == '=' && input[i + 2] == ' ' && !isspace(input[i + 3]),
+         "expected ' = ' but got something else");
 
-  return i+3;
+  return i + 3;
 }
 
 static int parse_distance(const char *const input, int i, unsigned int *const dist) {
   *dist = 0;
-  for (int j=0;; j++) {
-    const char c = input[i+j];
+  for (int j = 0;; j++) {
+    const char c = input[i + j];
     if (isspace(c)) {
       i += j;
       break;
@@ -157,8 +187,7 @@ static int parse_distance(const char *const input, int i, unsigned int *const di
     *dist += c - 0x30;
   }
 
-  ASSERT(input[i] == '\n' &&
-	 !isspace(input[i+1]), "expected end of line but got something else");
+  ASSERT(input[i] == '\n' && !isspace(input[i + 1]), "expected end of line but got something else");
 
   return i;
 }
@@ -179,10 +208,10 @@ static int parse_line(const char *const input, int i) {
 }
 
 static void parse(const char *const input) {
-  for (int i=0;; i++) {
+  for (int i = 0;; i++) {
     if (input[i] == '\0')
       return;
-    
+
     i = parse_line(input, i);
     ASSERT(input[i] == '\n', "Did not parse full line");
   }
@@ -193,12 +222,12 @@ static void compute_path_distance_min(int *const path, void *args) {
   unsigned int current_path_distance = 0;
 
   int prev = path[0];
-  for (int i=1; i<PLACES; i++) {
+  for (int i = 1; i < PLACES; i++) {
     int curr = path[i];
-    
+
     unsigned int distance = get_distance(prev, curr);
     current_path_distance += distance;
-    
+
     if (current_path_distance >= *result) {
       return;
     }
@@ -214,15 +243,15 @@ static void compute_path_distance_max(int *const path, void *args) {
   unsigned int current_path_distance = 0;
 
   int prev = path[0];
-  for (int i=1; i<PLACES; i++) {
+  for (int i = 1; i < PLACES; i++) {
     int curr = path[i];
-    
+
     unsigned int distance = get_distance(prev, curr);
     current_path_distance += distance;
 
     prev = curr;
   }
-  
+
   if (current_path_distance > *result) {
     *result = current_path_distance;
   }
@@ -254,6 +283,4 @@ static void solution2(const char *const input, char *const output) {
   snprintf(output, OUTPUT_BUFFER_SIZE, "%u", total_distance);
 }
 
-int main(int argc, char *argv[]) {
-  return aoc_run(argc, argv, solution1, solution2);
-}
+int main(int argc, char *argv[]) { return aoc_run(argc, argv, solution1, solution2); }

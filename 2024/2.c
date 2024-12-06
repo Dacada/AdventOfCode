@@ -9,8 +9,7 @@ struct report {
   int cap;
 };
 
-static bool report_is_safe_all(struct report *rep, bool descending, int dampen,
-                               int start) {
+static bool report_is_safe_all(struct report *rep, bool descending, int dampen, int start) {
   for (int i = start; i < rep->nlevels - 1; i++) {
     if (dampen == i) {
       continue;
@@ -175,6 +174,4 @@ static void solution2(const char *const input, char *const output) {
   free(reports);
 }
 
-int main(int argc, char *argv[]) {
-  return aoc_run(argc, argv, solution1, solution2);
-}
+int main(int argc, char *argv[]) { return aoc_run(argc, argv, solution1, solution2); }

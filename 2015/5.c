@@ -1,10 +1,10 @@
 #include <aoclib.h>
-#include <stdio.h>
 #include <stdbool.h>
+#include <stdio.h>
 
 static void solution1(const char *const input, char *const output) {
   int result = 0;
-  
+
   for (size_t i = 0; input[i] != '\0'; i++) {
     int vowels = 0;
     bool twice_in_a_row = false;
@@ -15,18 +15,15 @@ static void solution1(const char *const input, char *const output) {
       char c = input[i];
 
       if (c == 'a' || c == 'e' || c == 'i' || c == 'o' || c == 'u')
-	vowels++;
+        vowels++;
 
       if (c == last_letter) {
-	twice_in_a_row = true;
+        twice_in_a_row = true;
       }
 
-      forbidden_pair =
-	(c == 'b' && last_letter == 'a') ||
-	(c == 'd' && last_letter == 'c') ||
-	(c == 'q' && last_letter == 'p') ||
-	(c == 'y' && last_letter == 'x');
-      
+      forbidden_pair = (c == 'b' && last_letter == 'a') || (c == 'd' && last_letter == 'c') ||
+                       (c == 'q' && last_letter == 'p') || (c == 'y' && last_letter == 'x');
+
       last_letter = c;
     }
 
@@ -78,24 +75,24 @@ static void solution2(const char *const input, char *const output) {
     bool repeated_between = false;
 
     size_t j;
-    for (j=i; input[j+2] != '\n'; j++) {
-      if (!repeated_pair && input[j+3] != '\n') {
-	for (size_t k=j+2; input[k+1] != '\n'; k++) {
-	  //fprintf(stderr, "%c%c == %c%c\n", input[j], input[j+1], input[k], input[k+1]);
-	  if (input[j] == input[k] && input[j+1] == input[k+1]) {
-	    repeated_pair = true;
-	    break;
-	  }
-	}
+    for (j = i; input[j + 2] != '\n'; j++) {
+      if (!repeated_pair && input[j + 3] != '\n') {
+        for (size_t k = j + 2; input[k + 1] != '\n'; k++) {
+          // fprintf(stderr, "%c%c == %c%c\n", input[j], input[j+1], input[k], input[k+1]);
+          if (input[j] == input[k] && input[j + 1] == input[k + 1]) {
+            repeated_pair = true;
+            break;
+          }
+        }
       }
-      
+
       if (!repeated_between) {
-	if (input[j] == input[j+2]) {
-	  repeated_between = true;
-	}
+        if (input[j] == input[j + 2]) {
+          repeated_between = true;
+        }
       }
     }
-    i=j+2;
+    i = j + 2;
 
     if (repeated_pair && repeated_between) {
       result += 1;
@@ -105,6 +102,4 @@ static void solution2(const char *const input, char *const output) {
   snprintf(output, OUTPUT_BUFFER_SIZE, "%d", result);
 }
 
-int main(int argc, char *argv[]) {
-  return aoc_run(argc, argv, solution1, solution2);
-}
+int main(int argc, char *argv[]) { return aoc_run(argc, argv, solution1, solution2); }

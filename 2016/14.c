@@ -34,8 +34,7 @@ static size_t num2str(size_t num, uint8_t *const str) {
   return len;
 }
 
-static void hash_first(size_t idx, const unsigned char *const salt,
-                       size_t salt_len, char *digest) {
+static void hash_first(size_t idx, const unsigned char *const salt, size_t salt_len, char *digest) {
   MD5_CTX ctx;
   MD5Init(&ctx);
   MD5Update(&ctx, salt, salt_len);
@@ -47,8 +46,7 @@ static void hash_first(size_t idx, const unsigned char *const salt,
   MD5End(&ctx, digest);
 }
 
-static void hash_second(size_t idx, const unsigned char *const salt,
-                        size_t salt_len, char *digest) {
+static void hash_second(size_t idx, const unsigned char *const salt, size_t salt_len, char *digest) {
   hash_first(idx, salt, salt_len, digest);
 
   for (int i = 0; i < 2016; i++) {
@@ -116,8 +114,7 @@ static void set_idxinfo(struct idxinfo *const idxinfo, const char *hex) {
   }
 }
 
-static bool iskey(const struct idxinfo *const candidate,
-                  const struct idxinfo *const searchspace) {
+static bool iskey(const struct idxinfo *const candidate, const struct idxinfo *const searchspace) {
   char c = candidate->first_triple;
   if (c == '\0') {
     return false;
@@ -133,8 +130,7 @@ static bool iskey(const struct idxinfo *const candidate,
 }
 
 static void solution(const char *const input, char *const output,
-                     void (*hash)(size_t, const unsigned char *, size_t,
-                                  char *)) {
+                     void (*hash)(size_t, const unsigned char *, size_t, char *)) {
   char digest[MD5_DIGEST_STRING_LENGTH];
 
   const unsigned char *salt = (const unsigned char *)input;
@@ -164,14 +160,8 @@ static void solution(const char *const input, char *const output,
   snprintf(output, OUTPUT_BUFFER_SIZE, "%lu", i - 1);
 }
 
-static void solution1(const char *const input, char *const output) {
-  solution(input, output, hash_first);
-}
+static void solution1(const char *const input, char *const output) { solution(input, output, hash_first); }
 
-static void solution2(const char *const input, char *const output) {
-  solution(input, output, hash_second);
-}
+static void solution2(const char *const input, char *const output) { solution(input, output, hash_second); }
 
-int main(int argc, char *argv[]) {
-  return aoc_run(argc, argv, solution1, solution2);
-}
+int main(int argc, char *argv[]) { return aoc_run(argc, argv, solution1, solution2); }

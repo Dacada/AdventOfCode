@@ -37,11 +37,8 @@ static void solution1(const char *input, char *const output) {
 }
 
 static void solution2(const char *input, char *const output) {
-  static const char numpad[5][5] = {{0, 0, '1', 0, 0},
-                                    {0, '2', '3', '4', 0},
-                                    {'5', '6', '7', '8', '9'},
-                                    {0, 'A', 'B', 'C', 0},
-                                    {0, 0, 'D', 0, 0}};
+  static const char numpad[5][5] = {
+      {0, 0, '1', 0, 0}, {0, '2', '3', '4', 0}, {'5', '6', '7', '8', '9'}, {0, 'A', 'B', 'C', 0}, {0, 0, 'D', 0, 0}};
 
   char code[8] = {0};
   int i = 0;
@@ -90,6 +87,4 @@ static void solution2(const char *input, char *const output) {
   snprintf(output, OUTPUT_BUFFER_SIZE, "%s", code);
 }
 
-int main(int argc, char *argv[]) {
-  return aoc_run(argc, argv, solution1, solution2);
-}
+int main(int argc, char *argv[]) { return aoc_run(argc, argv, solution1, solution2); }

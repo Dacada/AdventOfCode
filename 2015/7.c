@@ -2,33 +2,22 @@
 
 #include <ctype.h>
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <stdint.h>
 #include <stdbool.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #include <string.h>
 
-//#define DEBUG
+// #define DEBUG
 
 #define IS_VAR(c) ((c) >= 'a' && (c) <= 'z')
 #define IS_NUM(c) ((c) >= '0' && (c) <= '9')
-#define IS_OP(c)  ((c) >= 'A' && (c) <= 'Z')
+#define IS_OP(c) ((c) >= 'A' && (c) <= 'Z')
 
-typedef enum param_type_t {
-  NONE,
-  NUMBER,
-  VARIABLE
-} param_type_t;
+typedef enum param_type_t { NONE, NUMBER, VARIABLE } param_type_t;
 
-typedef enum operation_t {
-  NOT,
-  LSHIFT,
-  RSHIFT,
-  AND,
-  OR,
-  EQ
-} operation_t;
+typedef enum operation_t { NOT, LSHIFT, RSHIFT, AND, OR, EQ } operation_t;
 
 typedef struct expression_t {
   uint16_t param1;
@@ -40,13 +29,16 @@ typedef struct expression_t {
 
 expression_t expressions[512];
 
-uint16_t known_val[1024]; // index: var, content: value
-bool is_known[1024]; // index: var, content: the value in known_val is correct for this var
-uint16_t needs[1024][1024]; // index: var, content: vars which depend on index var in order to be calculated, they might depend on more vars. this array is laid out such that index 0 is the number of vars in the array and the following elements are the vars themselves
+uint16_t known_val[1024];   // index: var, content: value
+bool is_known[1024];        // index: var, content: the value in known_val is correct for this var
+uint16_t needs[1024][1024]; // index: var, content: vars which depend on index var in order to be calculated, they might
+                            // depend on more vars. this array is laid out such that index 0 is the number of vars in
+                            // the array and the following elements are the vars themselves
 expression_t *unknown[1024]; // index: var, content: expression to calculate var or NULL
 
 static size_t skip_whitespace(const char *const text, size_t i) {
-  while (isspace(text[i])) i++;
+  while (isspace(text[i]))
+    i++;
   return i;
 }
 
@@ -71,9 +63,9 @@ static char decode_var(uint16_t var, char *c2) {
 
 static size_t eval_expr(const char *const text, size_t i, size_t j, uint16_t *const val, bool *const ok) {
   (void)j; // used only in debug mode, suppress warnings otherwise
-  
+
   if (IS_VAR(text[i])) {
-    const uint16_t var = encode_var(text[i], text[i+1]);
+    const uint16_t var = encode_var(text[i], text[i + 1]);
     if (is_known[var]) {
       *ok = true;
       *val = known_val[var];
@@ -81,11 +73,11 @@ static size_t eval_expr(const char *const text, size_t i, size_t j, uint16_t *co
       *ok = false;
       *val = var;
     }
-    return i+2;
+    return i + 2;
   } else if (IS_NUM(text[i])) {
     uint16_t num = 0;
     while (IS_NUM(text[i])) {
-      num = num*10 + (text[i] - 0x30);
+      num = num * 10 + (text[i] - 0x30);
       i++;
     }
     *ok = true;
@@ -119,7 +111,7 @@ static bool assign_value(const uint16_t var, const uint16_t val) {
   known_val[var] = val;
   is_known[var] = true;
   unknown[var] = NULL;
-  
+
   if (var == encode_var('a', ' ')) {
     return true;
   }
@@ -127,30 +119,30 @@ static bool assign_value(const uint16_t var, const uint16_t val) {
   // iterate each dependency of the newly assigned var
 
   // variables we need to keep track of stuff
-  uint16_t *vars_found = malloc(1024 * sizeof(uint16_t)); // dependencies we have found a value for
+  uint16_t *vars_found = malloc(1024 * sizeof(uint16_t));  // dependencies we have found a value for
   uint16_t *vars_values = malloc(1024 * sizeof(uint16_t)); // value we have found for a dependency
   int removed_elements = 0; // pointer to next value to assign in vars_found and vars_values
-  
-  for (int i=0; i<needs[var][0]; i++) {
-    const uint16_t dep = needs[var][i+1];
-    
+
+  for (int i = 0; i < needs[var][0]; i++) {
+    const uint16_t dep = needs[var][i + 1];
+
     expression_t *const expr = unknown[dep];
     if (expr != NULL) {
       if (expr->param1_type == VARIABLE && expr->param1 == var) {
-	expr->param1_type = NUMBER;
-	expr->param1 = val;
+        expr->param1_type = NUMBER;
+        expr->param1 = val;
       }
-      
+
       if (expr->param2_type == VARIABLE && expr->param2 == var) {
-	expr->param2_type = NUMBER;
-	expr->param2 = val;
+        expr->param2_type = NUMBER;
+        expr->param2 = val;
       }
 
       if (expr->param1_type == NUMBER && (expr->param2_type == NUMBER || expr->param2_type == NONE)) {
-	const uint16_t newval = apply_op(expr->param1, expr->param2, expr->op);
-	vars_found[removed_elements] = dep;
+        const uint16_t newval = apply_op(expr->param1, expr->param2, expr->op);
+        vars_found[removed_elements] = dep;
         vars_values[removed_elements] = newval;
-	removed_elements++;
+        removed_elements++;
       }
     }
   }
@@ -158,7 +150,7 @@ static bool assign_value(const uint16_t var, const uint16_t val) {
 
   bool retval;
 
-  for (int i=0; i<removed_elements; i++) {
+  for (int i = 0; i < removed_elements; i++) {
     if (assign_value(vars_found[i], vars_values[i])) {
       retval = true;
       goto end;
@@ -166,7 +158,7 @@ static bool assign_value(const uint16_t var, const uint16_t val) {
   }
   retval = false;
 
- end:
+end:
   free(vars_found);
   free(vars_values);
 
@@ -179,24 +171,25 @@ static void assign_dependency(const uint16_t depends, const uint16_t is_depended
   needs[is_depended][0] = len;
 }
 
-static size_t parse_assign(const char *const text, size_t i, size_t j, expression_t *const expr, const uint16_t val, const bool isnum) {
+static size_t parse_assign(const char *const text, size_t i, size_t j, expression_t *const expr, const uint16_t val,
+                           const bool isnum) {
   (void)j; // used only in debug mode, suppress warnings otherwise
-  
+
   ASSERT(IS_VAR(text[i]), "Expected lowercase character but got something else");
-  const uint16_t var = encode_var(text[i], text[i+1]);
-  if (isspace(text[i+1])) {
+  const uint16_t var = encode_var(text[i], text[i + 1]);
+  if (isspace(text[i + 1])) {
     i += 1;
   } else {
     i += 2;
   }
 
   // Solution 2 breaks this assert
-  //ASSERT(!known_val[var], "The destination of a rule is a known value");
+  // ASSERT(!known_val[var], "The destination of a rule is a known value");
   // So we replace it with this if.
   if (!known_val[var]) {
     if (isnum) {
       if (assign_value(var, val)) {
-	return 0;
+        return 0;
       }
     } else {
       assign_dependency(var, val);
@@ -214,17 +207,17 @@ static size_t parse_assign(const char *const text, size_t i, size_t j, expressio
 #ifdef DEBUG
 
 static void assert_op(const char *const text, const size_t i, const size_t j, const char *const op_text) {
-  for (int k=0;; k++) {
+  for (int k = 0;; k++) {
     const char c = op_text[k];
     if (c == '\0') {
       break;
     }
-    
-    const char d = text[i+k];
+
+    const char d = text[i + k];
     if (d == '\0') {
       break;
     }
-    
+
     ASSERT(c == d, "Unexpected operation name");
   }
 }
@@ -240,7 +233,8 @@ static void assert_op(const char *const text, size_t i, const size_t j, const ch
 
 #endif
 
-static size_t parse_op(const char *const text, size_t i, size_t j, expression_t *const expr, const uint16_t val1, const bool isnum1) {
+static size_t parse_op(const char *const text, size_t i, size_t j, expression_t *const expr, const uint16_t val1,
+                       const bool isnum1) {
   operation_t op;
   switch (text[i]) {
   case 'L':
@@ -279,14 +273,14 @@ static size_t parse_op(const char *const text, size_t i, size_t j, expression_t 
 
   i = skip_whitespace(text, i);
 
-  ASSERT(text[i] == '-' && text[i+1] == '>', "Expected arrow (->) but didn't find it");
+  ASSERT(text[i] == '-' && text[i + 1] == '>', "Expected arrow (->) but didn't find it");
   i += 2;
 
   i = skip_whitespace(text, i);
 
   ASSERT(IS_VAR(text[i]), "Expected lowercase letter but found something else");
-  const uint16_t var = encode_var(text[i], text[i+1]);
-  if (isspace(text[i+1])) {
+  const uint16_t var = encode_var(text[i], text[i + 1]);
+  if (isspace(text[i + 1])) {
     i += 1;
   } else {
     i += 2;
@@ -331,9 +325,9 @@ static size_t parse_assign_or_op(const char *const text, size_t i, const size_t 
   i = skip_whitespace(text, i);
 
   if (text[i] == '-') {
-    ASSERT(text[i+1] == '>', "Expected an arrow (->) but found something else");
+    ASSERT(text[i + 1] == '>', "Expected an arrow (->) but found something else");
     i += 2;
-    
+
     i = skip_whitespace(text, i);
 
     return parse_assign(text, i, j, expr, val, isnum);
@@ -345,11 +339,11 @@ static size_t parse_assign_or_op(const char *const text, size_t i, const size_t 
 }
 
 static size_t parse_not(const char *const text, size_t i, const size_t j, expression_t *const expr) {
-  ASSERT(text[i+1] == 'O' && text[i+2] == 'T', "Expected NOT but it wasn't.");
+  ASSERT(text[i + 1] == 'O' && text[i + 2] == 'T', "Expected NOT but it wasn't.");
   i += 3;
 
   i = skip_whitespace(text, i);
-  
+
   uint16_t v1;
   bool known_value;
   i = eval_expr(text, i, j, &v1, &known_value);
@@ -359,14 +353,14 @@ static size_t parse_not(const char *const text, size_t i, const size_t j, expres
 
   i = skip_whitespace(text, i);
 
-  ASSERT(text[i] == '-' && text[i+1] == '>', "Expected arrow (->) but didn't find it");
+  ASSERT(text[i] == '-' && text[i + 1] == '>', "Expected arrow (->) but didn't find it");
   i += 2;
 
   i = skip_whitespace(text, i);
 
   ASSERT(IS_VAR(text[i]), "Expected lowercase letter but found something else");
-  const uint16_t var = encode_var(text[i], text[i+1]);
-  if (isspace(text[i+1])) {
+  const uint16_t var = encode_var(text[i], text[i + 1]);
+  if (isspace(text[i + 1])) {
     i += 1;
   } else {
     i += 2;
@@ -410,9 +404,9 @@ static void solution(const char *const input) {
 
 static void solution1(const char *const input, char *const output) {
   solution(input);
-  
+
   uint16_t var_a = encode_var('a', ' ');
-  
+
   ASSERT(is_known[var_a], "Execution ended but value of A is not known!");
   snprintf(output, OUTPUT_BUFFER_SIZE, "%d", known_val[var_a]);
 }
@@ -443,6 +437,4 @@ static void solution2(const char *const input, char *const output) {
   snprintf(output, OUTPUT_BUFFER_SIZE, "%d", known_val[var_a]);
 }
 
-int main(int argc, char *argv[]) {
-  return aoc_run(argc, argv, solution1, solution2);
-}
+int main(int argc, char *argv[]) { return aoc_run(argc, argv, solution1, solution2); }

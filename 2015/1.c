@@ -27,9 +27,7 @@ static void solution2(const char *const input, char *const output) {
       break;
     }
   }
-  snprintf(output, OUTPUT_BUFFER_SIZE, "%lu", i+1);
+  snprintf(output, OUTPUT_BUFFER_SIZE, "%lu", i + 1);
 }
 
-int main(int argc, char *argv[]) {
-  return aoc_run(argc, argv, solution1, solution2);
-}
+int main(int argc, char *argv[]) { return aoc_run(argc, argv, solution1, solution2); }

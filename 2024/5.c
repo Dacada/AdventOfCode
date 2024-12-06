@@ -7,7 +7,7 @@
 // during part 2 i realized: wait a second, this is all just about sorting
 
 #define NUM_IDS 100
-#define IDX(arr, i, j) ((arr)[(j) * NUM_IDS + (i)])
+#define IDX(arr, i, j) ((arr)[(j)*NUM_IDS + (i)])
 
 static int parse_2digit_int(const char **input) {
   int n = 0;
@@ -85,18 +85,14 @@ static struct sequence *parse_sequences(const char *input, int *nsequences) {
   return buff;
 }
 
-static struct sequence *parse_input(const char *input, bool *dependencies,
-                                    int *nsequences) {
+static struct sequence *parse_input(const char *input, bool *dependencies, int *nsequences) {
   parse_dependencies(&input, dependencies);
   return parse_sequences(input, nsequences);
 }
 
-static int sequence_midpoint(const struct sequence *seq) {
-  return seq->numbers[seq->len / 2];
-}
+static int sequence_midpoint(const struct sequence *seq) { return seq->numbers[seq->len / 2]; }
 
-static bool is_sequence_valid(const struct sequence *seq,
-                              const bool *dependencies) {
+static bool is_sequence_valid(const struct sequence *seq, const bool *dependencies) {
   for (int i = 0; i < seq->len - 1; i++) {
     int a = seq->numbers[i];
     int b = seq->numbers[i + 1];
@@ -108,8 +104,7 @@ static bool is_sequence_valid(const struct sequence *seq,
 }
 
 // DFS topological sorting
-static void visit(int i, const struct sequence *seq, bool *marked,
-                  const bool *dependencies, int *new, int *inew) {
+static void visit(int i, const struct sequence *seq, bool *marked, const bool *dependencies, int *new, int *inew) {
   if (marked[i]) {
     return;
   }
@@ -128,8 +123,7 @@ static void visit(int i, const struct sequence *seq, bool *marked,
   new[(*inew)++] = seq->numbers[i];
 }
 
-static void make_sequence_valid(struct sequence *seq,
-                                const bool *dependencies) {
+static void make_sequence_valid(struct sequence *seq, const bool *dependencies) {
   int *new = malloc(sizeof(*new) * seq->len);
   int inew = 0;
   bool marked[seq->len];
@@ -155,8 +149,7 @@ static void make_sequence_valid(struct sequence *seq,
   seq->numbers = new;
 }
 
-static void solution(const char *const input, char *const output,
-                     bool correcting) {
+static void solution(const char *const input, char *const output, bool correcting) {
   static bool dependencies[NUM_IDS * NUM_IDS];
   int nsequences;
   struct sequence *sequences = parse_input(input, dependencies, &nsequences);
@@ -190,14 +183,8 @@ static void solution(const char *const input, char *const output,
   free(sequences);
 }
 
-static void solution1(const char *const input, char *const output) {
-  solution(input, output, false);
-}
+static void solution1(const char *const input, char *const output) { solution(input, output, false); }
 
-static void solution2(const char *const input, char *const output) {
-  solution(input, output, true);
-}
+static void solution2(const char *const input, char *const output) { solution(input, output, true); }
 
-int main(int argc, char *argv[]) {
-  return aoc_run(argc, argv, solution1, solution2);
-}
+int main(int argc, char *argv[]) { return aoc_run(argc, argv, solution1, solution2); }

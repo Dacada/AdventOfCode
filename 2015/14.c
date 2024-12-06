@@ -1,13 +1,14 @@
 #include <aoclib.h>
-#include <stdio.h>
 #include <stdbool.h>
+#include <stdio.h>
 
 #define NSECONDS 2503
 #define NREINDEERS 9
 
 #define ISNUM(n) ((n) >= '0' && (n) <= '9')
 
-static unsigned int calculate_distance(const unsigned int speed, const unsigned int run_time, const unsigned int stop_time) {
+static unsigned int calculate_distance(const unsigned int speed, const unsigned int run_time,
+                                       const unsigned int stop_time) {
   unsigned int total_time = run_time + stop_time;
   unsigned int full_iterations = NSECONDS / total_time;
   unsigned int seconds_last_iteration = NSECONDS % total_time;
@@ -23,12 +24,13 @@ static unsigned int calculate_distance(const unsigned int speed, const unsigned 
 
 static unsigned int parse_number(const char *const input, unsigned int *const i) {
   unsigned int j = *i;
-  
-  while (!ISNUM(input[j])) j++;
+
+  while (!ISNUM(input[j]))
+    j++;
 
   unsigned int number = 0;
   while (ISNUM(input[j])) {
-    number = number*10 + input[j]-0x30;
+    number = number * 10 + input[j] - 0x30;
     j++;
   }
 
@@ -38,7 +40,8 @@ static unsigned int parse_number(const char *const input, unsigned int *const i)
 
 static void parse_until_eol(const char *const input, unsigned int *const i) {
   unsigned int j = *i;
-  while (input[j] != '\n') j++;
+  while (input[j] != '\n')
+    j++;
   *i = j;
 }
 
@@ -47,15 +50,14 @@ static unsigned int parse_line1(const char *const input, unsigned int *const i) 
   const unsigned int run_time = parse_number(input, i);
   const unsigned int stop_time = parse_number(input, i);
   parse_until_eol(input, i);
-  
+
   return calculate_distance(speed, run_time, stop_time);
 }
 
-__attribute__((pure))
-static unsigned int parse1(const char *const input) {
+__attribute__((pure)) static unsigned int parse1(const char *const input) {
   unsigned int max = 0;
-  
-  for (unsigned int i=0;; i++) {
+
+  for (unsigned int i = 0;; i++) {
     if (input[i] == '\0') {
       break;
     }
@@ -80,7 +82,7 @@ struct reindeer {
   unsigned int speed;
   unsigned int run_time;
   unsigned int stop_time;
-  
+
   unsigned int distance;
   unsigned int points;
   unsigned int running_counter;
@@ -107,14 +109,14 @@ static void parse_line2(const char *const input, unsigned int *const i, struct r
 
 static void parse2(const char *const input, struct reindeer *const array) {
   unsigned int j = 0;
-  for (unsigned int i=0;; i++) {
+  for (unsigned int i = 0;; i++) {
     if (input[i] == '\0') {
       break;
     }
 
     parse_line2(input, &i, array + j);
     j++;
-    
+
     ASSERT(input[i] == '\n', "Did not parse full line");
   }
 }
@@ -123,50 +125,48 @@ static void solution2(const char *const input, char *const output) {
   struct reindeer rdrs[NREINDEERS];
   parse2(input, rdrs);
 
-  for (int i=0; i<NSECONDS; i++) {
-    for (int j=0; j<NREINDEERS; j++) {
+  for (int i = 0; i < NSECONDS; i++) {
+    for (int j = 0; j < NREINDEERS; j++) {
       if (rdrs[j].is_running) {
-	rdrs[j].distance += rdrs[j].speed;
+        rdrs[j].distance += rdrs[j].speed;
       }
-      
+
       if (rdrs[j].is_running) {
-	rdrs[j].running_counter++;
-	if (rdrs[j].running_counter >= rdrs[j].run_time) {
-	  rdrs[j].running_counter = 0;
-	  rdrs[j].is_running = false;
-	}
+        rdrs[j].running_counter++;
+        if (rdrs[j].running_counter >= rdrs[j].run_time) {
+          rdrs[j].running_counter = 0;
+          rdrs[j].is_running = false;
+        }
       } else {
-	rdrs[j].stopped_counter++;
-	if (rdrs[j].stopped_counter >= rdrs[j].stop_time) {
-	  rdrs[j].stopped_counter = 0;
-	  rdrs[j].is_running = true;
-	}
+        rdrs[j].stopped_counter++;
+        if (rdrs[j].stopped_counter >= rdrs[j].stop_time) {
+          rdrs[j].stopped_counter = 0;
+          rdrs[j].is_running = true;
+        }
       }
     }
-    
+
     unsigned int head_distance = 0;
-    for (int j=0; j<NREINDEERS; j++) {
+    for (int j = 0; j < NREINDEERS; j++) {
       if (rdrs[j].distance > head_distance) {
-	head_distance = rdrs[j].distance;
+        head_distance = rdrs[j].distance;
       }
     }
-    
-    for (int j=0; j<NREINDEERS; j++) {
+
+    for (int j = 0; j < NREINDEERS; j++) {
       if (rdrs[j].distance == head_distance)
-	rdrs[j].points++;
+        rdrs[j].points++;
     }
   }
 
   unsigned int winner_points = 0;
-  for (int i=0; i<NREINDEERS; i++) {
+  for (int i = 0; i < NREINDEERS; i++) {
     if (rdrs[i].points > winner_points) {
       winner_points = rdrs[i].points;
     }
   }
-  
+
   snprintf(output, OUTPUT_BUFFER_SIZE, "%u", winner_points);
 }
 
-int main(int argc, char *argv[]) {
-  return aoc_run(argc, argv, solution1, solution2);
-}
+int main(int argc, char *argv[]) { return aoc_run(argc, argv, solution1, solution2); }

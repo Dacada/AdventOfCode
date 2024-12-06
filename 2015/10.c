@@ -3,7 +3,7 @@
 #include <string.h>
 
 // ez, just get a fuckton of space
-#define NUMLEN (1<<23)
+#define NUMLEN (1 << 23)
 
 char num_[NUMLEN];
 char nextnum_[NUMLEN];
@@ -19,7 +19,7 @@ static void look_and_say(void) {
 
   while (i < NUMLEN) {
     size_t count = 1;
-    
+
     char n = num[i++];
     if (n == '\0') {
       numlen = j;
@@ -29,15 +29,15 @@ static void look_and_say(void) {
       nextnum = tmp;
       return;
     }
-    
+
     while (num[i] == n) {
       count++;
-      
+
       if (++i >= NUMLEN) {
-	FAIL("NUMBER GREW TOO BIG!!!!");
+        FAIL("NUMBER GREW TOO BIG!!!!");
       }
     }
-    
+
     nextnum[j++] = count + 0x30;
     nextnum[j++] = n;
   }
@@ -47,8 +47,8 @@ static void look_and_say(void) {
 
 static void solution1(const char *const input, char *const output) {
   strcpy(num, input);
-  num[strlen(num)-1] = '\0';
-  for (int i=0; i<40; i++) {
+  num[strlen(num) - 1] = '\0';
+  for (int i = 0; i < 40; i++) {
     look_and_say();
   }
   snprintf(output, OUTPUT_BUFFER_SIZE, "%lu", numlen);
@@ -56,13 +56,11 @@ static void solution1(const char *const input, char *const output) {
 
 static void solution2(const char *const input, char *const output) {
   strcpy(num, input);
-  num[strlen(num)-1] = '\0';
-  for (int i=0; i<50; i++) {
+  num[strlen(num) - 1] = '\0';
+  for (int i = 0; i < 50; i++) {
     look_and_say();
   }
   snprintf(output, OUTPUT_BUFFER_SIZE, "%lu", numlen);
 }
 
-int main(int argc, char *argv[]) {
-  return aoc_run(argc, argv, solution1, solution2);
-}
+int main(int argc, char *argv[]) { return aoc_run(argc, argv, solution1, solution2); }

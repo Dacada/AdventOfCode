@@ -7,9 +7,8 @@
 
 #ifdef DEBUG
 
-__attribute__((format(printf, 3, 0))) static void
-aoc_err_prnt(const int srcline, const char *const type, const char *const msg,
-             va_list ap) {
+__attribute__((format(printf, 3, 0))) static void aoc_err_prnt(const int srcline, const char *const type,
+                                                               const char *const msg, va_list ap) {
   fprintf(stderr, "(line %d) %s: ", srcline, type);
   vfprintf(stderr, msg, ap);
   fprintf(stderr, "\n");
@@ -23,8 +22,7 @@ void aoc_fail(const int srcline, const char *const msg, ...) {
   abort();
 }
 
-void aoc_failif(const bool condition, const int srcline, const char *const msg,
-                ...) {
+void aoc_failif(const bool condition, const int srcline, const char *const msg, ...) {
   if (condition) {
     va_list ap;
     va_start(ap, msg);
@@ -97,8 +95,7 @@ static char *read_input() {
   return ptrString;
 }
 
-int aoc_run(const int argc, char *const *const argv,
-            aoc_solution_callback *const solution1,
+int aoc_run(const int argc, char *const *const argv, aoc_solution_callback *const solution1,
             aoc_solution_callback *const solution2) {
   char output[OUTPUT_BUFFER_SIZE];
   int retcode = 0;
@@ -141,8 +138,7 @@ static void swap(int *const array, const size_t i, const size_t j) {
 
 // Heap's algorithm
 // https://en.wikipedia.org/wiki/Heap%27s_algorithm
-void aoc_permute(int *const array, const size_t size,
-                 aoc_permute_callback *const func, void *const args) {
+void aoc_permute(int *const array, const size_t size, aoc_permute_callback *const func, void *const args) {
   if (size == 1) {
     func(array, args);
   } else {
@@ -160,11 +156,8 @@ void aoc_permute(int *const array, const size_t size,
   }
 }
 
-static void combinations_recursive(const size_t offset, const int *const array,
-                                   const size_t len, int *const aux,
-                                   const size_t n,
-                                   aoc_combinations_callback *const fun,
-                                   void *const args) {
+static void combinations_recursive(const size_t offset, const int *const array, const size_t len, int *const aux,
+                                   const size_t n, aoc_combinations_callback *const fun, void *const args) {
   if (n < 1) {
     FAIL("Attempt to make combinations of less than one element");
   } else if (n > len) {
@@ -202,14 +195,13 @@ static void combinations_recursive(const size_t offset, const int *const array,
      */
     for (size_t i = 0; i <= len - n; i++) {
       aux[offset] = array[i];
-      combinations_recursive(offset + 1, array + i + 1, len - i - 1, aux, n - 1,
-                             fun, args);
+      combinations_recursive(offset + 1, array + i + 1, len - i - 1, aux, n - 1, fun, args);
     }
   }
 }
 
-void aoc_combinations(const int *const array, const size_t len, const size_t n,
-                      aoc_combinations_callback *const func, void *const args) {
+void aoc_combinations(const int *const array, const size_t len, const size_t n, aoc_combinations_callback *const func,
+                      void *const args) {
   int *const aux = malloc(n * sizeof(int));
   combinations_recursive(0, array, len, aux, n, func, args);
   free(aux);
@@ -409,8 +401,7 @@ const struct aoc_ocr_letter alphabet[26] = {
 
 // Return whether the image has the given letter in the given offset
 // matching exactly
-static bool aoc_ocr_letter_match(const char *image, size_t image_height,
-                                 size_t image_width, size_t image_width_offset,
+static bool aoc_ocr_letter_match(const char *image, size_t image_height, size_t image_width, size_t image_width_offset,
                                  struct aoc_ocr_letter letter) {
   for (size_t i = 0; i < letter.width; i++) {
     if (i + image_width_offset >= image_width) {
@@ -433,8 +424,7 @@ static bool aoc_ocr_letter_match(const char *image, size_t image_height,
 
 // Return whether the image has a blank (all spaces) column in the
 // given width offset
-static bool aoc_ocr_blank_column(const char *image, size_t image_height,
-                                 size_t image_width,
+static bool aoc_ocr_blank_column(const char *image, size_t image_height, size_t image_width,
                                  size_t image_width_offset) {
   for (size_t j = 0; j < image_height; j++) {
     char c = image[image_width * j + image_width_offset];
@@ -447,11 +437,9 @@ static bool aoc_ocr_blank_column(const char *image, size_t image_height,
 
 // Read a single character from image using alphabet, skip blank
 // columns first
-static char aoc_ocr_letter(const char *image, size_t image_width,
-                           size_t image_height, size_t *image_width_offset) {
+static char aoc_ocr_letter(const char *image, size_t image_width, size_t image_height, size_t *image_width_offset) {
   // Skip any blank columns
-  while (aoc_ocr_blank_column(image, image_height, image_width,
-                              *image_width_offset)) {
+  while (aoc_ocr_blank_column(image, image_height, image_width, *image_width_offset)) {
     *image_width_offset += 1;
   }
 
@@ -460,8 +448,7 @@ static char aoc_ocr_letter(const char *image, size_t image_width,
       continue;
     }
 
-    if (aoc_ocr_letter_match(image, image_height, image_width,
-                             *image_width_offset, alphabet[i])) {
+    if (aoc_ocr_letter_match(image, image_height, image_width, *image_width_offset, alphabet[i])) {
       *image_width_offset += alphabet[i].width;
       return 'A' + i;
     }
@@ -483,8 +470,7 @@ char *aoc_ocr(const char *image, size_t image_width, size_t image_height) {
       result = realloc(result, sizeof(char) * result_cap);
     }
 
-    char c =
-        aoc_ocr_letter(image, image_width, image_height, &image_width_offset);
+    char c = aoc_ocr_letter(image, image_width, image_height, &image_width_offset);
     result[result_len++] = c;
     if (c == '\0') {
       break;
@@ -494,8 +480,8 @@ char *aoc_ocr(const char *image, size_t image_width, size_t image_height) {
   return result;
 }
 
-void *aoc_parse_grid(const char *input, aoc_parse_grid_callback callback,
-                     size_t size, int *nrows, int *ncols, void *args) {
+void *aoc_parse_grid(const char *input, aoc_parse_grid_callback callback, size_t size, int *nrows, int *ncols,
+                     void *args) {
   struct aoc_dynarr arr;
   aoc_dynarr_init(&arr, size, 32);
 
@@ -529,8 +515,7 @@ void *aoc_parse_grid(const char *input, aoc_parse_grid_callback callback,
   }
   r += 1;
 
-  ASSERT(arr.len == c * r, "grid parse error: %d != %d * %d (rows * cols)",
-         arr.len, c, r);
+  ASSERT(arr.len == c * r, "grid parse error: %d != %d * %d (rows * cols)", arr.len, c, r);
 
   *nrows = r;
   *ncols = c;

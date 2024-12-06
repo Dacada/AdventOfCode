@@ -4,8 +4,7 @@
 #include <stdio.h>
 #include <string.h>
 
-static void solution(const char *const input, char *const output,
-                     bool can_disable) {
+static void solution(const char *const input, char *const output, bool can_disable) {
   const char *expected = "mul(NNN,MMM)";
   const int final_state = strlen(expected);
   const int end_n = 7;
@@ -113,14 +112,8 @@ static void solution(const char *const input, char *const output,
   snprintf(output, OUTPUT_BUFFER_SIZE, "%d", total);
 }
 
-static void solution1(const char *const input, char *const output) {
-  solution(input, output, false);
-}
+static void solution1(const char *const input, char *const output) { solution(input, output, false); }
 
-static void solution2(const char *const input, char *const output) {
-  solution(input, output, true);
-}
+static void solution2(const char *const input, char *const output) { solution(input, output, true); }
 
-int main(int argc, char *argv[]) {
-  return aoc_run(argc, argv, solution1, solution2);
-}
+int main(int argc, char *argv[]) { return aoc_run(argc, argv, solution1, solution2); }

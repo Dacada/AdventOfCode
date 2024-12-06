@@ -104,6 +104,4 @@ static void solution2(const char *const input, char *const output) {
   free(l2_count);
 }
 
-int main(int argc, char *argv[]) {
-  return aoc_run(argc, argv, solution1, solution2);
-}
+int main(int argc, char *argv[]) { return aoc_run(argc, argv, solution1, solution2); }
