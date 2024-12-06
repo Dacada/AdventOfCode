@@ -12,10 +12,6 @@ GDB_LDFLAGS = -std=c99 -Og -g
 LDLIBS =
 
 
-lib/jsmn/libjsmn.a:
-	$(MAKE) -C lib/jsmn
-
-
 aoclib/aoclib_rel.o: aoclib/aoclib.c aoclib/aoclib.h
 	$(CC) $(CFLAGS) -c $< -o $@
 aoclib/aoclib_dbg.o: aoclib/aoclib.c aoclib/aoclib.h
@@ -49,11 +45,6 @@ aoclib/aoclib_gdb.o: aoclib/aoclib.c aoclib/aoclib.h
 2015/4_rel: LDLIBS = -lmd
 2015/4_dbg: LDLIBS = -lmd
 2015/4_gdb: LDLIBS = -lmd
-
-2015/12_rel: lib/jsmn/libjsmn.a
-2015/12_dbg: lib/jsmn/libjsmn.a
-2015/12_gdb: lib/jsmn/libjsmn.a
-
 
 2016/5_rel: LDLIBS = -lmd
 2016/5_dbg: LDLIBS = -lmd -lncurses
