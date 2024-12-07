@@ -107,4 +107,10 @@ char *aoc_ocr(const char *image, size_t image_width, size_t image_height);
 void *aoc_parse_grid(const char *input, aoc_parse_grid_callback callback, size_t size, int *nrows, int *ncols,
                      void *args);
 
+// Parse a sequence of numbers from the input, stopping at the first non digit
+// character, as a base 10 unsigned integer. Fail if the first character pointed
+// to by the input is not a digit.
+int aoc_parse_int(const char **input);
+long aoc_parse_long(const char **input);
+
 #endif

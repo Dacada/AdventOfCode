@@ -521,3 +521,22 @@ void *aoc_parse_grid(const char *input, aoc_parse_grid_callback callback, size_t
   *ncols = c;
   return arr.data;
 }
+
+#define AOC_PARSE_NUM(input, type)                                                                                     \
+  ({                                                                                                                   \
+    ASSERT(isdigit(**input), "parse error, expected %c to be a digit", **input);                                       \
+                                                                                                                       \
+    type n = **input - '0';                                                                                            \
+    *input += 1;                                                                                                       \
+                                                                                                                       \
+    while (isdigit(**input)) {                                                                                         \
+      n *= 10;                                                                                                         \
+      n += **input - '0';                                                                                              \
+      *input += 1;                                                                                                     \
+    }                                                                                                                  \
+                                                                                                                       \
+    n;                                                                                                                 \
+  })
+
+int aoc_parse_int(const char **input) { return AOC_PARSE_NUM(input, int); }
+long aoc_parse_long(const char **input) { return AOC_PARSE_NUM(input, long); }
