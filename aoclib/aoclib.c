@@ -66,8 +66,6 @@ void *aoc_dynarr_grow(struct aoc_dynarr *arr, int amount) {
 
 void aoc_dynarr_truncate(struct aoc_dynarr *arr) { arr->len = 0; }
 
-void *aoc_dynarr_get(const struct aoc_dynarr *arr, int idx) { return (char *)arr->data + (arr->size * idx); }
-
 void *aoc_malloc(size_t size) {
   void *ptr = malloc(size);
   if (ptr == NULL) {
@@ -579,3 +577,12 @@ int *aoc_parse_grid_digits(const char **input, int *nrows, int *ncols) {
 
 int aoc_parse_int(const char **input) { return AOC_PARSE_NUM(input, int); }
 long aoc_parse_long(const char **input) { return AOC_PARSE_NUM(input, long); }
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wsuggest-attribute=pure"
+int aoc_cmp_int(const void *v1, const void *v2) {
+  const int *p1 = v1;
+  const int *p2 = v2;
+  return *p1 - *p2;
+}
+#pragma GCC diagnostic pop

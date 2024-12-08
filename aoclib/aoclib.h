@@ -31,6 +31,10 @@ __attribute__((format(printf, 2, 3))) void aoc_dbg(const int srcline, const char
 
 #define OUTPUT_BUFFER_SIZE 256
 
+#define AOC_ABS(x) ((x) > 0 ? (x) : -(x))
+#define AOC_MAX(x, y) ((x) > ((y) ? (x) : (y)))
+#define AOC_MIN(x, y) ((x) < ((y) ? (x) : (y)))
+
 // Generic dynamic array implementation
 struct aoc_dynarr {
   void *data;
@@ -51,8 +55,17 @@ void *aoc_dynarr_grow(struct aoc_dynarr *arr, int amount);
 // Remove every element from the array but keep memory reserved
 void aoc_dynarr_truncate(struct aoc_dynarr *arr);
 
-// Random access to array
-__attribute__((pure)) void *aoc_dynarr_get(const struct aoc_dynarr *arr, int idx);
+#define AOC_DYNARR_IDX(arr, idx, type)                                                                                 \
+  ({                                                                                                                   \
+    struct aoc_dynarr __arr = (arr);                                                                                   \
+    int __idx = (idx);                                                                                                 \
+    ASSERT(__idx >= 0 && __idx < __arr.len, "aoc_array oob access: %d (len %d)", __idx, __arr.len);                    \
+    ASSERT(sizeof(type) == __arr.size, "aoc_array access with invalid type (expected size %d but got %d)", __arr.size, \
+           sizeof(type));                                                                                              \
+    ASSERT(__arr.data != NULL, "aoc_array initialized access");                                                        \
+    type *__ptr = __arr.data;                                                                                          \
+    __ptr[__idx];                                                                                                      \
+  })
 
 __attribute__((malloc)) __attribute__((alloc_size(1))) __attribute__((returns_nonnull)) void *aoc_malloc(size_t size);
 __attribute__((alloc_size(2))) __attribute__((returns_nonnull)) void *aoc_realloc(void *ptr, size_t size);
@@ -129,5 +142,10 @@ int *aoc_parse_grid_digits(const char **input, int *height, int *width);
 // to by the input is not a digit.
 int aoc_parse_int(const char **input);
 long aoc_parse_long(const char **input);
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wsuggest-attribute=pure"
+int aoc_cmp_int(const void *v1, const void *v2);
+#pragma GCC diagnostic pop
 
 #endif
