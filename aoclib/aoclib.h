@@ -51,6 +51,9 @@ void *aoc_dynarr_grow(struct aoc_dynarr *arr, int amount);
 // Remove every element from the array but keep memory reserved
 void aoc_dynarr_truncate(struct aoc_dynarr *arr);
 
+// Random access to array
+__attribute__((pure)) void *aoc_dynarr_get(const struct aoc_dynarr *arr, int idx);
+
 __attribute__((malloc)) __attribute__((alloc_size(1))) __attribute__((returns_nonnull)) void *aoc_malloc(size_t size);
 __attribute__((alloc_size(2))) __attribute__((returns_nonnull)) void *aoc_realloc(void *ptr, size_t size);
 

@@ -66,6 +66,8 @@ void *aoc_dynarr_grow(struct aoc_dynarr *arr, int amount) {
 
 void aoc_dynarr_truncate(struct aoc_dynarr *arr) { arr->len = 0; }
 
+void *aoc_dynarr_get(const struct aoc_dynarr *arr, int idx) { return (char *)arr->data + (arr->size * idx); }
+
 void *aoc_malloc(size_t size) {
   void *ptr = malloc(size);
   if (ptr == NULL) {
