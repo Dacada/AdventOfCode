@@ -505,7 +505,7 @@ void *aoc_parse_grid(const char **const input, aoc_parse_grid_callback callback,
         w = arr.len;
       }
       h += 1;
-      ASSERT(arr.len % w == 0, "row %d has inconsistent column count", r);
+      ASSERT(arr.len % w == 0, "row %d has inconsistent column count", w);
       *input += 1;
       continue;
     }
@@ -525,7 +525,7 @@ void *aoc_parse_grid(const char **const input, aoc_parse_grid_callback callback,
 
   h += 1;
 
-  ASSERT(arr.len == w * h, "grid parse error: %d != %d * %d (width * height)", arr.len, c, r);
+  ASSERT(arr.len == w * h, "grid parse error: %d != %d * %d (width * height)", arr.len, w, h);
 
   *height = h;
   *width = w;
