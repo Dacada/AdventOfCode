@@ -81,7 +81,10 @@ char *aoc_ocr(const char *image, size_t image_width, size_t image_height);
 // (modifiable), a pointer to the memory where the parsed cell value should be
 // written, the current x coordinate we're parsing, the current y coordinate and
 // the args pointer passed to the function (for reentrant passing of additional
-// arguments to the callback)
+// arguments to the callback). The function parses until it encounters either a
+// null character or two newlines in a row and leaves the pointer pointing to
+// the character where it finished parsing (either the second newline or the
+// null character).
 //
 // Example: Parsing space-separated 2-digit numbers into an integer grid:
 //
@@ -99,13 +102,18 @@ char *aoc_ocr(const char *image, size_t image_width, size_t image_height);
 //     *((int*)parsed) = n;
 // }
 //
-// int nrows, ncols;
-// int *numbers = aoc_parse_grid(input, callback, sizeof(int), &nrows, &ncols,
+// char *input = ...
+// int width, height;
+// int *numbers = aoc_parse_grid(&input, callback, sizeof(int), &height, &width,
 // NULL);
 //
-// Access elements: numbers[row * ncols + col]
-void *aoc_parse_grid(const char *input, aoc_parse_grid_callback callback, size_t size, int *nrows, int *ncols,
+// Access elements: numbers[row * width + col]
+void *aoc_parse_grid(const char **input, aoc_parse_grid_callback callback, size_t size, int *height, int *width,
                      void *args);
+
+// Some generic grid parsers that don't need callbacks
+char *aoc_parse_grid_chars(const char **input, int *height, int *width);
+int *aoc_parse_grid_digits(const char **input, int *height, int *width);
 
 // Parse a sequence of numbers from the input, stopping at the first non digit
 // character, as a base 10 unsigned integer. Fail if the first character pointed

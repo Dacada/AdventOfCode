@@ -43,6 +43,10 @@ void aoc_dbg(const int srcline, const char *const msg, ...) {
 
 void aoc_dynarr_init(struct aoc_dynarr *arr, size_t size, int cap) {
   arr->data = malloc(size * cap);
+  if (arr->data == NULL) {
+    perror("malloc");
+    FAIL("memory error");
+  }
   arr->size = size;
   arr->len = 0;
   arr->cap = cap;
@@ -59,6 +63,10 @@ void *aoc_dynarr_grow(struct aoc_dynarr *arr, int amount) {
       arr->cap *= 2;
     } while (arr->len > arr->cap);
     arr->data = realloc(arr->data, arr->cap * arr->size);
+    if (arr->data == NULL) {
+      perror("realloc");
+      FAIL("memory error");
+    }
   }
 
   return (char *)arr->data + (arr->size * oldlen);
@@ -480,46 +488,77 @@ char *aoc_ocr(const char *image, size_t image_width, size_t image_height) {
   return result;
 }
 
-void *aoc_parse_grid(const char *input, aoc_parse_grid_callback callback, size_t size, int *nrows, int *ncols,
+void *aoc_parse_grid(const char **const input, aoc_parse_grid_callback callback, size_t size, int *height, int *width,
                      void *args) {
   struct aoc_dynarr arr;
   aoc_dynarr_init(&arr, size, 32);
 
-  int c = 0;
-  int r = 0;
+  int w = 0;
+  int h = 0;
 
-  while (*input != '\0') {
-    if (*input == '\n') {
-      if (input[1] == '\0') {
+  while (**input != '\0') {
+    if (**input == '\n') {
+      if ((*input)[1] == '\0' || (*input)[1] == '\n') {
         break;
       }
-      if (c == 0) {
-        c = arr.len;
+      if (w == 0) {
+        w = arr.len;
       }
-      r += 1;
-      ASSERT(arr.len % c == 0, "row %d has inconsistent column count", r);
-      input += 1;
+      h += 1;
+      ASSERT(arr.len % w == 0, "row %d has inconsistent column count", r);
+      *input += 1;
       continue;
     }
 
     int x, y;
-    if (c == 0) {
+    if (w == 0) {
       x = arr.len;
       y = 0;
     } else {
-      x = arr.len % c;
-      y = arr.len / c;
+      x = arr.len % w;
+      y = arr.len / w;
     }
+
     void *mem = aoc_dynarr_grow(&arr, 1);
-    callback(&input, mem, x, y, args);
+    callback(input, mem, x, y, args);
   }
-  r += 1;
 
-  ASSERT(arr.len == c * r, "grid parse error: %d != %d * %d (rows * cols)", arr.len, c, r);
+  h += 1;
 
-  *nrows = r;
-  *ncols = c;
+  ASSERT(arr.len == w * h, "grid parse error: %d != %d * %d (width * height)", arr.len, c, r);
+
+  *height = h;
+  *width = w;
   return arr.data;
+}
+
+static void aoc_parse_grid_char_callback(const char **input, void *res, int x, int y, void *args) {
+  (void)x;
+  (void)y;
+  (void)args;
+
+  char *result = res;
+  *result = **input;
+  *input += 1;
+}
+
+static void aoc_parse_grid_digit_callback(const char **input, void *res, int x, int y, void *args) {
+  (void)x;
+  (void)y;
+  (void)args;
+
+  int *result = res;
+  ASSERT(isdigit(**input), "expected digit but got: %c", **input);
+  *result = **input - '0';
+  *input += 1;
+}
+
+char *aoc_parse_grid_chars(const char **input, int *nrows, int *ncols) {
+  return aoc_parse_grid(input, aoc_parse_grid_char_callback, sizeof(char), nrows, ncols, NULL);
+}
+
+int *aoc_parse_grid_digits(const char **input, int *nrows, int *ncols) {
+  return aoc_parse_grid(input, aoc_parse_grid_digit_callback, sizeof(int), nrows, ncols, NULL);
 }
 
 #define AOC_PARSE_NUM(input, type)                                                                                     \
