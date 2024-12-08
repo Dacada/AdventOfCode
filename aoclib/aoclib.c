@@ -42,11 +42,7 @@ void aoc_dbg(const int srcline, const char *const msg, ...) {
 #endif
 
 void aoc_dynarr_init(struct aoc_dynarr *arr, size_t size, int cap) {
-  arr->data = malloc(size * cap);
-  if (arr->data == NULL) {
-    perror("malloc");
-    FAIL("memory error");
-  }
+  arr->data = aoc_malloc(size * cap);
   arr->size = size;
   arr->len = 0;
   arr->cap = cap;
@@ -62,11 +58,7 @@ void *aoc_dynarr_grow(struct aoc_dynarr *arr, int amount) {
     do {
       arr->cap *= 2;
     } while (arr->len > arr->cap);
-    arr->data = realloc(arr->data, arr->cap * arr->size);
-    if (arr->data == NULL) {
-      perror("realloc");
-      FAIL("memory error");
-    }
+    arr->data = aoc_realloc(arr->data, arr->cap * arr->size);
   }
 
   return (char *)arr->data + (arr->size * oldlen);
@@ -74,34 +66,38 @@ void *aoc_dynarr_grow(struct aoc_dynarr *arr, int amount) {
 
 void aoc_dynarr_truncate(struct aoc_dynarr *arr) { arr->len = 0; }
 
-// from
-// https://stackoverflow.com/questions/27097915/read-all-data-from-stdin-c
+void *aoc_malloc(size_t size) {
+  void *ptr = malloc(size);
+  if (ptr == NULL) {
+    perror("malloc");
+    FAIL("memory error");
+  }
+  return ptr;
+}
+
+void *aoc_realloc(void *ptr, size_t size) {
+  void *newptr = realloc(ptr, size);
+  if (newptr == NULL) {
+    perror("realloc");
+    FAIL("memory error");
+  }
+  return newptr;
+}
+
 static char *read_input() {
   int c;
   size_t p4kB = 4096, i = 0;
-  void *newPtr = NULL;
-  char *ptrString = malloc((p4kB + 1) * sizeof(char));
+  char *ptrString = aoc_malloc((p4kB + 1) * sizeof(*ptrString));
 
-  while (ptrString != NULL && (c = getchar()) != EOF) {
+  while ((c = getchar()) != EOF) {
     if (i == p4kB * sizeof(char)) {
       p4kB += 4096;
-      if ((newPtr = realloc(ptrString, (p4kB + 1) * sizeof(char))) != NULL) {
-        ptrString = (char *)newPtr;
-      } else {
-        free(ptrString);
-        return NULL;
-      }
+      ptrString = aoc_realloc(ptrString, (p4kB + 1) * sizeof(*ptrString));
     }
     ptrString[i++] = c;
   }
 
-  if (ptrString != NULL) {
-    ptrString[i] = '\0';
-    ptrString = realloc(ptrString, strlen(ptrString) + 1);
-  } else {
-    return NULL;
-  }
-
+  ptrString[i] = '\0';
   return ptrString;
 }
 
@@ -212,7 +208,7 @@ static void combinations_recursive(const size_t offset, const int *const array, 
 
 void aoc_combinations(const int *const array, const size_t len, const size_t n, aoc_combinations_callback *const func,
                       void *const args) {
-  int *const aux = malloc(n * sizeof(int));
+  int *const aux = aoc_malloc(n * sizeof(int));
   combinations_recursive(0, array, len, aux, n, func, args);
   free(aux);
 }
@@ -469,7 +465,7 @@ static char aoc_ocr_letter(const char *image, size_t image_width, size_t image_h
 
 char *aoc_ocr(const char *image, size_t image_width, size_t image_height) {
   size_t result_cap = 4;
-  char *result = malloc(sizeof(char) * result_cap);
+  char *result = aoc_malloc(sizeof(char) * result_cap);
   size_t result_len = 0;
 
   size_t image_width_offset = 0;
@@ -477,7 +473,7 @@ char *aoc_ocr(const char *image, size_t image_width, size_t image_height) {
   for (;;) {
     if (result_len >= result_cap) {
       result_cap *= 10;
-      result = realloc(result, sizeof(char) * result_cap);
+      result = aoc_realloc(result, sizeof(char) * result_cap);
     }
 
     char c = aoc_ocr_letter(image, image_width, image_height, &image_width_offset);

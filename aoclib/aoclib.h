@@ -51,6 +51,9 @@ void *aoc_dynarr_grow(struct aoc_dynarr *arr, int amount);
 // Remove every element from the array but keep memory reserved
 void aoc_dynarr_truncate(struct aoc_dynarr *arr);
 
+__attribute__((malloc)) __attribute__((alloc_size(1))) __attribute__((returns_nonnull)) void *aoc_malloc(size_t size);
+__attribute__((alloc_size(2))) __attribute__((returns_nonnull)) void *aoc_realloc(void *ptr, size_t size);
+
 typedef void(aoc_solution_callback)(const char *const, char *const);
 typedef void(aoc_permute_callback)(int *const, void *);
 typedef void(aoc_combinations_callback)(int *const, void *);
