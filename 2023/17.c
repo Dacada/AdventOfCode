@@ -263,30 +263,7 @@ static struct state heap_pop(struct heap *heap) {
 }
 
 static int *parse_input(const char *input, int *width, int *height) {
-  int len = 0;
-  int cap = 16;
-  int *list = malloc(sizeof(*list) * cap);
-
-  int w = 0;
-  while (*input != '\0') {
-    if (len >= cap) {
-      cap *= 2;
-      list = realloc(list, sizeof(*list) * cap);
-    }
-    char c = *input;
-    if (c == '\n') {
-      if (w == 0) {
-        w = len;
-      }
-    } else {
-      list[len++] = c - '0';
-    }
-    input++;
-  }
-
-  *width = w;
-  *height = len / w;
-  return list;
+  return aoc_parse_grid_digits(&input, height, width);
 }
 
 static int search(const int *map, int width, int height, bool ultra) {

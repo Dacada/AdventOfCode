@@ -11,43 +11,11 @@ struct pattern {
 };
 
 static void parse_pattern(const char **input, struct pattern *pattern) {
-  int cap = 16;
-  int len = 0;
-  char *list = malloc(sizeof(*list) * cap);
+  pattern->str = aoc_parse_grid_chars(input, &pattern->height, &pattern->width);
 
-  int width = 0;
-  int height = 0;
-  for (;;) {
-    if (len >= cap) {
-      cap *= 2;
-      list = realloc(list, sizeof(*list) * cap);
-    }
-
-    char c = **input;
-    if (c == '\0') {
-      break;
-    }
-    if (c == '\n') {
-      *input += 1;
-      height++;
-      if (**input == '\n' || **input == '\0') {
-        break;
-      }
-      width = 0;
-      continue;
-    }
-    list[len++] = c;
-    width += 1;
+  while (**input == '\n') {
     *input += 1;
   }
-
-  if (**input == '\n') {
-    *input += 1;
-  }
-
-  pattern->str = list;
-  pattern->width = width;
-  pattern->height = height;
 }
 
 static struct pattern *parse_input(const char *input, int *length) {

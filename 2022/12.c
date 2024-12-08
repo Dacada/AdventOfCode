@@ -99,52 +99,40 @@ static int bfs(const int *map, int width, int height, struct point start, struct
   return INT_MAX;
 }
 
-static int *parse_input(const char *const input, int *width, int *height, struct point *start, struct point *end) {
-  int len = 0;
-  int cap = 64;
-  int *map = malloc(cap * sizeof(*map));
+struct parse_input_callback_args {
+  struct point *start;
+  struct point *end;
+};
 
-  *width = 0;
-  for (int i = 0;; i++) {
-    char c = input[i];
-    if (c == '\0') {
-      break;
-    }
-    if (c == '\n') {
-      if (*width == 0) {
-        *width = i;
-      }
-      continue;
-    }
+static void parse_input_callback(const char **input, void *vres, int x, int y, void *vargs) {
+  struct parse_input_callback_args *args = vargs;
+  int *res = vres;
 
-    if (len >= cap) {
-      cap *= 2;
-      map = realloc(map, cap * sizeof(*map));
+  char c = **input;
+  if (c == 'S' || c == 'E') {
+    struct point p;
+    p.x = x;
+    p.y = y;
+    if (c == 'S') {
+      c = 'a';
+      *args->start = p;
+    } else if (c == 'E') {
+      c = 'z';
+      *args->end = p;
     }
-    if (c == 'S' || c == 'E') {
-      struct point p;
-      if (*width == 0) {
-        p.y = 0;
-        p.x = len;
-      } else {
-        p.y = len / *width;
-        p.x = len % *width;
-      }
-      if (c == 'S') {
-        c = 'a';
-        *start = p;
-      } else if (c == 'E') {
-        c = 'z';
-        *end = p;
-      }
-    } else if (c < 'a' || c > 'z') {
-      FAIL("parse error");
-    }
-    map[len++] = c - 'a';
+  } else if (c < 'a' || c > 'z') {
+    FAIL("parse error");
   }
 
-  ASSERT(len % *width == 0, "parse error");
-  *height = len / *width;
+  *res = c - 'a';
+  *input += 1;
+}
+
+static int *parse_input(const char *input, int *width, int *height, struct point *start, struct point *end) {
+  struct parse_input_callback_args args;
+  args.start = start;
+  args.end = end;
+  int *map = aoc_parse_grid(&input, parse_input_callback, sizeof(*map), height, width, &args);
 
 #ifdef DEBUG
   for (int j = 0; j < *height; j++) {

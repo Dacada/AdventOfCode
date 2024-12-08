@@ -8,43 +8,8 @@
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
 #define ABS(x) ((x) < 0 ? -(x) : (x))
 
-static char *parse_map(const char *const input, int *const rows, int *const columns) {
-  int size = 1014;
-  char *map = malloc(size * sizeof(*map));
-  if (map == NULL) {
-    perror("malloc");
-    return NULL;
-  }
-
-  *rows = 0;
-  int j = 0;
-  for (int i = 0;; i++) {
-    char c = input[i];
-    switch (c) {
-    case '\0':
-      map = realloc(map, j);
-      if (map == NULL) {
-        perror("realloc");
-        return NULL;
-      }
-      *columns = j / *rows;
-      return map;
-
-    case '\n':
-      *rows += 1;
-      break;
-    default:
-      while (j > size) {
-        size *= 2;
-        map = realloc(map, size);
-        if (map == NULL) {
-          perror("realloc");
-          return NULL;
-        }
-      }
-      map[j++] = input[i];
-    }
-  }
+static char *parse_map(const char *input, int *const rows, int *const columns) {
+  return aoc_parse_grid_chars(&input, rows, columns);
 }
 
 static void make_coprime(int a, int b, int *const resA, int *const resB) {

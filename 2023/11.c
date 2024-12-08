@@ -1,6 +1,5 @@
 #include <aoclib.h>
 #include <stdio.h>
-#include <string.h>
 
 #define IDX(array, x, y, width) ((array)[(x) + (y) * (width)])
 #define ABS(x) ((x) < 0 ? -(x) : (x))
@@ -9,24 +8,6 @@ struct point {
   int x;
   int y;
 };
-
-static char *parse_input(const char *input, int *width, int *height) {
-  char *res = malloc(sizeof(*res) * strlen(input));
-  *width = -1;
-  int j = 0;
-  for (int i = 0; input[i] != '\0'; i++) {
-    char c = input[i];
-    if (c == '\n') {
-      if (*width == -1) {
-        *width = i;
-      }
-      continue;
-    }
-    res[j++] = c;
-  }
-  *height = j / *width;
-  return res;
-}
 
 static struct point *find_galaxies(const char *universe, int width, int height, int *ngalaxies) {
   int len = 0;
@@ -120,9 +101,9 @@ static int *find_empty_rows(const char *universe, int width, int height, int *le
   return find_empty(universe, height, width, 2, length);
 }
 
-static void solution(const char *const input, char *const output, int times) {
+static void solution(const char *input, char *const output, int times) {
   int width, height;
-  char *universe = parse_input(input, &width, &height);
+  char *universe = aoc_parse_grid_chars(&input, &height, &width);
 
 #ifdef DEBUG
   DBG("original");

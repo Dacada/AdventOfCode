@@ -113,17 +113,11 @@ static void send_line(int point, bool start, bool vertical, int *trees, bool *vi
   }
 }
 
-static int *parse_input(const char *const input, int *const len) {
-  for (*len = 0; input[*len] != '\n'; *len += 1)
-    ;
-  int *res = malloc(*len * *len * sizeof(*res));
-  for (int i = 0; i < *len; i++) {
-    for (int j = 0; j < *len; j++) {
-      char c = input[IDX(i, j, *len + 1)];
-      ASSERT(isdigit(c), "parse error");
-      res[IDX(i, j, *len)] = c - '0';
-    }
-  }
+static int *parse_input(const char *input, int *const len) {
+  int width, height;
+  int *res = aoc_parse_grid_digits(&input, &height, &width);
+  ASSERT(width == height, parse error);
+  *len = width;
   return res;
 }
 

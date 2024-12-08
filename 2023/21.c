@@ -5,30 +5,7 @@
 #define IDX(array, x, y, width) ((array)[(x) + (y) * (width)])
 
 static char *parse_input(const char *input, int *width, int *height) {
-  int len = 0;
-  int cap = 16;
-  char *list = malloc(sizeof(*list) * cap);
-
-  int w = 0;
-  while (*input != '\0') {
-    if (len >= cap) {
-      cap *= 2;
-      list = realloc(list, sizeof(*list) * cap);
-    }
-    char c = *input;
-    if (c == '\n') {
-      if (w == 0) {
-        w = len;
-      }
-    } else {
-      list[len++] = c;
-    }
-    input++;
-  }
-
-  *width = w;
-  *height = len / w;
-  return list;
+  return aoc_parse_grid_chars(&input, height, width);
 }
 
 static bool *init_positions(int width, int height) {

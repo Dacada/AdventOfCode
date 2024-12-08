@@ -1,53 +1,19 @@
 #include <aoclib.h>
-#include <ctype.h>
 #include <limits.h>
 #include <stdio.h>
 #include <string.h>
 
-static unsigned *parse_input(const char *input, size_t *const width, size_t *const height) {
-  size_t size = 64;
-  unsigned *matrix = malloc(size * sizeof(*matrix));
-  size_t i = 0;
-
-  *width = 0;
-  while (*input != '\n') {
-    if (i >= size) {
-      size *= 2;
-      matrix = realloc(matrix, size * sizeof(*matrix));
-    }
-    ASSERT(isdigit(*input), "parse error");
-    matrix[i++] = *input - '0';
-    *width += 1;
-    input += 1;
-  }
-
-  while (*input != '\0') {
-    if (i >= size) {
-      size *= 2;
-      matrix = realloc(matrix, size * sizeof(*matrix));
-    }
-    if (*input == '\n') {
-      input += 1;
-      if (*input == '\0') {
-        break;
-      }
-    }
-    ASSERT(isdigit(*input), "parse error");
-    matrix[i++] = *input - '0';
-    input += 1;
-  }
-
-  *height = i / *width;
-  return matrix;
+static int *parse_input(const char *input, int *const width, int *const height) {
+  return aoc_parse_grid_digits(&input, height, width);
 }
 
 struct point {
-  size_t x, y;
+  int x, y;
 };
 
-static size_t point_asidx(const struct point p, const size_t width) { return p.y * width + p.x; }
+static int point_asidx(const struct point p, const int width) { return p.y * width + p.x; }
 
-/* static struct point point_fromidx(const size_t i, const size_t width) { */
+/* static struct point point_fromidx(const int i, const int width) { */
 /*         struct point p; */
 /*         p.x = i % width; */
 /*         p.y = i / width; */
@@ -57,14 +23,14 @@ static size_t point_asidx(const struct point p, const size_t width) { return p.y
 static bool point_equal(const struct point a, const struct point b) { return a.x == b.x && a.y == b.y; }
 
 struct prioQueueNode {
-  unsigned priority;
+  int priority;
   struct point point;
 };
 
 struct prioQueue {
   struct prioQueueNode *nodes;
-  size_t size;
-  size_t len;
+  int size;
+  int len;
 };
 
 static void prioQueue_init(struct prioQueue *const q) {
@@ -80,7 +46,7 @@ static void prioQueue_free(struct prioQueue *const q) {
 
 static bool prioQueue_empty(const struct prioQueue *const q) { return q->len == 0; }
 
-static void prioQueue_push(struct prioQueue *const q, const struct point p, const unsigned prio) {
+static void prioQueue_push(struct prioQueue *const q, const struct point p, const int prio) {
   if (q->len >= q->size) {
     q->size *= 2;
     q->nodes = realloc(q->nodes, q->size * sizeof(*q->nodes));
@@ -89,8 +55,8 @@ static void prioQueue_push(struct prioQueue *const q, const struct point p, cons
   q->nodes[q->len].point = p;
   q->nodes[q->len].priority = prio;
 
-  size_t i = q->len;
-  size_t p_i = (i - 1) / 2;
+  int i = q->len;
+  int p_i = (i - 1) / 2;
 
   for (;;) {
     if (i == 0) {
@@ -111,23 +77,23 @@ static void prioQueue_push(struct prioQueue *const q, const struct point p, cons
   q->len += 1;
 }
 
-static unsigned prioQueue_pop(struct prioQueue *const q, struct point *const p) {
+static int prioQueue_pop(struct prioQueue *const q, struct point *const p) {
   ASSERT(q->len > 0, "pop empty queue");
 
   q->len -= 1;
-  unsigned res = q->nodes[0].priority;
+  int res = q->nodes[0].priority;
   *p = q->nodes[0].point;
   q->nodes[0] = q->nodes[q->len];
 
-  size_t i = 0;
-  size_t c1_i = 2 * i + 1;
-  size_t c2_i = 2 * i + 2;
+  int i = 0;
+  int c1_i = 2 * i + 1;
+  int c2_i = 2 * i + 2;
 
   for (;;) {
     if (c1_i >= q->len) {
       break;
     }
-    size_t c_i;
+    int c_i;
     if (c2_i >= q->len) {
       c_i = c1_i;
     } else {
@@ -153,14 +119,14 @@ static unsigned prioQueue_pop(struct prioQueue *const q, struct point *const p) 
   return res;
 }
 
-static unsigned dijkstra(const unsigned *const danger, const size_t width, const size_t height,
-                         const struct point start, const struct point destination) {
+static int dijkstra(const int *const danger, const int width, const int height, const struct point start,
+                    const struct point destination) {
   bool *visited = malloc(width * height * sizeof(*visited));
-  unsigned *total_risks = malloc(width * height * sizeof(*total_risks));
+  int *total_risks = malloc(width * height * sizeof(*total_risks));
 
-  for (size_t i = 0; i < width * height; i++) {
+  for (int i = 0; i < width * height; i++) {
     visited[i] = false;
-    total_risks[i] = UINT_MAX;
+    total_risks[i] = INT_MAX;
   }
   total_risks[point_asidx(start, width)] = 0;
 
@@ -170,8 +136,8 @@ static unsigned dijkstra(const unsigned *const danger, const size_t width, const
 
   while (!prioQueue_empty(&q)) {
     struct point current;
-    unsigned current_risk = prioQueue_pop(&q, &current);
-    size_t currentIdx = point_asidx(current, width);
+    int current_risk = prioQueue_pop(&q, &current);
+    int currentIdx = point_asidx(current, width);
     if (current_risk > total_risks[currentIdx]) {
       continue;
     }
@@ -220,7 +186,7 @@ static unsigned dijkstra(const unsigned *const danger, const size_t width, const
         continue;
       }
 
-      unsigned total_risk = current_risk + danger[point_asidx(p, width)];
+      int total_risk = current_risk + danger[point_asidx(p, width)];
       if (total_risk < total_risks[point_asidx(p, width)]) {
         total_risks[point_asidx(p, width)] = total_risk;
         prioQueue_push(&q, p, total_risk);
@@ -230,7 +196,7 @@ static unsigned dijkstra(const unsigned *const danger, const size_t width, const
     visited[point_asidx(current, width)] = true;
   }
 
-  unsigned result = total_risks[point_asidx(destination, width)];
+  int result = total_risks[point_asidx(destination, width)];
   free(visited);
   free(total_risks);
   prioQueue_free(&q);
@@ -238,37 +204,37 @@ static unsigned dijkstra(const unsigned *const danger, const size_t width, const
 }
 
 static void solution1(const char *const input, char *const output) {
-  size_t width, height;
-  unsigned *danger = parse_input(input, &width, &height);
+  int width, height;
+  int *danger = parse_input(input, &width, &height);
 
-  unsigned lowest_risk =
+  int lowest_risk =
       dijkstra(danger, width, height, (struct point){.x = 0, .y = 0}, (struct point){.x = width - 1, .y = height - 1});
 
   snprintf(output, OUTPUT_BUFFER_SIZE, "%u", lowest_risk);
   free(danger);
 }
 
-static unsigned *enlarge(unsigned *const map, size_t *const width, size_t *const height, unsigned factor) {
-  size_t w = *width;
-  size_t h = *height;
+static int *enlarge(int *const map, int *const width, int *const height, int factor) {
+  int w = *width;
+  int h = *height;
 
   *width = w * factor;
   *height = h * factor;
 
-  unsigned *newmap = malloc(*width * *height * sizeof(*newmap));
+  int *newmap = malloc(*width * *height * sizeof(*newmap));
 
-  for (size_t j = 0; j < h; j++) {
-    for (size_t i = 0; i < w; i++) {
-      for (unsigned x = 0; x < factor; x++) {
-        for (unsigned y = 0; y < factor; y++) {
-          unsigned value = map[j * w + i] + x + y;
+  for (int j = 0; j < h; j++) {
+    for (int i = 0; i < w; i++) {
+      for (int x = 0; x < factor; x++) {
+        for (int y = 0; y < factor; y++) {
+          int value = map[j * w + i] + x + y;
           while (value >= 10) {
             value -= 9;
           }
 
-          size_t newi = i + w * x;
-          size_t newj = j + h * y;
-          size_t idx = newj * *width + newi;
+          int newi = i + w * x;
+          int newj = j + h * y;
+          int idx = newj * *width + newi;
 
           newmap[idx] = value;
         }
@@ -281,12 +247,12 @@ static unsigned *enlarge(unsigned *const map, size_t *const width, size_t *const
 }
 
 static void solution2(const char *const input, char *const output) {
-  size_t width, height;
-  unsigned *danger = parse_input(input, &width, &height);
+  int width, height;
+  int *danger = parse_input(input, &width, &height);
 
   danger = enlarge(danger, &width, &height, 5);
 
-  unsigned lowest_risk =
+  int lowest_risk =
       dijkstra(danger, width, height, (struct point){.x = 0, .y = 0}, (struct point){.x = width - 1, .y = height - 1});
 
   snprintf(output, OUTPUT_BUFFER_SIZE, "%u", lowest_risk);

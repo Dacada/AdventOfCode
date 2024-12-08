@@ -71,42 +71,7 @@ static inline bool is_x_mas(char *buff, int i, int j, int cols, int rows) {
   return second_ok;
 }
 
-static char *parse_input(const char *input, int *rows, int *cols) {
-  int len = 0;
-  int cap = 16;
-  char *buff = malloc(sizeof(*buff) * cap);
-
-  int c = 0;
-  int r = 0;
-  while (*input != '\0') {
-    if (*input == '\n') {
-      if (input[1] == '\0') {
-        break;
-      }
-      if (c == 0) {
-        c = len;
-      }
-      r += 1;
-      input += 1;
-      continue;
-    }
-
-    if (len >= cap) {
-      cap *= 2;
-      buff = realloc(buff, sizeof(*buff) * cap);
-    }
-    buff[len] = *input;
-    len++;
-    input += 1;
-  }
-  r += 1;
-
-  ASSERT(len == c * r, "parse error %d != %d * %d", len, c, r);
-
-  *rows = r;
-  *cols = c;
-  return buff;
-}
+static char *parse_input(const char *input, int *rows, int *cols) { return aoc_parse_grid_chars(&input, rows, cols); }
 
 static void solution1(const char *const input, char *const output) {
   int rows, cols;

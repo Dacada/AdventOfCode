@@ -172,37 +172,23 @@ static void pipe_next(enum pipe *maze, struct point current, struct point *next1
   FAIL("could not find two valid connections for pipe");
 }
 
+static void parse_input_cb(const char **input, void *vres, int x, int y, void *vargs) {
+  char c = **input;
+  enum pipe *res = vres;
+  struct point *start = vargs;
+
+  *res = c;
+  if (c == 'S') {
+    start->x = x;
+    start->y = y;
+  }
+
+  *input += 1;
+}
+
 static enum pipe *parse_input(const char *input, int *width, int *height, struct point *start) {
   DBG("\n%s", input);
-  for (int i = 0;; i++) {
-    if (input[i] == '\n') {
-      *width = i;
-      break;
-    }
-  }
-  for (int i = 0;; i++) {
-    if (input[i] == 0 || (input[i] == '\n' && input[i + 1] == '\0')) {
-      *height = i / *width;
-      break;
-    }
-  }
-
-  enum pipe *res = malloc(sizeof(*res) * *width * *height);
-
-  int j = 0;
-  for (int i = 0; input[i] != '\0'; i++) {
-    if (input[i] == '\n') {
-      continue;
-    }
-    res[j] = input[i];
-    if (input[i] == 'S') {
-      start->x = j % *width;
-      start->y = j / *width;
-    }
-    j++;
-  }
-
-  return res;
+  return aoc_parse_grid(&input, parse_input_cb, sizeof(enum pipe), height, width, start);
 }
 
 __attribute__((pure)) static enum pipe brute_force_start_sign(const enum pipe *maze, struct point start, int width,

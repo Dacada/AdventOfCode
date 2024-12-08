@@ -3,7 +3,7 @@
 
 enum position { floor, empty_seat, full_seat };
 
-size_t lenx, leny;
+int lenx, leny;
 enum position *grid;
 enum position *other_grid;
 static void gridswap() {
@@ -12,50 +12,32 @@ static void gridswap() {
   other_grid = tmp;
 }
 
-static void parse(const char *input) {
-  enum position *grid1 = NULL;
-  size_t capacity;
+static void parse_cb(const char **input, void *result, int x, int y, void *args) {
+  (void)x;
+  (void)y;
+  (void)args;
 
-  for (lenx = 0; input[lenx] != '\n'; lenx++)
-    ;
-  leny = 0;
-  capacity = 16;
-  grid1 = malloc(sizeof(*grid1) * lenx * capacity);
-
-  while (*input != '\0') {
-    if (leny >= capacity) {
-      capacity *= 2;
-      grid1 = realloc(grid1, sizeof(*grid1) * lenx * capacity);
-    }
-
-    for (size_t i = 0; i < lenx; i++) {
-      enum position seat;
-      switch (*input) {
-      case '.':
-        seat = floor;
-        break;
-      case 'L':
-        seat = empty_seat;
-        break;
-      default:
-        FAIL("parse error");
-      }
-      grid1[lenx * leny + i] = seat;
-      input++;
-    }
-
-    ASSERT(*input == '\n', "parse error");
-    input++;
-    leny++;
+  enum position *seat = result;
+  switch (**input) {
+  case '.':
+    *seat = floor;
+    break;
+  case 'L':
+    *seat = empty_seat;
+    break;
+  default:
+    FAIL("parse error");
   }
 
-  enum position *grid2 = malloc(sizeof(*grid2) * lenx * leny);
-
-  grid = grid1;
-  other_grid = grid2;
+  *input += 1;
 }
 
-static unsigned count_occupied_neighbors_1(size_t i, size_t j) {
+static void parse(const char *input) {
+  grid = aoc_parse_grid(&input, parse_cb, sizeof(*grid), &leny, &lenx, NULL);
+  other_grid = malloc(sizeof(*other_grid) * lenx * leny);
+}
+
+static unsigned count_occupied_neighbors_1(int i, int j) {
   unsigned count = 0;
   for (int jj = -1; jj <= 1; jj++) {
     if (jj < 0 && j == 0) {
@@ -83,7 +65,7 @@ static unsigned count_occupied_neighbors_1(size_t i, size_t j) {
   return count;
 }
 
-__attribute__((pure)) static unsigned count_occupied_neighbors_2(size_t ui, size_t uj) {
+__attribute__((pure)) static unsigned count_occupied_neighbors_2(int ui, int uj) {
   int i = ui;
   int j = uj;
 
@@ -96,7 +78,7 @@ __attribute__((pure)) static unsigned count_occupied_neighbors_2(size_t ui, size
 
       int ii = di;
       int jj = dj;
-      while (i + ii >= 0 && i + ii < (int)lenx && j + jj >= 0 && j + jj < (int)leny) {
+      while (i + ii >= 0 && i + ii < lenx && j + jj >= 0 && j + jj < leny) {
         enum position seat = grid[(j + jj) * lenx + (i + ii)];
         if (seat == full_seat) {
           count++;
@@ -112,10 +94,10 @@ __attribute__((pure)) static unsigned count_occupied_neighbors_2(size_t ui, size
   return count;
 }
 
-static bool step(unsigned (*do_count)(size_t, size_t), unsigned neighbor_limit) {
+static bool step(unsigned (*do_count)(int, int), unsigned neighbor_limit) {
   bool changed = false;
-  for (size_t j = 0; j < leny; j++) {
-    for (size_t i = 0; i < lenx; i++) {
+  for (int j = 0; j < leny; j++) {
+    for (int i = 0; i < lenx; i++) {
       unsigned neighbors = do_count(i, j);
       switch (grid[j * lenx + i]) {
       case floor:
@@ -145,8 +127,8 @@ static bool step(unsigned (*do_count)(size_t, size_t), unsigned neighbor_limit) 
 
 __attribute__((pure)) static unsigned count_occupied_seats(void) {
   unsigned count = 0;
-  for (size_t j = 0; j < leny; j++) {
-    for (size_t i = 0; i < lenx; i++) {
+  for (int j = 0; j < leny; j++) {
+    for (int i = 0; i < lenx; i++) {
       enum position seat = grid[j * lenx + i];
       if (seat == full_seat) {
         count++;

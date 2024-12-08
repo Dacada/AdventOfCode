@@ -22,56 +22,40 @@ struct cell {
   int nblizards;
 };
 
-static struct cell *parse_input(const char *input, int *width, int *height) {
-  int cap = 32;
-  int len = 0;
-  struct cell *map = malloc(sizeof(*map) * cap);
+static void parse_input_cb(const char **input, void *vres, int x, int y, void *args) {
+  (void)x;
+  (void)y;
+  (void)args;
 
-  int w = 0;
-  *height = 0;
-  while (*input != '\0') {
-    if (len >= cap) {
-      cap *= 2;
-      map = realloc(map, sizeof(*map) * cap);
-    }
-    char c = *input;
-    if (c == '\n') {
-      *width = w;
-      w = 0;
-      *height += 1;
-      input++;
-      while (*input == '\n') {
-        input++;
-      }
+  char c = **input;
+  struct cell *res = vres;
+  if (c == '#') {
+    res->type = CELL_WALL;
+  } else {
+    res->type = CELL_GROUND;
+    if (c == '.') {
+      res->nblizards = 0;
     } else {
-      if (c == '#') {
-        map[len].type = CELL_WALL;
+      res->nblizards = 1;
+      if (c == '^') {
+        res->blizards[0] = NORTH;
+      } else if (c == 'v') {
+        res->blizards[0] = SOUTH;
+      } else if (c == '<') {
+        res->blizards[0] = WEST;
+      } else if (c == '>') {
+        res->blizards[0] = EAST;
       } else {
-        map[len].type = CELL_GROUND;
-        if (c == '.') {
-          map[len].nblizards = 0;
-        } else {
-          map[len].nblizards = 1;
-          if (c == '^') {
-            map[len].blizards[0] = NORTH;
-          } else if (c == 'v') {
-            map[len].blizards[0] = SOUTH;
-          } else if (c == '<') {
-            map[len].blizards[0] = WEST;
-          } else if (c == '>') {
-            map[len].blizards[0] = EAST;
-          } else {
-            FAIL("parse error");
-          }
-        }
+        FAIL("parse error");
       }
-      len++;
-      input++;
-      w++;
     }
   }
 
-  return map;
+  *input += 1;
+}
+
+static struct cell *parse_input(const char *input, int *width, int *height) {
+  return aoc_parse_grid(&input, parse_input_cb, sizeof(struct cell), height, width, NULL);
 }
 
 struct state {

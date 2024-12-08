@@ -146,10 +146,10 @@ static bool guard_would_loop(const enum cell *cells, struct point start, int nco
   return looping;
 }
 
-static void solution1(const char *const input, char *const output) {
+static void solution1(const char *input, char *const output) {
   struct point start;
   int nrows, ncols;
-  enum cell *cells = aoc_parse_grid(input, parse_cb, sizeof(enum cell), &nrows, &ncols, &start);
+  enum cell *cells = aoc_parse_grid(&input, parse_cb, sizeof(enum cell), &nrows, &ncols, &start);
 
   struct aoc_dynarr arr = get_guard_locations(cells, start, ncols, nrows);
 
@@ -158,10 +158,10 @@ static void solution1(const char *const input, char *const output) {
   aoc_dynarr_free(&arr);
 }
 
-static void solution2(const char *const input, char *const output) {
+static void solution2(const char *input, char *const output) {
   struct point start;
   int nrows, ncols;
-  enum cell *cells = aoc_parse_grid(input, parse_cb, sizeof(enum cell), &nrows, &ncols, &start);
+  enum cell *cells = aoc_parse_grid(&input, parse_cb, sizeof(enum cell), &nrows, &ncols, &start);
 
   struct aoc_dynarr arr = get_guard_locations(cells, start, ncols, nrows);
 

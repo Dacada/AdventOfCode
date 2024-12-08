@@ -20,42 +20,21 @@ __attribute__((pure)) static enum cucumber identify_cucumber(const char c) {
   }
 }
 
-static enum cucumber *parse_input(const char *input, size_t *const width, size_t *const height) {
-  size_t size = 64;
-  size_t len = 0;
-  enum cucumber *grid = malloc(size * sizeof(*grid));
+static void parse_input_cb(const char **input, void *res, int x, int y, void *args) {
+  (void)args;
+  (void)x;
+  (void)y;
 
-  while (*input != '\n') {
-    if (len >= size) {
-      size *= 2;
-      grid = realloc(grid, size * sizeof(*grid));
-    }
-    grid[len++] = identify_cucumber(*input);
-    input++;
-  }
-  *width = len;
-  input++;
-
-  while (*input != '\0') {
-    if (*input == '\n') {
-      input++;
-      continue;
-    }
-
-    if (len >= size) {
-      size *= 2;
-      grid = realloc(grid, size * sizeof(*grid));
-    }
-    grid[len++] = identify_cucumber(*input);
-    input++;
-  }
-  *height = len / *width;
-
-  return grid;
+  enum cucumber *result = res;
+  *result = identify_cucumber(**input);
+  *input += 1;
 }
 
-static void get_next_location(enum cucumber which, size_t i, size_t j, size_t *ii, size_t *jj, size_t width,
-                              size_t height) {
+static enum cucumber *parse_input(const char *input, int *const width, int *const height) {
+  return aoc_parse_grid(&input, parse_input_cb, sizeof(enum cucumber), height, width, NULL);
+}
+
+static void get_next_location(enum cucumber which, int i, int j, int *ii, int *jj, int width, int height) {
   if (which == CUCUMBER_EAST) {
     *ii = (i + 1) % width;
     *jj = j;
@@ -67,16 +46,16 @@ static void get_next_location(enum cucumber which, size_t i, size_t j, size_t *i
   }
 }
 
-static bool step(enum cucumber *const grid, const size_t width, const size_t height, const enum cucumber which) {
+static bool step(enum cucumber *const grid, const int width, const int height, const enum cucumber which) {
   enum cucumber *const new_grid = malloc(sizeof(*new_grid) * width * height);
   memset(new_grid, 0, sizeof(*new_grid) * width * height);
 
   bool change = false;
-  for (size_t j = 0; j < height; j++) {
-    for (size_t i = 0; i < width; i++) {
+  for (int j = 0; j < height; j++) {
+    for (int i = 0; i < width; i++) {
       enum cucumber c = grid[j * width + i];
       if (c == which) {
-        size_t nexti, nextj;
+        int nexti, nextj;
         get_next_location(which, i, j, &nexti, &nextj, width, height);
         if (grid[nextj * width + nexti] == CUCUMBER_NONE) {
           new_grid[j * width + i] = CUCUMBER_NONE;
@@ -99,15 +78,15 @@ static bool step(enum cucumber *const grid, const size_t width, const size_t hei
 }
 
 static void solution1(const char *const input, char *const output) {
-  size_t width, height;
+  int width, height;
   enum cucumber *grid = parse_input(input, &width, &height);
 
   unsigned steps;
   for (steps = 0;; steps++) {
 #ifdef DEBUG
     fprintf(stderr, "After %u steps:\n", steps);
-    for (size_t j = 0; j < height; j++) {
-      for (size_t i = 0; i < width; i++) {
+    for (int j = 0; j < height; j++) {
+      for (int i = 0; i < width; i++) {
         enum cucumber cuc = grid[j * width + i];
         fprintf(stderr, "%c",
                 cuc == CUCUMBER_NONE ? '.' : (cuc == CUCUMBER_EAST ? '>' : (cuc == CUCUMBER_SOUTH ? 'v' : '?')));

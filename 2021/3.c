@@ -2,44 +2,20 @@
 #include <stdio.h>
 #include <string.h>
 
-static char *parse_input(const char *const input, size_t *const height, size_t *const width) {
-  for (*width = 0;; *width += 1) {
-    if (input[*width] != '0' && input[*width] != '1') {
-      break;
-    }
-  }
-
-  size_t size = 128;
-  char *numbers = malloc(size);
-  size_t j = 0;
-  for (size_t i = 0;; i++) {
-    if (input[i] == '\0') {
-      break;
-    }
-    if (j >= size) {
-      size *= 2;
-      numbers = realloc(numbers, size);
-    }
-    if (input[i] == '1' || input[i] == '0') {
-      numbers[j] = input[i];
-      j++;
-    }
-  }
-
-  *height = j / *width;
-  return numbers;
+static char *parse_input(const char *input, int *const height, int *const width) {
+  return aoc_parse_grid_chars(&input, height, width);
 }
 
 static void solution1(const char *const input, char *const output) {
-  size_t height, width;
+  int height, width;
   char *numbers = parse_input(input, &height, &width);
 
   unsigned gamma = 0;
   unsigned epsilon = 0;
 
-  for (size_t i = 0; i < width; i++) {
-    unsigned ones = 0;
-    for (size_t j = 0; j < height; j++) {
+  for (int i = 0; i < width; i++) {
+    int ones = 0;
+    for (int j = 0; j < height; j++) {
       if (numbers[j * width + i] == '1') {
         ones++;
       }
@@ -59,7 +35,7 @@ static void solution1(const char *const input, char *const output) {
 }
 
 static void solution2(const char *const input, char *const output) {
-  size_t height, width;
+  int height, width;
   char *numbers = parse_input(input, &height, &width);
 
   char *oxygen_criteria = malloc(width * sizeof(*oxygen_criteria));
@@ -77,7 +53,7 @@ static void solution2(const char *const input, char *const output) {
   unsigned oxygen = 0;
   unsigned co2 = 0;
 
-  for (size_t i = 0; i < width; i++) {
+  for (int i = 0; i < width; i++) {
     DBG("%lu", i);
     if (oxygen_found && co2_found) {
       break;
@@ -87,11 +63,11 @@ static void solution2(const char *const input, char *const output) {
     unsigned oxygen_zeros_count = 0;
     unsigned co2_ones_count = 0;
     unsigned co2_zeros_count = 0;
-    size_t oxygen_last_one = 0;
-    size_t oxygen_last_zero = 0;
-    size_t co2_last_one = 0;
-    size_t co2_last_zero = 0;
-    for (size_t j = 0; j < height; j++) {
+    int oxygen_last_one = 0;
+    int oxygen_last_zero = 0;
+    int co2_last_one = 0;
+    int co2_last_zero = 0;
+    for (int j = 0; j < height; j++) {
       bool oxygen_valid = !oxygen_found && !oxygen_discarded[j];
       bool co2_valid = !co2_found && !co2_discarded[j];
       if (oxygen_valid) {
@@ -136,14 +112,14 @@ static void solution2(const char *const input, char *const output) {
 
     if (!oxygen_found) {
       if (oxygen_count == 1) {
-        size_t j;
+        int j;
         if (oxygen_ones_count == 1) {
           j = oxygen_last_one;
         } else {
           j = oxygen_last_zero;
         }
         oxygen = 0;
-        for (size_t k = 0; k < width; k++) {
+        for (int k = 0; k < width; k++) {
           oxygen *= 2;
           oxygen += numbers[j * width + k] - '0';
         }
@@ -157,14 +133,14 @@ static void solution2(const char *const input, char *const output) {
 
     if (!co2_found) {
       if (co2_count == 1) {
-        size_t j;
+        int j;
         if (co2_ones_count == 1) {
           j = co2_last_one;
         } else {
           j = co2_last_zero;
         }
         co2 = 0;
-        for (size_t k = 0; k < width; k++) {
+        for (int k = 0; k < width; k++) {
           co2 *= 2;
           co2 += numbers[j * width + k] - '0';
         }
@@ -179,14 +155,14 @@ static void solution2(const char *const input, char *const output) {
 
   if (!oxygen_found) {
     oxygen = 0;
-    for (size_t i = 0; i < width; i++) {
+    for (int i = 0; i < width; i++) {
       oxygen *= 2;
       oxygen += oxygen_criteria[i] - '0';
     }
   }
   if (!co2_found) {
     co2 = 0;
-    for (size_t i = 0; i < width; i++) {
+    for (int i = 0; i < width; i++) {
       co2 *= 2;
       co2 += co2_criteria[i] - '0';
     }
