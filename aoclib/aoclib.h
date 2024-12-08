@@ -48,6 +48,9 @@ void aoc_dynarr_free(struct aoc_dynarr *arr);
 // least amount*size bytes.
 void *aoc_dynarr_grow(struct aoc_dynarr *arr, int amount);
 
+// Remove every element from the array but keep memory reserved
+void aoc_dynarr_truncate(struct aoc_dynarr *arr);
+
 typedef void(aoc_solution_callback)(const char *const, char *const);
 typedef void(aoc_permute_callback)(int *const, void *);
 typedef void(aoc_combinations_callback)(int *const, void *);

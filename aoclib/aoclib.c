@@ -72,6 +72,8 @@ void *aoc_dynarr_grow(struct aoc_dynarr *arr, int amount) {
   return (char *)arr->data + (arr->size * oldlen);
 }
 
+void aoc_dynarr_truncate(struct aoc_dynarr *arr) { arr->len = 0; }
+
 // from
 // https://stackoverflow.com/questions/27097915/read-all-data-from-stdin-c
 static char *read_input() {
