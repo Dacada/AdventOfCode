@@ -35,6 +35,14 @@ __attribute__((format(printf, 2, 3))) void aoc_dbg(const int srcline, const char
 #define AOC_MAX(x, y) ((x) > ((y) ? (x) : (y)))
 #define AOC_MIN(x, y) ((x) < ((y) ? (x) : (y)))
 
+// Generic 2D point
+struct aoc_point {
+  int x;
+  int y;
+};
+
+#define AOC_2D_IDX(x, y, width) ((y) * (width) + (x))
+
 // Generic dynamic array implementation
 struct aoc_dynarr {
   void *data;
