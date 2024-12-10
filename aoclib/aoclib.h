@@ -68,8 +68,8 @@ void aoc_dynarr_truncate(struct aoc_dynarr *arr);
     struct aoc_dynarr __arr = (arr);                                                                                   \
     int __idx = (idx);                                                                                                 \
     ASSERT(__idx >= 0 && __idx < __arr.len, "aoc_array oob access: %d (len %d)", __idx, __arr.len);                    \
-    ASSERT(sizeof(type) == __arr.size, "aoc_array access with invalid type (expected size %d but got %d)", __arr.size, \
-           sizeof(type));                                                                                              \
+    ASSERT(sizeof(type) == __arr.size, "aoc_array access with invalid type (expected size %ld but got %ld)",           \
+           __arr.size, sizeof(type));                                                                                  \
     ASSERT(__arr.data != NULL, "aoc_array initialized access");                                                        \
     type *__ptr = __arr.data;                                                                                          \
     __ptr[__idx];                                                                                                      \
