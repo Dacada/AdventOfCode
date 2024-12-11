@@ -577,6 +577,11 @@ int *aoc_parse_grid_digits(const char **input, int *nrows, int *ncols) {
 
 int aoc_parse_int(const char **input) { return AOC_PARSE_NUM(input, int); }
 long aoc_parse_long(const char **input) { return AOC_PARSE_NUM(input, long); }
+void aoc_skip_space(const char **input) {
+  while (isspace(**input)) {
+    *input += 1;
+  }
+}
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wsuggest-attribute=pure"

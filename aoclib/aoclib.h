@@ -150,6 +150,7 @@ int *aoc_parse_grid_digits(const char **input, int *height, int *width);
 // to by the input is not a digit.
 int aoc_parse_int(const char **input);
 long aoc_parse_long(const char **input);
+void aoc_skip_space(const char **input);
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wsuggest-attribute=pure"
