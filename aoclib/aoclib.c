@@ -41,6 +41,27 @@ void aoc_dbg(const int srcline, const char *const msg, ...) {
 
 #endif
 
+struct aoc_point aoc_point_move(struct aoc_point p, enum aoc_direction dir) {
+  struct aoc_point q = p;
+  switch (dir) {
+  case AOC_DIRECTION_NORTH:
+    q.y--;
+    break;
+  case AOC_DIRECTION_EAST:
+    q.x++;
+    break;
+  case AOC_DIRECTION_SOUTH:
+    q.y++;
+    break;
+  case AOC_DIRECTION_WEST:
+    q.x--;
+    break;
+  default:
+    FAIL("invalid direction %d", dir);
+  }
+  return q;
+}
+
 void aoc_dynarr_init(struct aoc_dynarr *arr, size_t size, int cap) {
   arr->data = aoc_malloc(size * cap);
   arr->size = size;
@@ -62,6 +83,12 @@ void *aoc_dynarr_grow(struct aoc_dynarr *arr, int amount) {
   }
 
   return (char *)arr->data + (arr->size * oldlen);
+}
+
+void *aoc_dynarr_shrink(struct aoc_dynarr *arr, int amount) {
+  ASSERT(arr->len >= amount, "attempt to shrink array of len %d by %d", arr->len, amount);
+  arr->len -= amount;
+  return (char *)arr->data + (arr->size * arr->len);
 }
 
 void aoc_dynarr_truncate(struct aoc_dynarr *arr) { arr->len = 0; }

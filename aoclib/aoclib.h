@@ -41,6 +41,17 @@ struct aoc_point {
   int y;
 };
 
+enum aoc_direction {
+  AOC_DIRECTION_NORTH,
+  AOC_DIRECTION_EAST,
+  AOC_DIRECTION_SOUTH,
+  AOC_DIRECTION_WEST,
+};
+
+__attribute__((pure)) struct aoc_point aoc_point_move(struct aoc_point p, enum aoc_direction dir);
+
+#define aoc_point_in_limits(p, width, height) ((p).x >= 0 && (p).y >= 0 && (p).x < (width) && (p).y < (height))
+
 #define AOC_2D_IDX(x, y, width) ((y) * (width) + (x))
 
 // Generic dynamic array implementation
@@ -57,8 +68,13 @@ void aoc_dynarr_init(struct aoc_dynarr *arr, size_t size, int cap);
 void aoc_dynarr_free(struct aoc_dynarr *arr);
 
 // Grow the array by the given amount. Return a pointer to a memory region of
-// least amount*size bytes.
+// least amount*size bytes. Pointer is valid until next array operation.
 void *aoc_dynarr_grow(struct aoc_dynarr *arr, int amount);
+
+// Shrink the array by the given amount. Return a pointer to the memory region
+// we just removed. Pointer is valid until next array operation. (This operation
+// does not change the memory allocation of the array.)
+void *aoc_dynarr_shrink(struct aoc_dynarr *arr, int amount);
 
 // Remove every element from the array but keep memory reserved
 void aoc_dynarr_truncate(struct aoc_dynarr *arr);
