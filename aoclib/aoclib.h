@@ -174,7 +174,7 @@ void aoc_expect_text(const char **input, const char *text, size_t len);
 int aoc_cmp_int(const void *v1, const void *v2);
 #pragma GCC diagnostic pop
 
-int aoc_modulo_int(int a, int b);
-long aoc_modulo_long(long a, long b);
+__attribute__((const)) int aoc_modulo_int(int a, int b);
+__attribute__((const)) long aoc_modulo_long(long a, long b);
 
 #endif
