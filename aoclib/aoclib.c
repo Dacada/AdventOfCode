@@ -610,6 +610,11 @@ void aoc_skip_space(const char **input) {
   }
 }
 
+void aoc_expect_text(const char **input, const char *text, size_t len) {
+  ASSERT(strncmp(*input, text, len) == 0, "parse error: expected text '%s' not found", text);
+  *input += len;
+}
+
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wsuggest-attribute=pure"
 int aoc_cmp_int(const void *v1, const void *v2) {
@@ -618,3 +623,16 @@ int aoc_cmp_int(const void *v1, const void *v2) {
   return *p1 - *p2;
 }
 #pragma GCC diagnostic pop
+
+#define AOC_MODULO(a, b, type)                                                                                         \
+  ({                                                                                                                   \
+    type result = a % b;                                                                                               \
+    if (result < 0) {                                                                                                  \
+      result += (b > 0) ? b : -b;                                                                                      \
+    }                                                                                                                  \
+    result;                                                                                                            \
+  })
+
+int aoc_modulo_int(int a, int b) { return AOC_MODULO(a, b, int); }
+
+long aoc_modulo_long(long a, long b) { return AOC_MODULO(a, b, long); }

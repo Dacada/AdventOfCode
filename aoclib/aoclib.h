@@ -48,7 +48,7 @@ enum aoc_direction {
   AOC_DIRECTION_WEST,
 };
 
-__attribute__((pure)) struct aoc_point aoc_point_move(struct aoc_point p, enum aoc_direction dir);
+__attribute__((const)) struct aoc_point aoc_point_move(struct aoc_point p, enum aoc_direction dir);
 
 #define aoc_point_in_limits(p, width, height) ((p).x >= 0 && (p).y >= 0 && (p).x < (width) && (p).y < (height))
 
@@ -167,10 +167,14 @@ int *aoc_parse_grid_digits(const char **input, int *height, int *width);
 int aoc_parse_int(const char **input);
 long aoc_parse_long(const char **input);
 void aoc_skip_space(const char **input);
+void aoc_expect_text(const char **input, const char *text, size_t len);
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wsuggest-attribute=pure"
 int aoc_cmp_int(const void *v1, const void *v2);
 #pragma GCC diagnostic pop
+
+int aoc_modulo_int(int a, int b);
+long aoc_modulo_long(long a, long b);
 
 #endif
