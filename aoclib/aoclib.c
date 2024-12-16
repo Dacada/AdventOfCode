@@ -636,3 +636,86 @@ int aoc_cmp_int(const void *v1, const void *v2) {
 int aoc_modulo_int(int a, int b) { return AOC_MODULO(a, b, int); }
 
 long aoc_modulo_long(long a, long b) { return AOC_MODULO(a, b, long); }
+
+void aoc_heap_init(struct aoc_heap *heap, size_t size, int cap, aoc_heap_cmp_callback cb) {
+  aoc_dynarr_init(&heap->arr, size, cap);
+  heap->cmp = cb;
+}
+
+void aoc_heap_free(struct aoc_heap *heap) { aoc_dynarr_free(&heap->arr); }
+
+bool aoc_heap_empty(const struct aoc_heap *heap) { return heap->arr.len == 0; }
+
+static void siftup(void *arr, int idx, size_t size, aoc_heap_cmp_callback cmp) {
+  while (idx > 0) {
+    int parent_idx = (idx - 1) / 2;
+    void *current = (char *)arr + idx * size;
+    void *parent = (char *)arr + parent_idx * size;
+
+    if (cmp(current, parent) <= 0) {
+      break;
+    }
+
+    char tmp[size];
+    memcpy(tmp, current, size);
+    memcpy(current, parent, size);
+    memcpy(parent, tmp, size);
+
+    idx = parent_idx;
+  }
+}
+
+static void siftdown(void *arr, int len, size_t size, aoc_heap_cmp_callback cmp) {
+  int idx = 0;
+
+  for (;;) {
+    int left_idx = 2 * idx + 1;
+    int right_idx = 2 * idx + 2;
+    int largest_idx = idx;
+
+    void *current = (char *)arr + idx * size;
+    void *left = (char *)arr + left_idx * size;
+    void *right = (char *)arr + right_idx * size;
+    void *largest = current;
+
+    if (left_idx < len && cmp(left, largest) > 0) {
+      largest_idx = left_idx;
+      largest = left;
+    }
+
+    if (right_idx < len && cmp(right, largest) > 0) {
+      largest_idx = right_idx;
+      largest = right;
+    }
+
+    if (largest_idx == idx) {
+      break;
+    }
+
+    char tmp[size];
+    memcpy(tmp, current, size);
+    memcpy(current, largest, size);
+    memcpy(largest, tmp, size);
+
+    idx = largest_idx;
+  }
+}
+
+void aoc_heap_push(struct aoc_heap *heap, void *element) {
+  void *new = aoc_dynarr_grow(&heap->arr, 1);
+  memcpy(new, element, heap->arr.size);
+  siftup(heap->arr.data, heap->arr.len - 1, heap->arr.size, heap->cmp);
+}
+
+void aoc_heap_pop(struct aoc_heap *heap, void *result) {
+  ASSERT(heap->arr.len > 0, "pop from empty heap");
+
+  memcpy(result, heap->arr.data, heap->arr.size);
+  if (heap->arr.len > 1) {
+    memcpy(heap->arr.data, (char *)heap->arr.data + (heap->arr.len - 1) * heap->arr.size, heap->arr.size);
+  }
+  aoc_dynarr_shrink(&heap->arr, 1);
+  if (heap->arr.len > 1) {
+    siftdown(heap->arr.data, heap->arr.len, heap->arr.size, heap->cmp);
+  }
+}

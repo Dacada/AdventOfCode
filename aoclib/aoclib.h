@@ -53,6 +53,7 @@ __attribute__((const)) struct aoc_point aoc_point_move(struct aoc_point p, enum 
 #define aoc_point_in_limits(p, width, height) ((p).x >= 0 && (p).y >= 0 && (p).x < (width) && (p).y < (height))
 
 #define AOC_2D_IDX(x, y, width) ((y) * (width) + (x))
+#define AOC_3D_IDX(x, y, z, width, height) ((z) * (width) * (height) + (y) * (width) + (x))
 
 // Generic dynamic array implementation
 struct aoc_dynarr {
@@ -98,6 +99,18 @@ typedef void(aoc_solution_callback)(const char *const, char *const);
 typedef void(aoc_permute_callback)(int *const, void *);
 typedef void(aoc_combinations_callback)(int *const, void *);
 typedef void(aoc_parse_grid_callback)(const char **, void *, int, int, void *);
+typedef int(aoc_heap_cmp_callback)(const void *, const void *);
+
+struct aoc_heap {
+  struct aoc_dynarr arr;
+  aoc_heap_cmp_callback *cmp;
+};
+
+void aoc_heap_init(struct aoc_heap *heap, size_t size, int cap, aoc_heap_cmp_callback cb);
+__attribute__((pure)) bool aoc_heap_empty(const struct aoc_heap *heap);
+void aoc_heap_free(struct aoc_heap *heap);
+void aoc_heap_push(struct aoc_heap *heap, void *element);
+void aoc_heap_pop(struct aoc_heap *heap, void *result);
 
 // Process arguments and call either solution function
 // which should take an input and an output it must write to
