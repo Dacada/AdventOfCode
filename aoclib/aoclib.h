@@ -181,6 +181,7 @@ int aoc_parse_int(const char **input);
 long aoc_parse_long(const char **input);
 void aoc_skip_space(const char **input);
 void aoc_expect_text(const char **input, const char *text, size_t len);
+void aoc_expect_char(const char **input, char expect);
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wsuggest-attribute=pure"

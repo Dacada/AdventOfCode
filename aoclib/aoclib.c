@@ -615,6 +615,11 @@ void aoc_expect_text(const char **input, const char *text, size_t len) {
   *input += len;
 }
 
+void aoc_expect_char(const char **input, char expect) {
+  ASSERT(**input == expect, "parse error: expected character '%c' but found '%c'", expect, **input);
+  *input += 1;
+}
+
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wsuggest-attribute=pure"
 int aoc_cmp_int(const void *v1, const void *v2) {
