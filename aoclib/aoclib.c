@@ -620,14 +620,11 @@ void aoc_expect_char(const char **input, char expect) {
   *input += 1;
 }
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wsuggest-attribute=pure"
 int aoc_cmp_int(const void *v1, const void *v2) {
   const int *p1 = v1;
   const int *p2 = v2;
   return *p1 - *p2;
 }
-#pragma GCC diagnostic pop
 
 #define AOC_MODULO(a, b, type)                                                                                         \
   ({                                                                                                                   \
