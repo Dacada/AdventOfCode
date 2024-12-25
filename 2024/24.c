@@ -168,6 +168,7 @@ static void solution1(const char *input, char *const output) {
 
 static int find_gate(struct aoc_dynarr *gates_by_input, int input1, int input2, enum gate_type gate_type, int *swaps,
                      int *currswap) {
+#ifdef DEBUG
   char str1[3];
   char str2[3];
   char str3[3];
@@ -176,6 +177,7 @@ static int find_gate(struct aoc_dynarr *gates_by_input, int input1, int input2, 
   WIRES_NAME(input2, str2);
   strgate = (char *[]){"<UNK>", "AND", "OR", "XOR"}[gate_type];
   DBG("Looking for %.3s %s %.3s", str1, strgate, str2);
+#endif
 
   const struct aoc_dynarr *arr = &gates_by_input[input1];
   for (int i = 0; i < arr->len; i++) {
@@ -183,8 +185,10 @@ static int find_gate(struct aoc_dynarr *gates_by_input, int input1, int input2, 
     if (gate->gate == gate_type) {
       if (gate->input1 == input1) {
         if (gate->input2 != input2) {
+#ifdef DEBUG
           WIRES_NAME(gate->input2, str3);
           DBG("!!!!!!!!!!  must replace %.3s with %.3s", str2, str3);
+#endif
           swaps[(*currswap)++] = input2;
           swaps[(*currswap)++] = gate->input2;
         }
@@ -192,8 +196,10 @@ static int find_gate(struct aoc_dynarr *gates_by_input, int input1, int input2, 
       }
       if (gate->input2 == input1) {
         if (gate->input1 != input2) {
+#ifdef DEBUG
           WIRES_NAME(gate->input1, str3);
           DBG("!!!!!!!!!!  must replace %.3s with %.3s", str2, str3);
+#endif
           swaps[(*currswap)++] = input2;
           swaps[(*currswap)++] = gate->input1;
         }
@@ -208,8 +214,10 @@ static int find_gate(struct aoc_dynarr *gates_by_input, int input1, int input2, 
     if (gate->gate == gate_type) {
       if (gate->input1 == input2) {
         if (gate->input2 != input1) {
+#ifdef DEBUG
           WIRES_NAME(gate->input2, str3);
           DBG("!!!!!!!!!!  must replace %.3s with %.3s", str1, str3);
+#endif
           swaps[(*currswap)++] = input1;
           swaps[(*currswap)++] = gate->input2;
         }
@@ -217,8 +225,10 @@ static int find_gate(struct aoc_dynarr *gates_by_input, int input1, int input2, 
       }
       if (gate->input2 == input2) {
         if (gate->input1 != input1) {
+#ifdef DEBUG
           WIRES_NAME(gate->input1, str3);
           DBG("!!!!!!!!!!  must replace %.3s with %.3s", str1, str3);
+#endif
           swaps[(*currswap)++] = input1;
           swaps[(*currswap)++] = gate->input1;
         }
@@ -306,10 +316,12 @@ static void solution2(const char *input, char *const output) {
       swaps[currswap] = zz;
       swaps[currswap + 1] = z;
       currswap += 2;
+#ifdef DEBUG
       WIRES_NAME(z, str);
       char str2[3];
       WIRES_NAME(zz, str2);
       DBG("!!!!!!!!!!  must replace %.3s with %.3s", str2, str);
+#endif
     }
     DBG("verified z_%d: %.*s", i, 3, str);
 
