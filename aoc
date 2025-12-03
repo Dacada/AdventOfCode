@@ -4,11 +4,13 @@ import os
 import argparse
 import subprocess
 import requests
+from dotenv import load_dotenv
+from typing import Optional
 
 
-CACHE_FILENAME = '.cache/{}_{}_input.txt'
+CACHE_FILENAME = ".cache/{}_{}_input.txt"
 
-GNUTIME_BINARY = '/bin/time'
+GNUTIME_BINARY = "/bin/time"
 TIMESTRING = """
 Total elapsed time: %e s.
   System: %S
@@ -22,14 +24,16 @@ PLAIN_TIMESTRING = """
 %e,%S,%U,%F,%R,%W,%c,%w,%x
 """.strip()
 
+
 class NoSessionFile(Exception):
     pass
+
 
 class NoGNUTimeBinary(Exception):
     pass
 
 
-def parse_args():
+def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="""
 Download or take from a cache the input for an AoC problem, then
@@ -42,51 +46,39 @@ its argument.""".strip(),
         epilog="""
 A file called session.txt must exist within the working directory
 when this script is executed. A new directory called .cache may be
-created also on the working directory.  """.strip()
+created also on the working directory.  """.strip(),
     )
 
     parser.add_argument(
-        '--debug',
-        action='store_true',
+        "--debug",
+        action="store_true",
         help="""Add this argument to run the debug verison. No statistics are
-printed.""".strip()
+printed.""".strip(),
     )
 
     parser.add_argument(
-        '--input',
-        type=argparse.FileType('r'),
+        "--input",
+        type=argparse.FileType("r"),
         help="""Use given file as input. If - is passed, read input from
-stdin.""".strip()
+stdin.""".strip(),
     )
 
     parser.add_argument(
-        '--simple',
-        action='store_true',
+        "--simple",
+        action="store_true",
         help="""Just spawn the process in the same terminal and let it go
-wild""".strip()
+wild""".strip(),
     )
 
     parser.add_argument(
-        '--plain-output',
-        action='store_true',
-        help="""Return a very simplified output that is suitable to being parsed""".strip()
+        "--plain-output",
+        action="store_true",
+        help="""Return a very simplified output that is suitable to being parsed""".strip(),
     )
 
-    parser.add_argument(
-        'year',
-        type=int,
-        help="""Year of the problem"""
-    )
-    parser.add_argument(
-        'day',
-        type=int,
-        help="""Day of the problem"""
-    )
-    parser.add_argument(
-        'problem',
-        type=int,
-        help="""Part of the problem (1 or 2)"""
-    )
+    parser.add_argument("year", type=int, help="""Year of the problem""")
+    parser.add_argument("day", type=int, help="""Day of the problem""")
+    parser.add_argument("problem", type=int, help="""Part of the problem (1 or 2)""")
 
     return parser.parse_args()
 
@@ -100,10 +92,10 @@ def get_input(year: int, day: int) -> str:
     return inputstr
 
 
-def get_input_from_cache(year: int, day: int) -> str:
+def get_input_from_cache(year: int, day: int) -> Optional[str]:
     filename = CACHE_FILENAME.format(year, day)
     try:
-        with open(filename, 'r') as f:
+        with open(filename, "r") as f:
             return f.read()
     except IOError:
         return None
@@ -111,49 +103,50 @@ def get_input_from_cache(year: int, day: int) -> str:
 
 def get_session() -> str:
     try:
-        with open('session.txt') as f:
+        with open("session.txt") as f:
             return f.read().strip()
     except FileNotFoundError as e:
         raise NoSessionFile() from e
 
 
 def get_filename(year: int, day: int, debug: bool) -> str:
-    return '{}/{}{}'.format(year, day, '_dbg' if debug else '_rel')
+    return "{}/{}{}".format(year, day, "_dbg" if debug else "_rel")
 
 
 def get_input_from_aoc(year: int, day: int) -> str:
     url = "https://adventofcode.com/{}/day/{}/input".format(year, day)
-    cookies = {'session': get_session()}
-    r = requests.get(url, cookies=cookies)
+    cookies = {"session": get_session()}
+    headers = {
+        "User-Agent": f"{requests.utils.default_user_agent()} (+mailto:{os.getenv('CONTACT_EMAIL')})"
+    }
+    r = requests.get(url, cookies=cookies, headers=headers)
     r.raise_for_status()
     return r.text
 
 
-def save_input_to_cache(year: int, day: int, input: str):
-    os.makedirs('.cache', exist_ok=True)
+def save_input_to_cache(year: int, day: int, input: str) -> None:
+    os.makedirs(".cache", exist_ok=True)
     filename = CACHE_FILENAME.format(year, day)
-    with open(filename, 'w') as f:
+    with open(filename, "w") as f:
         f.write(input)
 
 
-def launch_solution(year: int, day: int, problem: int,
-                    debug: bool, input: str, simple: bool,
-                    plain_output: bool):
+def launch_solution(
+    year: int,
+    day: int,
+    problem: int,
+    debug: bool,
+    input: str,
+    simple: bool,
+    plain_output: bool,
+) -> tuple[Optional[str], Optional[str]]:
     process_name = get_filename(year, day, debug)
 
     if simple:
-        process = subprocess.Popen(
-            [process_name, str(problem)],
-            stdin=subprocess.PIPE
-        )
+        process = subprocess.Popen([process_name, str(problem)], stdin=subprocess.PIPE)
     elif debug:
         process = subprocess.Popen(
-            [
-                process_name,
-                str(problem)
-            ],
-            stdin=subprocess.PIPE,
-            stdout=subprocess.PIPE
+            [process_name, str(problem)], stdin=subprocess.PIPE, stdout=subprocess.PIPE
         )
     else:
         if plain_output:
@@ -162,55 +155,50 @@ def launch_solution(year: int, day: int, problem: int,
             timestring = TIMESTRING
         try:
             process = subprocess.Popen(
-                [
-                    GNUTIME_BINARY,
-                    '-f', timestring,
-                    process_name,
-                    str(problem)
-                ],
+                [GNUTIME_BINARY, "-f", timestring, process_name, str(problem)],
                 stdin=subprocess.PIPE,
                 stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE
+                stderr=subprocess.PIPE,
             )
         except FileNotFoundError as e:
             raise NoGNUTimeBinary() from e
 
-    out, err = process.communicate(input.encode('ascii'))
+    out, err = process.communicate(input.encode("ascii"))
 
     if simple:
         return None, None
     elif debug:
-        return \
-            out.decode('ascii', errors='backslashreplace'), \
-            None
+        return out.decode("ascii", errors="backslashreplace"), None
     else:
-        return \
-            out.decode('ascii', errors='backslashreplace'), \
-            err.decode('ascii', errors='backslashreplace')
+        return out.decode("ascii", errors="backslashreplace"), err.decode(
+            "ascii", errors="backslashreplace"
+        )
 
 
-def prepare_solution(year, day, debug):
-    subprocess.run(['make', '-s', get_filename(year, day, debug)])
+def prepare_solution(year: int, day: int, debug: bool) -> None:
+    subprocess.run(["make", "-s", get_filename(year, day, debug)])
 
 
-def unprepare_solution(year, day, debug):
-    subprocess.run(['rm', get_filename(year, day, debug)])
+def unprepare_solution(year: int, day: int, debug: bool) -> None:
+    subprocess.run(["rm", get_filename(year, day, debug)])
 
 
-def print_results(result, summary, plain):
+def print_results(result: Optional[str], summary: Optional[str], plain: bool) -> None:
     if plain:
-        print(summary.strip() + "|" + result)
+        if summary is not None and result is not None:
+            print(summary.strip() + "|" + result)
         return
 
     if summary is not None:
         print()
-        print('Summary:')
+        print("Summary:")
         print(summary)
     if result is not None:
-        print('Result:', result)
+        print("Result:", result)
 
 
-def main():
+def main() -> int:
+    load_dotenv()
     args = parse_args()
 
     if args.input is None:
@@ -223,11 +211,16 @@ def main():
     except NoSessionFile:
         print("No session.txt file found in current directory.")
         return 1
-        
+
     try:
         result, summary = launch_solution(
-            args.year, args.day, args.problem,
-            args.debug, input, args.simple, args.plain_output
+            args.year,
+            args.day,
+            args.problem,
+            args.debug,
+            input,
+            args.simple,
+            args.plain_output,
         )
     except NoGNUTimeBinary:
         print("No GNU time binary installed in this system")

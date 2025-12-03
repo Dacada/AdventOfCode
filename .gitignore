@@ -3,4 +3,5 @@ session.txt
 *.o
 *.clang_complete
 .venv
+.env
 compile_flags.txt
