@@ -109,7 +109,7 @@ struct aoc_heap {
 void aoc_heap_init(struct aoc_heap *heap, size_t size, int cap, aoc_heap_cmp_callback cb);
 __attribute__((pure)) bool aoc_heap_empty(const struct aoc_heap *heap);
 void aoc_heap_free(struct aoc_heap *heap);
-void aoc_heap_push(struct aoc_heap *heap, void *element);
+void aoc_heap_push(struct aoc_heap *heap, const void *element);
 void aoc_heap_pop(struct aoc_heap *heap, void *result);
 
 // Process arguments and call either solution function

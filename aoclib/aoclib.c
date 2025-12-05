@@ -714,7 +714,7 @@ static void siftdown(void *arr, int len, size_t size, aoc_heap_cmp_callback cmp)
   }
 }
 
-void aoc_heap_push(struct aoc_heap *heap, void *element) {
+void aoc_heap_push(struct aoc_heap *heap, const void *element) {
   void *new = aoc_dynarr_grow(&heap->arr, 1);
   memcpy(new, element, heap->arr.size);
   siftup(heap->arr.data, heap->arr.len - 1, heap->arr.size, heap->cmp);
