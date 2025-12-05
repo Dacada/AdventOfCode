@@ -5,9 +5,9 @@ CFLAGS = $(GENERIC_CFLAGS) -Ofast -march=native
 DEBUG_CFLAGS = $(GENERIC_CFLAGS) -Og -g -DDEBUG -fsanitize=address -fsanitize=undefined
 GDB_CFLAGS = $(GENERIC_CFLAGS) -Og -g -DDEBUG
 
-LDFLAGS = -std=c99 -Ofast
-DEBUG_LDFLAGS = -std=c99 -Og -g -fsanitize=address -fsanitize=undefined
-GDB_LDFLAGS = -std=c99 -Og -g
+LDFLAGS = -Ofast
+DEBUG_LDFLAGS = -Og -g -fsanitize=address -fsanitize=undefined
+GDB_LDFLAGS = -Og -g
 
 LDLIBS =
 
