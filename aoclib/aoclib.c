@@ -620,6 +620,17 @@ void aoc_expect_char(const char **input, char expect) {
   *input += 1;
 }
 
+void *aoc_parse_sequence(const char **input, int *sequence_len, size_t size, int cap, parser_callback cb) {
+  struct aoc_dynarr arr;
+  aoc_dynarr_init(&arr, size, cap);
+
+  while (cb(input, aoc_dynarr_grow(&arr, 1)))
+    ;
+
+  *sequence_len = arr.len - 1;
+  return arr.data;
+}
+
 int aoc_cmp_int(const void *v1, const void *v2) {
   const int *p1 = v1;
   const int *p2 = v2;

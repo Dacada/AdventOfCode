@@ -183,6 +183,11 @@ void aoc_skip_space(const char **input);
 void aoc_expect_text(const char **input, const char *text, size_t len);
 void aoc_expect_char(const char **input, char expect);
 
+// Parse a sequence of objects from the input. The callback is called repeatedly with the running input pointer until it
+// return false. Returns an allocated array of objects of the given size.
+typedef bool(parser_callback)(const char **, void *);
+void *aoc_parse_sequence(const char **input, int *sequence_len, size_t size, int cap, parser_callback cb);
+
 __attribute__((pure)) int aoc_cmp_int(const void *v1, const void *v2);
 
 __attribute__((const)) int aoc_modulo_int(int a, int b);
