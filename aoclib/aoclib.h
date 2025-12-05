@@ -32,8 +32,8 @@ __attribute__((format(printf, 2, 3))) void aoc_dbg(const int srcline, const char
 #define OUTPUT_BUFFER_SIZE 256
 
 #define AOC_ABS(x) ((x) > 0 ? (x) : -(x))
-#define AOC_MAX(x, y) ((x) > ((y) ? (x) : (y)))
-#define AOC_MIN(x, y) ((x) < ((y) ? (x) : (y)))
+#define AOC_MAX(x, y) ((x) > (y) ? (x) : (y))
+#define AOC_MIN(x, y) ((x) < (y) ? (x) : (y))
 
 // Generic 2D point
 struct aoc_point {
