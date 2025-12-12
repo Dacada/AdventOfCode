@@ -196,11 +196,6 @@ __attribute__((const)) static long get_gcd(long a, long b) {
   return a;
 }
 
-__attribute__((const)) static long get_lcm(long a, long b) {
-  long gcd = get_gcd(a, b);
-  return (a / gcd) * b;
-}
-
 __attribute__((const)) static struct rational rational_simplify(struct rational r) {
   long gcd = get_gcd(r.num, r.den);
 
@@ -222,23 +217,10 @@ static struct rational rational_init(long n) {
   return r;
 }
 
-/* static struct rational rational_init_fraction(long num, long den) { */
-/*   struct rational r = { */
-/*       .num = num, */
-/*       .den = den, */
-/*   }; */
-/*   ASSERT(den != 0, "division by zero"); */
-/*   return rational_simplify(r); */
-/* } */
-
 __attribute__((const)) static struct rational rational_sum(struct rational r1, struct rational r2) {
-  long lcm = get_lcm(r1.den, r2.den);
-  long m1 = lcm / r1.den;
-  long m2 = lcm / r2.den;
-
   struct rational res;
-  res.num = r1.num * m1 + r2.num * m2;
-  res.den = lcm;
+  res.num = r1.num * r2.den + r2.num * r1.den;
+  res.den = r1.den * r2.den;
 
   return rational_simplify(res);
 }
@@ -262,10 +244,6 @@ static struct rational rational_inv(struct rational r) {
   r.den = n;
   return r;
 }
-
-/* static struct rational rational_div(struct rational r1, struct rational r2) { */
-/*   return rational_mul(r1, rational_inv(r2)); */
-/* } */
 
 static bool rational_is_zero(struct rational r) { return r.num == 0; }
 
