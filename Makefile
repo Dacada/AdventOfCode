@@ -4,10 +4,12 @@ GENERIC_CFLAGS = -Iaoclib -Ilib -Wall -Wextra -Wformat -Wshadow -Wpointer-arith 
 CFLAGS = $(GENERIC_CFLAGS) -Ofast -march=native
 DEBUG_CFLAGS = $(GENERIC_CFLAGS) -Og -g -DDEBUG -fsanitize=address -fsanitize=undefined
 GDB_CFLAGS = $(GENERIC_CFLAGS) -Og -g -DDEBUG
+PROFILE_CFLAGS = $(GENERIC_CFLAGS) -O2 -g -fno-omit-frame-pointer
 
 LDFLAGS = -Ofast
 DEBUG_LDFLAGS = -Og -g -fsanitize=address -fsanitize=undefined
 GDB_LDFLAGS = -Og -g
+PROFILE_LDFLAGS = -O2 -g -fno-omit-frame-pointer
 
 LDLIBS =
 
@@ -18,6 +20,8 @@ aoclib/aoclib_dbg.o: aoclib/aoclib.c aoclib/aoclib.h
 	$(CC) $(DEBUG_CFLAGS) -c $< -o $@
 aoclib/aoclib_gdb.o: aoclib/aoclib.c aoclib/aoclib.h
 	$(CC) $(GDB_CFLAGS) -c $< -o $@
+aoclib/aoclib_prf.o: aoclib/aoclib.c aoclib/aoclib.h
+	$(CC) $(PROFILE_CFLAGS) -c $< -o $@
 
 
 # Object files may be compiled using:
@@ -40,6 +44,8 @@ aoclib/aoclib_gdb.o: aoclib/aoclib.c aoclib/aoclib.h
 	$(CC) $(DEBUG_CFLAGS) -c $< -o $@
 %_gdb.o: %.c
 	$(CC) $(GDB_CFLAGS) -c $< -o $@
+%_prf.o: %.c
+	$(CC) $(PROFILE_CFLAGS) -c $< -o $@
 
 
 2015/4_rel: LDLIBS = -lmd
@@ -109,4 +115,6 @@ aoclib/aoclib_gdb.o: aoclib/aoclib.c aoclib/aoclib.h
 %_dbg: %_dbg.o aoclib/aoclib_dbg.o
 	$(CC) $(DEBUG_LDFLAGS) $(LDLIBS) $^ -o $@
 %_gdb: %_gdb.o aoclib/aoclib_gdb.o
+	$(CC) $(GDB_LDFLAGS) $(LDLIBS) $^ -o $@
+%_prf: %_prf.o aoclib/aoclib_prf.o
 	$(CC) $(GDB_LDFLAGS) $(LDLIBS) $^ -o $@
