@@ -197,14 +197,21 @@ __attribute__((const)) static long get_gcd(long a, long b) {
 }
 
 __attribute__((const)) static struct rational rational_simplify(struct rational r) {
-  long gcd = get_gcd(r.num, r.den);
-
-  r.num /= gcd;
-  r.den /= gcd;
   if (r.den < 0) {
     r.num = -r.num;
     r.den = -r.den;
   }
+
+  // avoid simplifying unless numbers have gotten really big
+  const long limit = 1L << 30;
+  if (r.num < limit && r.num > -limit && r.den < limit && r.den > -limit) {
+    return r;
+  }
+
+  long gcd = get_gcd(r.num, r.den);
+
+  r.num /= gcd;
+  r.den /= gcd;
 
   return r;
 }
@@ -247,9 +254,17 @@ static struct rational rational_inv(struct rational r) {
 
 static bool rational_is_zero(struct rational r) { return r.num == 0; }
 
-static int rational_is_integer(struct rational r) { return (r.den == 1 || r.den == -1); }
+static bool rational_is_integer(struct rational r) {
+  if (r.den == 1 || r.den == -1) {
+    return true;
+  }
+  if (r.num % r.den == 0) {
+    return true;
+  }
+  return false;
+}
 
-static int rational_is_nonnegative(struct rational r) { return r.num >= 0; }
+static bool rational_is_nonnegative(struct rational r) { return r.num >= 0; }
 
 __attribute__((const)) static int rational_cmp(struct rational a, struct rational b) {
   struct rational diff = rational_sub(a, b);
@@ -767,8 +782,8 @@ static int *best_solution_q(struct rational_linear_system_solution sol, int max_
       r.num = -r.num;
     }
     // at this point r should be an integer and >= 0
-    ASSERT(r.den == 1, "best solution entry not integer after simplify");
-    best_int[i] = r.num;
+    ASSERT(rational_is_integer(r), "best solution entry not integer after simplify");
+    best_int[i] = r.num / r.den;
   }
 
   free(best_candidate);
